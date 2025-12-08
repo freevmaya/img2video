@@ -1,0 +1,3 @@
+#!/bin/bash
+
+php8.1 -f bot_hook.php reset

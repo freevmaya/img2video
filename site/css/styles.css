@@ -1,0 +1,18 @@
+body {
+    background-color: var(--tg-theme-bg-color); /* Фон */
+    color: var(--tg-theme-text-color); /* Основной текст */
+    font-family: -apple-system, system-ui, sans-serif; /* Шрифт как в Telegram */
+}
+
+button {
+    background: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+}
+
+a {
+    color: var(--tg-theme-link-color);
+}
+
+h1, h2, h3, h4, h5 {
+    color: var(--tg-theme-text-color);
+}
