@@ -28,7 +28,6 @@ class MJMainCycle extends MidjourneyAPI {
     }   
 
     protected function doServiceAction($task, $response) {
-        $params = ['text'=>'Ваше изображение готово!'];
 
         if (isset($response['result'])) {
         	$result = json_decode($response['result'], true);
@@ -55,8 +54,6 @@ class MJMainCycle extends MidjourneyAPI {
 				return $response;
         	}
         }
-
-        $this->Message($task['chat_id'], $params);
         return true;
     }
 
