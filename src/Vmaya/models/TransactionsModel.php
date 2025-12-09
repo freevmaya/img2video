@@ -19,13 +19,13 @@ class TransactionsModel extends BaseModel {
 	public function Balance($userId) {
 		GLOBAL $dbp;
 
-		return $dbp->one("SELECT SUM(`value`) FROM {$this->getTable()} WHERE `user_id`={$userId} AND `type` IN ('expense', 'subscribe')");
+		return 300;//$dbp->one("SELECT SUM(`value`) FROM {$this->getTable()} WHERE `user_id`={$userId} AND `type` IN ('expense', 'subscribe')");
 	}
 
 	public function Expense($userId) {
 		GLOBAL $dbp;
 
-		return $dbp->one("SELECT SUM(`value`) FROM {$this->getTable()} WHERE `user_id`={$userId} AND `type` = 'expense'");
+		return 0;//$dbp->one("SELECT SUM(`value`) FROM {$this->getTable()} WHERE `user_id`={$userId} AND `type` = 'expense'");
 	}
 
 	public function LastSubscribe($userId) {
