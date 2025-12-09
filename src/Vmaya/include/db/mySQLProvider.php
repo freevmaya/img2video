@@ -31,8 +31,17 @@
 			$result = false;
 
 			try {
-				trace($query." ".$types);
+				//trace($query." ".$types);
 				$stmt = $this->mysqli->prepare($query);
+
+				$i=0;
+		        foreach ($params as $key => $value) {
+		            if ($this->isDateTime($value))
+		                $params[$key] = $this->formatDateTime($value);
+		            if (($types[$i] == 's') && !is_string($value))
+		            	$params[$key] = json_encode($value);
+		            $i++;
+		        }
 				$stmt->bind_param($types, ...$params);
 
 				$result = $stmt->execute();
@@ -40,7 +49,7 @@
 
 				$stmt->close();
 			} catch (Exception $e) {
-				$this->error('mysql_error='.$e->getMessage().' query='.$query);
+				$this->error('mysql_error='.$e->getMessage().' query='.$query.', data: '.json_encode($params));
 			}
 
 			return $result;
@@ -94,5 +103,44 @@
 		public function escape_string($string) {
 			return $this->mysqli->escape_string($string);
 		}
+
+	    private function isDateTime($value)
+	    {
+	        if (!is_string($value)) {
+	            return false;
+	        }
+	        
+	        // Проверяем форматы даты
+	        $patterns = [
+	            '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/', // ISO 8601 с Z
+	            '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/', // ISO 8601 с миллисекундами
+	            '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/', // ISO 8601 с таймзоной
+	            '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', // MySQL формат
+	        ];
+	        
+	        foreach ($patterns as $pattern) {
+	            if (preg_match($pattern, $value)) {
+	                return true;
+	            }
+	        }
+	        
+	        return false;
+	    }
+
+	    private function formatDateTime($dateTimeString)
+	    {
+	        // Если уже в MySQL формате, возвращаем как есть
+	        if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $dateTimeString)) {
+	            return $dateTimeString;
+	        }
+	        
+	        try {
+	            $date = new \DateTime($dateTimeString);
+	            return $date->format('Y-m-d H:i:s');
+	        } catch (\Exception $e) {
+	            // Если не удалось распарсить, возвращаем текущую дату
+	            return date('Y-m-d H:i:s');
+	        }
+	    }
 	}
 ?>

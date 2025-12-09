@@ -33,7 +33,7 @@ class SubscribeOptions extends BaseModel {
 			],
 			'price' => [
 				'label'=> 'Price',
-				'dbtype' => 'f'
+				'dbtype' => 'd'
 			],
 			'image_limit' => [
 				'label'=> 'Image limit',

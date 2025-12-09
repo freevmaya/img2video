@@ -7,8 +7,8 @@
 
 	use \App\Services\API\MidjourneyAPI;
 
-	$mj = new MidjourneyAPI(MJ_APIKEY, MJ_HOOK_URL, MJ_TOKEN);
+	$mj = new MidjourneyAPI(MJ_APIKEY, MJ_HOOK_URL, MJ_ACCOUNTHASH);
 
-	$result = $mj->generateImage("A cinematic photorealistic portrait of an old Norwegian sailor with a grey beard and wrinkled face, wearing a raincoat");
+	$result = $mj->generateImage("A majestic white wolf with blue eyes standing on a cliff under the aurora borealis");
 
 	print_r(json_encode($result));

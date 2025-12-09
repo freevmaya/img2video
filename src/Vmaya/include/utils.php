@@ -48,4 +48,51 @@ function roundv($v, $n) {
     return round($v * $p) / $p;
 }
 
+function downloadFile($url, $savePath)
+{
+    $ch = curl_init($url);
+    
+    // Настройки cURL
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,      // Возвращать результат
+        CURLOPT_FOLLOWLOCATION => true,      // Следовать редиректам
+        CURLOPT_SSL_VERIFYPEER => false,     // Для HTTPS (в продакшене должно быть true)
+        CURLOPT_SSL_VERIFYHOST => false,     // Для HTTPS (в продакшене должно быть true)
+        CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', // User-Agent
+        CURLOPT_TIMEOUT => 300,              // Таймаут 5 минут
+        CURLOPT_CONNECTTIMEOUT => 30,        // Таймаут подключения
+    ]);
+    
+    $fileContent = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
+    
+    curl_close($ch);
+    
+    if ($httpCode === 200 && $fileContent !== false) {
+        // Сохраняем файл
+        if (file_put_contents($savePath, $fileContent) !== false) {
+            return [
+                'success' => true,
+                'path' => $savePath,
+                'size' => filesize($savePath)
+            ];
+        } else {
+            $msg = 'Failed to save file';
+            trace_error($msg);
+            return [
+                'success' => false,
+                'error' => $msg
+            ];
+        }
+    } else {
+        $msg = "Error download file. HTTP: $httpCode, cURL: ".json_encode($error);
+        trace_error($msg);
+        return [
+            'success' => false,
+            'error' => $msg
+        ];
+    }
+}
+
 ?>

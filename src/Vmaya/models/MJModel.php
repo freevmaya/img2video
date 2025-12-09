@@ -1,5 +1,5 @@
 <?
-class CommModel extends BaseModel {
+class MJModel extends BaseModel {
 	
 	protected function getTable() {
 		return 'api_comm';
@@ -11,20 +11,32 @@ class CommModel extends BaseModel {
 				'type' => 'hidden',
 				'dbtype' => 'i'
 			],
-			'task_hash ' => [
+			'task_hash' => [
 				'type' => 'task_hash ',
 				'dbtype' => 's'
 			],
-			'service' => [
-				'type' => 'service',
+			'webhook_type' => [
+				'type' => 'webhook_type',
 				'dbtype' => 's'
 			],
-			'data' => [
-				'type' => 'data',
+			'prompt' => [
+				'type' => 'prompt',
 				'dbtype' => 's'
 			],
 			'type' => [
 				'label'=> 'type',
+				'dbtype' => 's'
+			],
+			'status' => [
+				'label'=> 'status',
+				'dbtype' => 's'
+			],
+			'result' => [
+				'label'=> 'result',
+				'dbtype' => 's'
+			],
+			'created_at' => [
+				'label'=> 'created_at',
 				'dbtype' => 's'
 			],
 			'processed' => [
