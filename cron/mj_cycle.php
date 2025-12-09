@@ -9,7 +9,7 @@ use \Telegram\Bot\Api;
 use \App\Services\API\MidjourneyAPI;
 
 // === ИНИЦИАЛИЗАЦИЯ БЛОКИРОВКИ ===
-$lock = new ProcessLock(__DIR__ . '/bot.pid');
+$lock = new ProcessLock(__DIR__ . '/mj_cycle.pid');
 
 if (!$lock->acquire()) {
     error_log("Bot is already running. Exiting.");
