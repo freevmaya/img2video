@@ -20,23 +20,12 @@ class Image2VideoBot extends YKassaBot {
         parent::initUser($update);
         if ($this->getUserId())
             $this->serviceApi = new MidjourneyAPI(MJ_APIKEY, MJ_HOOK_URL, MJ_ACCOUNTHASH, 
-                                    $this->getUserId(), new TaskModel(), new MJModel());
-    }
-
-    public function GetUpdates() {
-        if ($this->serviceApi) 
-            $this->serviceApi->Update($this);
-        parent::GetUpdates();
+                                    $this, new TaskModel(), new MJModel());
     }
 
     protected function runUpdate($update) {
         $this->expect = $this->popSession("expect");
         parent::runUpdate($update);
-    }
-
-
-    public function ServiceAction($params) {
-        trace($params);
     }
 
     protected function messageProcess($chatId, $messageId, $text) {

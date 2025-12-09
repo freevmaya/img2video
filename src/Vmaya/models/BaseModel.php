@@ -19,11 +19,12 @@ abstract class BaseModel {
 
 	public function Update($values, $idField = 'id') {
 		GLOBAL $dbp;
-		$types = $this->dbTypes(array_keys($values));
+		$types = $this->dbTypes(array_keys($values), $idField);
 
 		$id = isset($values[$idField]) ? $values[$idField] : null;
 
-		$values = $this->allowUpdateValues($values );
+		$values = $this->allowUpdateValues($values);
+		unset($values[$idField]);
 
 		if ($id) {
 			if ($dbp->bquery($this->updateQuery($id, $values, $idField), $types, array_values($values)))
@@ -51,14 +52,13 @@ abstract class BaseModel {
 		$id = $this->verifyId($idField, $id);
 
 		foreach($this->getFields() as $fieldName=>$field)
-			if (($fieldName != 'id') && isset($values[$fieldName]))
+			if (($fieldName != $idField) && isset($values[$fieldName]))
 				$updateList[] = "`{$fieldName}`=?";
 
 		return "UPDATE `{$this->getTable()}` SET ".implode(',', $updateList)." WHERE `{$idField}`={$id}";
 	}
 
 	protected function insertQuery($values) {
-		unset($values['id']);
 
 		$fieldList = array_keys($values);
 		$valuesList = [];
@@ -67,14 +67,13 @@ abstract class BaseModel {
 		return "INSERT INTO {$this->getTable()} (".implode(',', $fieldList).") VALUES (".implode(',', $valuesList).")";
 	}
 
-	protected function dbTypes($fieldsList)
+	protected function dbTypes($fieldsList, $filedId='id')
 	{
 		$fields = $this->getFields();
 		$types = '';
 		foreach ($fieldsList as $field)
-			if (($field != 'id') and isset($fields[$field]))
+			if (($field != $filedId) and isset($fields[$field]))
 				$types .= isset($fields[$field]['dbtype']) ? $fields[$field]['dbtype'] : 's';
-
 		return $types;
 	}
 

@@ -15,6 +15,10 @@ class TaskModel extends BaseModel {
 				'type' => 'user_id ',
 				'dbtype' => 'i'
 			],
+			'chat_id' => [
+				'type' => 'chat_id ',
+				'dbtype' => 'i'
+			],
 			'hash' => [
 				'type' => 'hash ',
 				'dbtype' => 's'

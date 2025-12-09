@@ -221,5 +221,19 @@
 		    "content-type": "application\/json",
 		    "accept-encoding": "gzip",
 		    "user-agent": "Go-http-client\/2.0"
-		}', '{"account_hash":"4318ceab-7987-4771-837f-f4fec3b7938e","hash":"3f542cbb-0bd4-48d3-b665-d53d0007a7d9","parent_hash":"","webhook_url":"https://vmaya.ru/img2video/mj_hook.php","webhook_type":"result","callback_id":null,"choice":"2","type":"upscale","status":"done","result":{"url":"https://cdn.discordapp.com/attachments/1446773822048174091/1447819875103014952/vmaya5252_A_majestic_white_wolf_with_blue_eyes_standing_on_a_cl_ae27b3c2-daeb-4dc5-8613-740cf7ba69f4.png?ex=693902d5\u0026is=6937b155\u0026hm=54d3dc446c4cd6bde8d23668b6738a6c2ae3060489ca4f6b00bc52b5acce1979\u0026","proxy_url":"https://media.discordapp.net/attachments/1446773822048174091/1447819875103014952/vmaya5252_A_majestic_white_wolf_with_blue_eyes_standing_on_a_cl_ae27b3c2-daeb-4dc5-8613-740cf7ba69f4.png?ex=693902d5\u0026is=6937b155\u0026hm=54d3dc446c4cd6bde8d23668b6738a6c2ae3060489ca4f6b00bc52b5acce1979\u0026","filename":"vmaya5252_A_majestic_white_wolf_with_blue_eyes_standing_on_a_cl_ae27b3c2-daeb-4dc5-8613-740cf7ba69f4.png","content_type":"image/png","width":1024,"height":1024,"size":1212283},"job_id":"ae27b3c2-daeb-4dc5-8613-740cf7ba69f4","next_actions":[{"type":"upsample","choices":["v7_2x_subtle","v7_2x_creative"]},{"type":"vary_subtle"},{"type":"vary_strong"},{"type":"inpaint"},{"type":"zoom","choices":[50,75,"custom"]},{"type":"pan","choices":["left","right","up","down"]},{"type":"animate","choices":["high","low"]},{"type":"seed"}],"status_reason":null,"created_at":"2025-12-09T05:19:13Z"}');
+		}', '{
+    "account_hash": "4318ceab-7987-4771-837f-f4fec3b7938e",
+    "hash": "abd18130-6e70-4cb2-b652-4804f474d01f",
+    "parent_hash": "",
+    "webhook_url": "https:\/\/vmaya.ru\/img2video\/mj_hook.php",
+    "webhook_type": "progress",
+    "callback_id": null,
+    "prompt": "A majestic white wolf with blue eyes standing on a cliff under the aurora borealis",
+    "type": "imagine",
+    "progress": 0,
+    "status": "waiting",
+    "result": null,
+    "status_reason": null,
+    "created_at": "2025-12-08T16:19:14Z"
+}');
 	} else Main(getallheaders(), file_get_contents('php://input'));

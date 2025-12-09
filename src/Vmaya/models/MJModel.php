@@ -12,15 +12,15 @@ class MJModel extends BaseModel {
 				'dbtype' => 'i'
 			],
 			'hash' => [
-				'type' => 'hash',
+				'label' => 'hash',
 				'dbtype' => 's'
 			],
 			'webhook_type' => [
-				'type' => 'webhook_type',
+				'label' => 'webhook_type',
 				'dbtype' => 's'
 			],
 			'prompt' => [
-				'type' => 'prompt',
+				'label' => 'prompt',
 				'dbtype' => 's'
 			],
 			'type' => [

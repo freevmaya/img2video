@@ -1,7 +1,7 @@
 <?
 	error_reporting(E_ALL);
-	require __DIR__ . '/vendor/autoload.php';
-	require __DIR__ . '/src/Vmaya/engine.php';
+	require '../vendor/autoload.php';
+	require '../src/Vmaya/engine.php';
 
 	use Telegram\Bot\Api;
 

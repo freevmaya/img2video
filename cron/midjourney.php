@@ -1,6 +1,6 @@
 <?
-	require __DIR__ . '/vendor/autoload.php';
-	require __DIR__ . '/src/Vmaya/engine.php';
+	require '../vendor/autoload.php';
+	require '../src/Vmaya/engine.php';
 
 	include(SERVICES_PATH.'APIInterface.php');
 	include(SERVICES_PATH.'MidjourneyAPI.php');

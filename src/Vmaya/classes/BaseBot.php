@@ -54,6 +54,10 @@ abstract class BaseBot {
         saveSession($this->currentUpdate->getMessage()->getChat()->getId(), $this->session);
     }
 
+    public function CurrentUpdate() {
+        return $this->currentUpdate;
+    }
+
     protected function hasSession($name) {
         return isset($this->session[$name]);
     }
@@ -199,8 +203,6 @@ abstract class BaseBot {
 
                 $this->_runUpdate($update);
             } 
-
-            print_r('update');
         } catch (Exception $e) {
             // 9. Обработка ошибок
             echo 'Ошибка: ' . $e->getMessage() . PHP_EOL;

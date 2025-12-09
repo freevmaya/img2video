@@ -7,27 +7,28 @@ class MidjourneyAPI implements APIInterface
     private $baseUrl = 'https://api.userapi.ai';
     private $webhook_url;
     private $account_hash;
-    private $modelTask;
-    private $modelReply;
+    protected $modelTask;
+    protected $modelReply;
+    protected $bot;
 
     public function __construct($apiKey, $webhook_url, $account_hash, 
-                                $user_id, $modelTask, $modelReply)
+                                $bot, $modelTask, $modelReply)
     {
-        $this->apiKey = $apiKey;
-        $this->webhook_url = $webhook_url;
+        $this->apiKey       = $apiKey;
+        $this->webhook_url  = $webhook_url;
         $this->account_hash = $account_hash;
-        $this->modelTask = $modelTask;
-        $this->modelReply = $modelReply;
-        $this->user_id = $user_id;
+        $this->modelTask    = $modelTask;
+        $this->modelReply   = $modelReply;
+        $this->bot          = $bot;
     }
 
     public function generateImage($prompt)
     {
         $data = [
-            'prompt' => $prompt,
-            'webhook_url' => $this->webhook_url,
-            'webhook_type' => "progress",
-            'account_hash' => $this->account_hash,
+            'prompt'        => $prompt,
+            'webhook_url'   => $this->webhook_url,
+            'webhook_type'  => "progress",
+            'account_hash'  => $this->account_hash,
             "is_disable_prefilter" => true
         ];
 
@@ -83,17 +84,11 @@ class MidjourneyAPI implements APIInterface
 
         if (isset($response['hash']))
             $this->modelTask->Update([
-                'user_id'=>$this->user_id,
+                'user_id'=>$this->bot->getUserId(),
+                'chat_id'=>$this->bot->CurrentUpdate()->getMessage()->getChat()->getId(),
                 'hash'=>$response['hash']
             ]);
 
         return $response;
-    }
-
-    public function Update($actionObject) {
-        $tasks = $this->modelTask->getItems(['state'=>'active']);
-        print_r($tasks);
-        if (count($tasks) > 0) {
-        }
     }
 }
