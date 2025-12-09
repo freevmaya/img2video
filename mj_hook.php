@@ -209,64 +209,64 @@
 
 
 	// Получаем сырые данные
-	//Main(getallheaders(), file_get_contents('php://input'));
-
-Main('{
-    "Host": "vmaya.ru",
-    "X-Server-Addr": "87.236.16.76",
-    "X-Forwarded-Proto": "https",
-    "X-Real-IP": "209.38.192.184",
-    "Content-Length": "429",
-    "content-type": "application\/json",
-    "accept-encoding": "gzip",
-    "user-agent": "Go-http-client\/2.0"
-}', '{
-    "account_hash": "4318ceab-7987-4771-837f-f4fec3b7938e",
-    "hash": "abd18130-6e70-4cb2-b652-4804f474d01f",
-    "parent_hash": "",
-    "webhook_url": "https:\/\/vmaya.ru\/img2video\/mj_hook.php",
-    "webhook_type": "progress",
-    "callback_id": null,
-    "prompt": "A majestic white wolf with blue eyes standing on a cliff under the aurora borealis",
-    "type": "imagine",
-    "progress": 100,
-    "status": "done",
-    "result": {
-        "url": "https:\/\/cdn.discordapp.com\/attachments\/1446773822048174091\/1447623696150822963\/vmaya5252_A_majestic_white_wolf_with_blue_eyes_standing_on_a_cl_2c9d9905-9956-411a-a24a-d7a1cbe460f6.png?ex=69384c20&is=6936faa0&hm=fd540149890e2d8808ba161fd20e7ae73801a42af601b9976eafb98b711dcdab&",
-        "proxy_url": "https:\/\/media.discordapp.net\/attachments\/1446773822048174091\/1447623696150822963\/vmaya5252_A_majestic_white_wolf_with_blue_eyes_standing_on_a_cl_2c9d9905-9956-411a-a24a-d7a1cbe460f6.png?ex=69384c20&is=6936faa0&hm=fd540149890e2d8808ba161fd20e7ae73801a42af601b9976eafb98b711dcdab&",
-        "filename": "vmaya5252_A_majestic_white_wolf_with_blue_eyes_standing_on_a_cl_2c9d9905-9956-411a-a24a-d7a1cbe460f6.png",
-        "content_type": "image\/png",
-        "width": 2048,
-        "height": 2048,
-        "size": 5788169
-    },
-    "job_id": "2c9d9905-9956-411a-a24a-d7a1cbe460f6",
-    "next_actions": [
-        {
-            "type": "upscale",
-            "choices": [
-                1,
-                2,
-                3,
-                4
-            ]
-        },
-        {
-            "type": "reroll"
-        },
-        {
-            "type": "variation",
-            "choices": [
-                1,
-                2,
-                3,
-                4
-            ]
-        },
-        {
-            "type": "seed"
-        }
-    ],
-    "status_reason": null,
-    "created_at": "2025-12-08T16:19:14Z"
-}');
+	if (DEV) {
+		Main('{
+		    "Host": "vmaya.ru",
+		    "X-Server-Addr": "87.236.16.76",
+		    "X-Forwarded-Proto": "https",
+		    "X-Real-IP": "209.38.192.184",
+		    "Content-Length": "429",
+		    "content-type": "application\/json",
+		    "accept-encoding": "gzip",
+		    "user-agent": "Go-http-client\/2.0"
+		}', '{
+		    "account_hash": "4318ceab-7987-4771-837f-f4fec3b7938e",
+		    "hash": "abd18130-6e70-4cb2-b652-4804f474d01f",
+		    "parent_hash": "",
+		    "webhook_url": "https:\/\/vmaya.ru\/img2video\/mj_hook.php",
+		    "webhook_type": "progress",
+		    "callback_id": null,
+		    "prompt": "A majestic white wolf with blue eyes standing on a cliff under the aurora borealis",
+		    "type": "imagine",
+		    "progress": 100,
+		    "status": "done",
+		    "result": {
+		        "url": "https:\/\/cdn.discordapp.com\/attachments\/1446773822048174091\/1447623696150822963\/vmaya5252_A_majestic_white_wolf_with_blue_eyes_standing_on_a_cl_2c9d9905-9956-411a-a24a-d7a1cbe460f6.png?ex=69384c20&is=6936faa0&hm=fd540149890e2d8808ba161fd20e7ae73801a42af601b9976eafb98b711dcdab&",
+		        "proxy_url": "https:\/\/media.discordapp.net\/attachments\/1446773822048174091\/1447623696150822963\/vmaya5252_A_majestic_white_wolf_with_blue_eyes_standing_on_a_cl_2c9d9905-9956-411a-a24a-d7a1cbe460f6.png?ex=69384c20&is=6936faa0&hm=fd540149890e2d8808ba161fd20e7ae73801a42af601b9976eafb98b711dcdab&",
+		        "filename": "vmaya5252_A_majestic_white_wolf_with_blue_eyes_standing_on_a_cl_2c9d9905-9956-411a-a24a-d7a1cbe460f6.png",
+		        "content_type": "image\/png",
+		        "width": 2048,
+		        "height": 2048,
+		        "size": 5788169
+		    },
+		    "job_id": "2c9d9905-9956-411a-a24a-d7a1cbe460f6",
+		    "next_actions": [
+		        {
+		            "type": "upscale",
+		            "choices": [
+		                1,
+		                2,
+		                3,
+		                4
+		            ]
+		        },
+		        {
+		            "type": "reroll"
+		        },
+		        {
+		            "type": "variation",
+		            "choices": [
+		                1,
+		                2,
+		                3,
+		                4
+		            ]
+		        },
+		        {
+		            "type": "seed"
+		        }
+		    ],
+		    "status_reason": null,
+		    "created_at": "2025-12-08T16:19:14Z"
+		}');
+	} else Main(getallheaders(), file_get_contents('php://input'));
