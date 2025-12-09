@@ -40,7 +40,14 @@ class MJMainCycle extends MidjourneyAPI {
 
         		$file_url = ($isProgress?PROCESS_URL:RESULT_URL).$task['hash'].'.'.$info['extension'];
 
-        		$params['photo'] = $file_url;
+        		$response = $this->bot->sendPhoto([
+				    'chat_id' => $task['chat_id'],
+				    'photo' => $file_url,
+				    'caption' => 'Ваше изображение готово!',
+				    'parse_mode' => 'HTML'
+				]);
+
+				return $response;
         	}
         }
 
