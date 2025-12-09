@@ -5,19 +5,6 @@ declare(ticks = 1);
 require dirname(__DIR__).'/vendor/autoload.php';
 require dirname(__DIR__).'/src/Vmaya/engine.php';
 
-// Увеличиваем лимиты
-ini_set('mysql.connect_timeout', 300);
-ini_set('default_socket_timeout', 300);
-
-// Регистрируем обработчик для автоматического восстановления соединения
-register_shutdown_function(function() {
-    $lastError = error_get_last();
-    if ($lastError && strpos($lastError['message'], 'MySQL server has gone away') !== false) {
-        // Логируем и продолжаем работу
-        error_log("MySQL connection lost, but continuing...");
-    }
-});
-
 use \Telegram\Bot\Api;
 use \Telegram\Bot\FileUpload\InputFile;
 
