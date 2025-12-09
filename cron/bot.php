@@ -38,25 +38,21 @@ try {
     
     // Основной цикл с обработкой обновлений
     while ($lock->isFile()) {
-        try {
-            $bot->GetUpdates();
-        } catch (Exception $e) {
-            error_log("Error in GetUpdates: " . $e->getMessage());
-            sleep(1); // Пауза при ошибке
-        }
+
+        $bot->GetUpdates();
         
         // Проверяем, не нужно ли завершить работу
         if (function_exists('pcntl_signal_dispatch')) {
             pcntl_signal_dispatch();
         }
         
-        usleep(100);
+        usleep(300);
     }
 
     $dbp->Close();
     
 } catch (Exception $e) {
-    error_log("Fatal bot error: " . $e->getMessage());
-    trace_error($e->getMessage());
+    trace_error("Fatal bot error: " . $e->getMessage());
+    $dbp->Close();
     exit(1);
 }
