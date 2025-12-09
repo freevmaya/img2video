@@ -2,8 +2,8 @@
 	require __DIR__ . '/vendor/autoload.php';
 	require __DIR__ . '/src/Vmaya/engine.php';
 
-	include('src/Vmaya/services/APIInterface.php');
-	include('src/Vmaya/services/MidjourneyAPI.php');
+	include(SERVICES_PATH.'APIInterface.php');
+	include(SERVICES_PATH.'MidjourneyAPI.php');
 
 	use \App\Services\API\MidjourneyAPI;
 

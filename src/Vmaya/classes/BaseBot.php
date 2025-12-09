@@ -10,12 +10,17 @@ abstract class BaseBot {
     protected $currentUpdate = null;
 
     public function getUser() { return $this->user; }
-    public function getUserId() { return $this->user['id']; }
+    public function getUserId() { return $this->user ? $this->user['id'] : null; }
     public function getReplyToMessage() { return $this->reply_to_message; }
 
 	function __construct($api, $dbp) {
         $this->api = $api;
         $this->lastUpdateId = 0;
+        $this->initialize();
+    }
+
+    protected function initialize() {
+        
     }
 
     public static function getUserLink($userId, $userName) {
@@ -28,7 +33,7 @@ abstract class BaseBot {
         $callback = $this->currentUpdate['callback_query'];
         $chatId = $callback['message']['chat']['id'];
         $messageId = $callback['message']['message_id'];
-        $data = $callback['data']; // Здесь содержится ваш callback_data
+        $callback_data = $callback['data']; // Здесь содержится ваш callback_data
         
         // 1. Ответим на callback (убирает "часики" у кнопки)
         $this->api->answerCallbackQuery([
@@ -36,10 +41,10 @@ abstract class BaseBot {
             'text' => 'Обрабатываю ваш выбор...'
         ]);
 
-        $this->callbackProcess($callback, $chatId, $messageId, $data);
+        $this->callbackProcess($callback, $chatId, $messageId, $callback_data);
     }
 
-    protected abstract function callbackProcess($callback, $chatId, $messageId, $data);
+    protected abstract function callbackProcess($callback, $chatId, $messageId, $callback_data);
     protected abstract function commandProcess($command, $chatId, $messageId, $text);
     protected abstract function replyToMessage($reply, $chatId, $messageId, $text);
     protected abstract function messageProcess($chatId, $messageId, $data);
@@ -138,14 +143,16 @@ abstract class BaseBot {
             }
 
         if ($user) {
-            $this->initLang($user['language_code']);
             $this->user = (new TGUserModel())->checkAndAdd($user);
+            $this->initLang($this->user['language_code']);
         } else $this->initLang('ru');
     }
 
     protected function initLang($language_code) {
         GLOBAL $lang;
-        include_once(LANGUAGE_PATH.$language_code.'.php');
+        $fileName = LANGUAGE_PATH.$language_code.'.php';
+        if (file_exists($fileName))
+            include_once($fileName);
     }
 
     public function GetWebhookUpdates() {
@@ -153,7 +160,8 @@ abstract class BaseBot {
         //$this->sendImmediateHttpResponse();
         $update = $this->api->getWebhookUpdate();
 
-        $this->initUser($update);
+        if (!$this->user) 
+            $this->initUser($update);
 
         if ($this->lastUpdateId != $update->getUpdateId())
             $this->_runUpdate($update);
@@ -186,9 +194,13 @@ abstract class BaseBot {
 
             // 5. Обрабатываем каждое обновление
             foreach ($updates as $update) {
-                $this->initUser($update);
+                if (!$this->user) 
+                    $this->initUser($update);
+
                 $this->_runUpdate($update);
             } 
+
+            print_r('update');
         } catch (Exception $e) {
             // 9. Обработка ошибок
             echo 'Ошибка: ' . $e->getMessage() . PHP_EOL;

@@ -10,6 +10,9 @@
 	include(INCLUDE_PATH.DS."session.php");
 	include(INCLUDE_PATH.DS.'db/mySQLProvider.php');
 
+	include(SERVICES_PATH.'APIInterface.php');
+	include(SERVICES_PATH.'MidjourneyAPI.php');
+
 	define("AUTOLOAD_PATHS", [INCLUDE_PATH, CLASSES_PATH, MODELS_PATH]);
 	spl_autoload_register(function ($class_name) {
 

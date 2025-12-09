@@ -11,8 +11,8 @@ class MJModel extends BaseModel {
 				'type' => 'hidden',
 				'dbtype' => 'i'
 			],
-			'task_hash' => [
-				'type' => 'task_hash ',
+			'hash' => [
+				'type' => 'hash',
 				'dbtype' => 's'
 			],
 			'webhook_type' => [

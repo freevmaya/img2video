@@ -7,12 +7,18 @@ class MidjourneyAPI implements APIInterface
     private $baseUrl = 'https://api.userapi.ai';
     private $webhook_url;
     private $account_hash;
+    private $modelTask;
+    private $modelReply;
 
-    public function __construct($apiKey, $webhook_url, $account_hash)
+    public function __construct($apiKey, $webhook_url, $account_hash, 
+                                $user_id, $modelTask, $modelReply)
     {
         $this->apiKey = $apiKey;
         $this->webhook_url = $webhook_url;
         $this->account_hash = $account_hash;
+        $this->modelTask = $modelTask;
+        $this->modelReply = $modelReply;
+        $this->user_id = $user_id;
     }
 
     public function generateImage($prompt)
@@ -72,13 +78,22 @@ class MidjourneyAPI implements APIInterface
             ]
         ]);
 
-        $response = curl_exec($ch);
+        $response = json_decode(curl_exec($ch), true);
         curl_close($ch);
 
-        return json_decode($response, true);
+        if (isset($response['hash']))
+            $this->modelTask->Update([
+                'user_id'=>$this->user_id,
+                'hash'=>$response['hash']
+            ]);
+
+        return $response;
     }
 
-    public function getStatus($jobId) {
-
+    public function Update($actionObject) {
+        $tasks = $this->modelTask->getItems(['state'=>'active']);
+        print_r($tasks);
+        if (count($tasks) > 0) {
+        }
     }
 }

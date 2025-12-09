@@ -6,7 +6,7 @@ subscribe - подписка
 
 */
 
-class YKassaBot extends MLServiceBot {
+abstract class YKassaBot extends BaseBot {
 
     protected $balance;
 
@@ -29,7 +29,7 @@ class YKassaBot extends MLServiceBot {
             case 'MySubscribe':
                 $this->mySubscribe($chatId);
                 return true;
-            default: return;
+            default: return false;
         }
     }
 
@@ -46,8 +46,8 @@ class YKassaBot extends MLServiceBot {
             $imgPrice = round($stype['price'] / $stype['image_limit']);
             $videoPrice = round($stype['price'] / $stype['video_limit']);
 
-            $limitsText = 'Хватит на '.round($this->balance / $imgPrice).' изображений или '.round($this->balance / $videoPrice).' видео.';
-
+            $limitsText = sprintf(Lang('Enough for %s images or %s videos'), round($this->balance / $imgPrice), round($this->balance / $videoPrice));
+            
             $this->Answer($chatId, ['text' => sprintf(Lang("Your balance %s"), $this->balance.' '.@$area['currency'])."\n\n".$limitsText]);
         }
     }

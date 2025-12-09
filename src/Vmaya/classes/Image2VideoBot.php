@@ -9,10 +9,61 @@ subscribe - подписка
 
 */
 
+use \App\Services\API\MidjourneyAPI;
+
 class Image2VideoBot extends YKassaBot {
 
-    protected function callbackProcess($callback, $chatId, $messageId, $data) {
-        parent::callbackProcess($callback, $chatId, $messageId, $data);
+    protected $serviceApi;
+    protected $expect;
+
+    protected function initUser($update) {
+        parent::initUser($update);
+        if ($this->getUserId())
+            $this->serviceApi = new MidjourneyAPI(MJ_APIKEY, MJ_HOOK_URL, MJ_ACCOUNTHASH, 
+                                    $this->getUserId(), new TaskModel(), new MJModel());
+    }
+
+    public function GetUpdates() {
+        if ($this->serviceApi) 
+            $this->serviceApi->Update($this);
+        parent::GetUpdates();
+    }
+
+    protected function runUpdate($update) {
+        $this->expect = $this->popSession("expect");
+        parent::runUpdate($update);
+    }
+
+
+    public function ServiceAction($params) {
+        trace($params);
+    }
+
+    protected function messageProcess($chatId, $messageId, $text) {
+
+        if ($expect = $this->expect) {
+            if (method_exists($this, $expect)) {
+                $this->$expect($chatId, $text);
+            }
+            else {
+                switch ($expect) {
+                    case 'photo':
+                        if ($photo = @$this->currentUpdate['message']['photo']) {
+                            $best_photo = $photo[count($photo) - 1];
+                            $file_url = $this->GetFileUrl($best_photo['file_id']);
+                            trace($file_url);
+                        }
+                        break;
+                    default:
+                        break;
+
+                }
+            }
+        }
+    }
+
+    protected function replyToMessage($reply, $chatId, $messageId, $text) {
+        $this->messageProcess($chatId, $messageId, $text);
     }
 
     protected function commandProcess($command, $chatId, $messageId, $text) {
@@ -39,23 +90,6 @@ class Image2VideoBot extends YKassaBot {
         }
     }
 
-
-    protected function messageProcess($chatId, $messageId, $text) {
-        switch ($this->popSession("expect")) {
-            case 'photo':
-                if ($photo = @$this->currentUpdate['message']['photo']) {
-                    $best_photo = $photo[count($photo) - 1];
-                    $file_url = $this->GetFileUrl($best_photo['file_id']);
-                    trace($file_url);
-                }
-                break;
-            default:
-                parent::messageProcess($chatId, $messageId, $text);
-                break;
-
-        }
-    }
-
     protected function start($chatId) {
         $keyboard = $this->subscribeTypeList();
 
@@ -66,14 +100,22 @@ class Image2VideoBot extends YKassaBot {
         ])]);
     }
 
+    protected function textToImage($chatId, $prompt) {
+        $this->Answer($chatId, ['text' => "Prompt: ".$prompt]);
+    }
+
+    protected function textToVideo($chatId, $prompt) {
+        $this->Answer($chatId, ['text' => "Prompt: ".$prompt]);
+    }
+
     protected function text2image($chatId) {
-        $this->Answer($chatId, ['text' => Lang("Send a photo")]);
-        $this->setSession("expect", 'photo');
+        $this->Answer($chatId, ['text' => Lang("Send a prompt")]);
+        $this->setSession("expect", 'textToImage');
     }
 
     protected function text2video($chatId) {
-        $this->Answer($chatId, ['text' => Lang("Send a photo")]);
-        $this->setSession("expect", 'photo');
+        $this->Answer($chatId, ['text' => Lang("Send a prompt")]);
+        $this->setSession("expect", 'textToVideo');
     }
 }
 ?>
