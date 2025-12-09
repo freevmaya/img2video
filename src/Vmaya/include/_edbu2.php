@@ -52,7 +52,7 @@ class DB {
     }               
     
     static function one($query, $cached=false) {
-        $row = DB::line($query, null, MYSQLI_BOTH, $cached);
+        $row = DB::line($query, null, MYSQLI_NUM, $cached);
         return $row[0];
     }
     
