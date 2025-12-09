@@ -1,6 +1,8 @@
 <?php
-require __DIR__.'../vendor/autoload.php';
-require __DIR__.'../src/Vmaya/engine.php';
+require '../vendor/autoload.php';
+require '../src/Vmaya/engine.php';
+
+/*
 
 use \Telegram\Bot\Api;
 use \Telegram\Bot\FileUpload\InputFile;
@@ -55,4 +57,4 @@ try {
     trace_error("Fatal bot error: " . $e->getMessage());
     $dbp->Close();
     exit(1);
-}
+}*/
