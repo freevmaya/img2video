@@ -1,8 +1,8 @@
 <?php
-require '../vendor/autoload.php';
-require '../src/Vmaya/engine.php';
 
 /*
+require '../vendor/autoload.php';
+require '../src/Vmaya/engine.php';
 
 use \Telegram\Bot\Api;
 use \Telegram\Bot\FileUpload\InputFile;
