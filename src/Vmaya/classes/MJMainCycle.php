@@ -33,16 +33,18 @@ class MJMainCycle extends MidjourneyAPI {
 
         		$isProgress = $response['status'] == 'progress';
 				$info = pathinfo($result['filename']);
-				$file_path = ($isProgress?PROCESS_PATH:RESULT_PATH).$task['hash'].'.'.$info['extension'];
+				$filename = $task['hash'].'.'.$info['extension'];
+				
+				$file_path = ($isProgress?PROCESS_PATH:RESULT_PATH).$filename;
 
 				if (!file_exists($file_path))
         			downloadFile($result['url'], $file_path);
 
-        		$file_url = ($isProgress?PROCESS_URL:RESULT_URL).$task['hash'].'.'.$info['extension'];
+        		$file_url = ($isProgress?PROCESS_URL:RESULT_URL).$filename;
 
         		$response = $this->bot->sendPhoto([
 				    'chat_id' => $task['chat_id'],
-				    'photo' => $file_url,
+				    'photo' => InputFile::create($file_path, $filename),
 				    'caption' => 'Ваше изображение готово!',
 				    'parse_mode' => 'HTML'
 				]);

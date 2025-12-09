@@ -4,6 +4,7 @@ require '../src/Vmaya/engine.php';
 
 use \Telegram\Bot\Api;
 use \Telegram\Bot\FileUpload\InputFile;
+use \Telegram\Bot\Exceptions\TelegramResponseException;
 use \App\Services\API\MidjourneyAPI;
 
 $telegram = new Api(BOTTOKEN);
