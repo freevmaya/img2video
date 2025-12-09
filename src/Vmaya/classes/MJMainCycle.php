@@ -1,5 +1,8 @@
 <?
 use \App\Services\API\MidjourneyAPI;
+use \Telegram\Bot\FileUpload\InputFile;
+use \Telegram\Bot\Exceptions\TelegramResponseException;
+
 class MJMainCycle extends MidjourneyAPI {
 
     protected function updateTask($task) {
@@ -34,7 +37,7 @@ class MJMainCycle extends MidjourneyAPI {
         		$isProgress = $response['status'] == 'progress';
 				$info = pathinfo($result['filename']);
 				$filename = $task['hash'].'.'.$info['extension'];
-				
+
 				$file_path = ($isProgress?PROCESS_PATH:RESULT_PATH).$filename;
 
 				if (!file_exists($file_path))
