@@ -8,10 +8,14 @@ class ProcessLock {
         $this->lockFile = $lockFile;
         $this->pid = getmypid();
     }
+
+    public function isFile() {
+    	return file_exists($this->lockFile);
+    }
     
     public function acquire() {
         // Проверяем существующий lock
-        if (file_exists($this->lockFile)) {
+        if ($this->isFile()) {
             $existingPid = (int) file_get_contents($this->lockFile);
             
             // Проверяем, жив ли процесс
