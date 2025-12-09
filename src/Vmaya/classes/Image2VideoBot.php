@@ -91,6 +91,7 @@ class Image2VideoBot extends YKassaBot {
 
     protected function textToImage($chatId, $prompt) {
         $this->Answer($chatId, ['text' => "Prompt: ".$prompt]);
+        $this->serviceApi->generateImage($prompt);
     }
 
     protected function textToVideo($chatId, $prompt) {
