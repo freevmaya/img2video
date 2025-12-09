@@ -47,7 +47,7 @@ class MJMainCycle extends MidjourneyAPI {
         		$response = $this->bot->sendPhoto([
 				    'chat_id' => $task['chat_id'],
 				    'photo' => InputFile::create($file_path, $filename),
-				    'caption' => $isProgress ? "Ваше изображение в процессе ({$response['progress']}%)" : 'Ваше изображение готово!',
+				    'caption' => $isProgress ? "Ваше изображение в процессе" : 'Ваше изображение готово!',
 				    'parse_mode' => 'HTML'
 				]);
 
