@@ -5,8 +5,6 @@
 	define("LOG_FILE", LOGPATH.'webhook.log');
 	define("LOG_ERROR_FILE", LOGPATH.'webhook_error.log');
 	define("LOG_UNKNOWN_FILE", LOGPATH.'webhook_unknown.log');
-	define('RESULT_PATH', BASEPATH.'downloads'.DS.'results'.DS);
-	define('PROCESS_PATH', BASEPATH.'downloads'.DS.'progress'.DS);
 	define("ISLOG", true);
 
 	if (!file_exists(RESULT_PATH))

@@ -16,24 +16,48 @@ class MJMainCycle extends MidjourneyAPI {
     }
 
     public function Update() {
-        $startTime = time();
-        do {
-            $tasks = $this->modelTask->getItems(['state'=>'active']);
-            if (count($tasks) > 0) {
-                foreach ($tasks as $task) {
-                    $this->updateTask($task);
-                }
+        $tasks = $this->modelTask->getItems(['state'=>'active']);
+        if (count($tasks) > 0) {
+            foreach ($tasks as $task) {
+                $this->updateTask($task);
             }
-
-            $delta = time() - $startTime;
-            //print_r(time() - $startTime);
-
-        } while ((count($tasks) > 0) && ($delta < 2));
+        }
     }   
 
     protected function doServiceAction($task, $response) {
-        print_r($task);
-        print_r($response);
+        $params = ['text'=>'Ваше изображение готово!'];
+
+        if (isset($response['result'])) {
+        	$result = json_decode($response['result'], true);
+        	if (isset($result['url']) && $result['url']) {
+
+        		$isProgress = $response['status'] == 'progress';
+				$info = pathinfo($result['filename']);
+				$file_path = ($isProgress?PROCESS_PATH:RESULT_PATH).$task['hash'].'.'.$info['extension'];
+
+				if (!file_exists($file_path))
+        			downloadFile($result['url'], $file_path);
+
+        		$file_url = ($isProgress?PROCESS_URL:RESULT_URL).$task['hash'].'.'.$info['extension'];
+
+        		$params['photo'] = $file_url;
+        	}
+        }
+
+        $this->Message($task['chat_id'], $params);
         return true;
-    } 
+    }
+
+    public function Message($chatId, $msg, $parse_mode = 'Markdown') {
+
+        $params = array_merge([
+            'chat_id' => $chatId,
+            'text' => $msg,
+            'parse_mode' => $parse_mode
+        ], is_string($msg) ? ['text' => $msg] : $msg);
+
+        print_r($params);
+
+        return $this->bot->sendMessage($params);
+    }
 }

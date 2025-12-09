@@ -3,6 +3,11 @@
 
 	include(dirname(__FILE__).'/config/config'.($is_dev ? '-local' : '').'.php');
 
+	define('RESULT_PATH', BASEPATH.'downloads'.DS.'results'.DS);
+	define('PROCESS_PATH', BASEPATH.'downloads'.DS.'progress'.DS);
+	define('RESULT_URL', BASEURL.DS.'downloads'.DS.'results'.DS);
+	define('PROCESS_URL', BASEURL.DS.'downloads'.DS.'progress'.DS);
+
 	include(INCLUDE_PATH.DS."_edbu2.php");
 	include(INCLUDE_PATH.DS."console.php");
 	include(INCLUDE_PATH.DS."fdbg.php");
