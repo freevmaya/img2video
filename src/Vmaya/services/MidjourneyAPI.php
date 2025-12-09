@@ -45,6 +45,18 @@ class MidjourneyAPI implements APIInterface
         throw new \Exception("Video generation not supported by Midjourney API");
     }
 
+    public function Upscale($hash, $choice)
+    {
+        $data = [
+            'hash'          => $hash,
+            'choice'        => $choice,
+            'webhook_url'   => $this->webhook_url,
+            'webhook_type'  => 'result'
+        ];
+
+        return $this->makeRequest('/midjourney/v2/upscale', $data);
+    }
+
     private function makeRequest($endpoint, $data)
     {
         $ch = curl_init($this->baseUrl . $endpoint);
