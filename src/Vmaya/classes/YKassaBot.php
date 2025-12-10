@@ -234,7 +234,7 @@ abstract class YKassaBot extends BaseBot {
         ])]);
     }
 
-    private function subscribeTypeList() {
+    protected function subscribeTypeList() {
         $list = (new SubscribeOptions())->ByArea($this->getUser()['area_id']);
         $keyboard = [];
 

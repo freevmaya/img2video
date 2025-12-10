@@ -100,19 +100,6 @@ class Image2VideoBot extends YKassaBot {
                 //$this->DeleteMessage($chatId, $messageId);
                 $this->showMainMenu($chatId);
                 break;
-                /*
-            case '/text2image':
-                //$this->DeleteMessage($chatId, $messageId);
-                if ($this->isAllowedImage())
-                    $this->text2image($chatId);
-                else $this->notEnough($chatId);
-                break;
-            case '/text2video':
-                //$this->DeleteMessage($chatId, $messageId);
-                if ($this->isAllowedVideo())
-                    $this->text2video($chatId);
-                else $this->notEnough($chatId);
-                break;*/
             default:
                 parent::commandProcess($command, $chatId, $messageId, $text);
                 break;
