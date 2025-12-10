@@ -20,11 +20,13 @@ class MJMainCycle extends MidjourneyAPI {
 
         $responses = $this->modelReply->getItems(['processed'=>0, 'hash'=>$task['hash']]);
 
-        if (count($responses) == 0)
-            $this->modelTask->Update([
-                'id'=>$task['id'], 'state'=>'failure'
-            ]);
-        else {
+        if (count($responses) == 0) {
+            if (HoursDiffDate($task['date']) > 1) {
+                $this->modelTask->Update([
+                    'id'=>$task['id'], 'state'=>'failure'
+                ]);
+            }
+        } else {
             foreach ($responses as $response) {
                 if ($this->doServiceAction($task, $response)) {
                     $this->modelReply->Update([

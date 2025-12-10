@@ -95,4 +95,17 @@ function downloadFile($url, $savePath)
     }
 }
 
+function HoursDiffDate($dateString, $referenceDate = 'now') {
+    $timestamp1 = strtotime($dateString);
+    $timestamp2 = strtotime($referenceDate);
+    
+    // Разница в секундах
+    $diffSeconds = $timestamp2 - $timestamp1;
+    
+    // Преобразуем в часы
+    $diffHours = $diffSeconds / 3600;
+    
+    return $diffHours;
+}
+
 ?>
