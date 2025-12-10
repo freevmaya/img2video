@@ -13,7 +13,7 @@ class fdbg {
         $targetFile = $type == ERROR_TYPE ? $FDBGErrorsFile : $FDBGLogFile;
         
         $stack = fdbg::GetStack();
-        $stackMax = min($topCalled + 5, count($stack) - 1);
+        $stackMax = min($topCalled + 6, count($stack) - 1);
         
         $i = $topCalled;
         $stackStr = '';
