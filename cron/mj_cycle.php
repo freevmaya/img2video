@@ -12,7 +12,6 @@ use \App\Services\API\MidjourneyAPI;
 $lock = new ProcessLock(__DIR__ . '/mj_cycle.pid');
 
 if (!$lock->acquire()) {
-    error_log("Bot is already running. Exiting.");
     exit(0);
 }
 

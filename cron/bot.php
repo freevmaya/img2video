@@ -12,7 +12,6 @@ use \Telegram\Bot\FileUpload\InputFile;
 $lock = new ProcessLock(__DIR__ . '/bot.pid');
 
 if (!$lock->acquire()) {
-    trace_error("Bot is already running. Exiting.");
     exit(0);
 }
 
