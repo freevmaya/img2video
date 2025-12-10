@@ -109,15 +109,6 @@
 			return $result;
 	    }
 
-	    private function catchError($e) {
-			if ($this->isConnectionError($e->getMessage())) {
-                $this->reconnect();
-                return $this->query($query);
-            }
-            $this->error('mysql_error='.$e->getMessage().' query='.$query);
-            throw $e;
-	    }
-
 		public function query($query) {
 			$result = false;
 
@@ -126,7 +117,12 @@
 				try {
 					$result = $this->mysqli->query($query);
 				} catch (Exception $e) {
-					$this->catchError($e);
+					if ($this->isConnectionError($e->getMessage())) {
+		                $this->reconnect();
+		                return $this->query($query);
+		            }
+		            $this->error('mysql_error='.$e->getMessage().' query='.$query);
+		            throw $e;
 				}
 			} else $this->error("Query cannot be empty");
 
@@ -137,7 +133,12 @@
 			try {
 				return $this->mysqli->query("SHOW TABLES LIKE '{$tableName}'")->num_rows == 1;
 			} catch (Exception $e) {
-				$this->catchError($e);
+				if ($this->isConnectionError($e->getMessage())) {
+	                $this->reconnect();
+	                return $this->isTableExists($tableName);
+	            }
+	            $this->error('mysql_error='.$e->getMessage());
+	            throw $e;
 			}
 		}
 
@@ -145,7 +146,12 @@
 			try {
 				return $this->mysqli->escape_string($string);
 			} catch (Exception $e) {
-				$this->catchError($e);
+				if ($this->isConnectionError($e->getMessage())) {
+	                $this->reconnect();
+	                return $this->escape_string($string);
+	            }
+	            $this->error('mysql_error='.$e->getMessage());
+	            throw $e;
 			}
 		}
 
