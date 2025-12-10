@@ -130,16 +130,6 @@ class Image2VideoBot extends YKassaBot {
         ]);
     }
 
-    protected function start($chatId) {
-        $keyboard = array_merge($this->startMenuList(), $this->subscribeTypeList());
-
-        $keyboard[] = [['text' => Lang("For free"), 'callback_data' => 'subscribe-0']];
-
-        $this->Answer($chatId, ['text' => Lang("BotDescription"), 'reply_markup'=> json_encode([
-            'inline_keyboard' => $keyboard
-        ])]);
-    }
-
     function gitPull($branch = 'main', $path = null) {
         $path = $path ?: __DIR__;
         
