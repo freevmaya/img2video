@@ -20,5 +20,8 @@ $lang = [
 	'Subscription'=>'Подписка',
 	'Your image in progress'=>'Ваше изображение в процессе',
 	'Choose the option you like best'=>'Выберите вариант который вам больше нравится',
-	'Your photo is ready'=>'Ваше фото готово'
+	'Your photo is ready'=>'Ваше фото готово',
+	'Help Desk'=>'Служба поддержки',
+	'HelpDeskDescription'=>'Здесь вы можете решить вопросы касающиеся техподдержки, платежей и т.п.',
+	'Go to dialogue'=>'Перейти к диалогу'
 ];

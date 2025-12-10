@@ -33,7 +33,8 @@ class Image2VideoBot extends YKassaBot {
             [['text' => '🎥'.Lang('Create a video'), 'callback_data' => 'create_video']],
             [['text' => '💰'.Lang('Balance'), 'callback_data' => 'MySubscribe']],
             [['text' => '📊'.Lang('My generations'), 'callback_data' => 'my_generations']],
-            [['text' => '⭐'.Lang('Subscription'), 'callback_data' => 'subscribe']]
+            [['text' => '⭐'.Lang('Subscription'), 'callback_data' => 'subscribe']],
+            [['text' => '💬'.Lang('Help Desk'), 'callback_data' => 'support']]
         ];
 
         if ($this->getUserId() == ADMIN_USERID)
@@ -58,6 +59,9 @@ class Image2VideoBot extends YKassaBot {
                 if ($this->isAllowedVideo())
                     $this->text2video($chatId);
                 else $this->notEnough($chatId);
+                return true;
+            case 'support':
+                $this->Support($chatId);
                 return true;
             case 'stopBot':
                 $this->stopBot($chatId);
@@ -171,6 +175,16 @@ class Image2VideoBot extends YKassaBot {
 
             $this->Answer($chatId, ['text' => Lang($msg)]);
         }
+    }
+
+    protected function Support($chatId) {
+
+        $link = 'tg://user?id='.ADMIN_USERID;
+        $this->Answer($chatId, ['text' => Lang("HelpDeskDescription"), 'reply_markup'=> json_encode([
+            'inline_keyboard' => [
+                [['text' => Lang("Go to dialogue"), 'url' => $link]]
+            ]
+        ])]);
     }
 
     protected function textToImage($chatId, $prompt) {
