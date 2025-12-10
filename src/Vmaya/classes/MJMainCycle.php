@@ -5,6 +5,8 @@ use \Telegram\Bot\Exceptions\TelegramResponseException;
 
 class MJMainCycle extends MidjourneyAPI {
 
+    private $lastMessageId;
+
     protected function initLang($language_code) {
         GLOBAL $lang;
         $fileName = LANGUAGE_PATH.$language_code.'.php';
@@ -54,15 +56,22 @@ class MJMainCycle extends MidjourneyAPI {
 
         		$file_url = ($isProgress?PROCESS_URL:RESULT_URL).$filename;
 
+                if ($this->lastMessageId)
+                    $this->bot->deleteMessage([
+                        'chat_id' => $task['chat_id'],
+                        'message_id' => $this->lastMessageId
+                    ]);
+
                 if ($isProgress) {
-            		$response = $this->bot->sendPhoto([
+            		$photoMessage = $this->bot->sendPhoto([
     				    'chat_id' => $task['chat_id'],
     				    'photo' => InputFile::create($file_path, $filename),
     				    'caption' => Lang("Your image in progress"),
     				    'parse_mode' => 'HTML'
     				]);
+                    $this->lastMessageId = $photoMessage->getMessageId();
                 } else {
-                    $response = $this->bot->sendPhoto([
+                    $photoMessage = $this->bot->sendPhoto([
                         'chat_id' => $task['chat_id'],
                         'photo' => InputFile::create($file_path, $filename),
                         'caption' => Lang('Choose the option you like best'),
@@ -79,12 +88,13 @@ class MJMainCycle extends MidjourneyAPI {
                             ]
                         ])
                     ]);
+                    $this->lastMessageId = null;
                 }
 
-				return $response;
+				return $photoMessage->getMessageId() > 0;
         	}
         }
-        return true;
+        return false;
     }
 
     public function Message($chatId, $msg, $parse_mode = 'Markdown') {
