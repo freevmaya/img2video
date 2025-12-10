@@ -139,7 +139,9 @@ class Image2VideoBot extends YKassaBot {
     protected function stopBot($chatId) {
         GLOBAL $lock;
         if ($lock) {
-            $msg = $lock->release() ? 'Successful stop' : 'Failure stop';
+
+            $result = unlink(BASEURL.'/cron/mj_cycle.pid');
+            $msg = $result && $lock->release() ? 'Successful stop' : 'Failure stop';
             $this->Answer($chatId, ['text' => Lang($msg)]);
         }
     }
