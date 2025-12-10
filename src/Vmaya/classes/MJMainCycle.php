@@ -156,7 +156,7 @@ class MJMainCycle extends MidjourneyAPI {
         // Проверяем, анимированный ли это WebP
         if (!$this->isAnimatedWebP($webpFile)) {
             // Если не анимированный, отправляем как фото
-            return $this->api->sendPhoto(array_merge([
+            return $this->bot->sendPhoto(array_merge([
                 'chat_id' => $chatId,
                 'photo' => InputFile::create($webpFile, $filename),
                 'caption' => "Ваше изображение готово! 🎨"
@@ -165,7 +165,7 @@ class MJMainCycle extends MidjourneyAPI {
         
         // Отправляем анимированный WebP
         try {
-            $response = $this->api->sendAnimation(array_merge([
+            $response = $this->bot->sendAnimation(array_merge([
                 'chat_id' => $chatId,
                 'animation' => InputFile::create($webpFile, $filename),
                 'caption' => $message,
