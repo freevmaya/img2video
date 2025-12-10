@@ -12,17 +12,19 @@ use \Telegram\Bot\FileUpload\InputFile;
 $lock = new ProcessLock(__DIR__ . '/bot.pid');
 
 if (!$lock->acquire()) {
-    error_log("Bot is already running. Exiting.");
+    trace_error("Bot is already running. Exiting.");
     exit(0);
 }
 
 // Регистрируем обработчики для корректного завершения
 if (function_exists('pcntl_signal')) {
+    GLOBAL $lock;
     pcntl_signal(SIGTERM, function() use ($lock) { exit(0); });
     pcntl_signal(SIGINT, function() use ($lock) { exit(0); });
 }
 
 register_shutdown_function(function() use ($lock) {
+    GLOBAL $lock;
     $lock->release();
 });
 
@@ -49,7 +51,7 @@ try {
             pcntl_signal_dispatch();
         }
         
-        usleep(300);
+        usleep(50);
     }
 
     $dbp->Close();

@@ -41,7 +41,7 @@ abstract class BaseBot {
             'text' => 'Обрабатываю ваш выбор...'
         ]);
 
-        $this->callbackProcess($callback, $chatId, $messageId, $callback_data);
+        return $this->callbackProcess($callback, $chatId, $messageId, $callback_data);
     }
 
     protected abstract function callbackProcess($callback, $chatId, $messageId, $callback_data);

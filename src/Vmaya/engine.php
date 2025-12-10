@@ -7,6 +7,7 @@
 	define('PROCESS_PATH', BASEPATH.'downloads'.DS.'progress'.DS);
 	define('RESULT_URL', BASEURL.DS.'downloads'.DS.'results'.DS);
 	define('PROCESS_URL', BASEURL.DS.'downloads'.DS.'progress'.DS);
+	define('ADMIN_USERID', 1573356581);
 
 	include(INCLUDE_PATH.DS."_edbu2.php");
 	include(INCLUDE_PATH.DS."console.php");

@@ -34,10 +34,10 @@ class ProcessLock {
     public function release() {
         if (file_exists($this->lockFile)) {
             $currentPid = (int) file_get_contents($this->lockFile);
-            if ($currentPid === $this->pid) {
-                unlink($this->lockFile);
-            }
+            if ($currentPid === $this->pid)
+                return unlink($this->lockFile);
         }
+        return false;
     }
     
     private function isProcessRunning($pid) {

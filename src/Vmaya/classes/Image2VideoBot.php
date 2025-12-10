@@ -3,8 +3,7 @@
 /*
 Команды
 
-text2image - текст в картинку
-text2video - текст в видео
+menu - главное меню
 subscribe - подписка
 
 */
@@ -26,6 +25,42 @@ class Image2VideoBot extends YKassaBot {
     protected function runUpdate($update) {
         $this->expect = $this->popSession("expect");
         parent::runUpdate($update);
+    }
+
+    protected function startMenuList() {
+        $result = [
+            [['text' => '🖼️ Создать изображение', 'callback_data' => 'create_image']],
+            [['text' => '🎥 Создать видео', 'callback_data' => 'create_video']],
+            [['text' => '💰 Баланс', 'callback_data' => 'MySubscribe']],
+            [['text' => '📊 Мои генерации', 'callback_data' => 'my_generations']],
+            [['text' => 'Подписка', 'callback_data' => 'subscribe']]
+        ];
+
+        if ($this->getUserId() == ADMIN_USERID)
+            $result[] = [['text' => 'Остановить', 'callback_data' => 'stopBot']];
+
+        return $result;
+    }
+
+    protected function callbackProcess($callback, $chatId, $messageId, $data) {
+
+        switch ($data) {
+            case 'create_image':
+                if ($this->isAllowedImage())
+                    $this->text2image($chatId);
+                else $this->notEnough($chatId);
+                return true;
+            case 'create_video':
+                if ($this->isAllowedVideo())
+                    $this->text2video($chatId);
+                else $this->notEnough($chatId);
+                return true;
+            case 'stopBot':
+                $this->stopBot($chatId);
+                return true;
+            default: 
+                return parent::callbackProcess($callback, $chatId, $messageId, $data);
+        }
     }
 
     protected function messageProcess($chatId, $messageId, $text) {
@@ -61,6 +96,11 @@ class Image2VideoBot extends YKassaBot {
                 //$this->DeleteMessage($chatId, $messageId);
                 $this->start($chatId);
                 break;
+            case '/menu':
+                //$this->DeleteMessage($chatId, $messageId);
+                $this->showMainMenu($chatId);
+                break;
+                /*
             case '/text2image':
                 //$this->DeleteMessage($chatId, $messageId);
                 if ($this->isAllowedImage())
@@ -72,21 +112,36 @@ class Image2VideoBot extends YKassaBot {
                 if ($this->isAllowedVideo())
                     $this->text2video($chatId);
                 else $this->notEnough($chatId);
-                break;
+                break;*/
             default:
                 parent::commandProcess($command, $chatId, $messageId, $text);
                 break;
         }
     }
 
+    protected function showMainMenu($chatId) {        
+        $this->Answer($chatId, [
+            'text' => 'Выберите действие:',
+            'reply_markup' => json_encode(['inline_keyboard' => $this->startMenuList()])
+        ]);
+    }
+
     protected function start($chatId) {
-        $keyboard = $this->subscribeTypeList();
+        $keyboard = array_merge($this->startMenuList(), $this->subscribeTypeList());
 
         $keyboard[] = [['text' => Lang("For free"), 'callback_data' => 'subscribe-0']];
 
         $this->Answer($chatId, ['text' => Lang("BotDescription"), 'reply_markup'=> json_encode([
             'inline_keyboard' => $keyboard
         ])]);
+    }
+
+    protected function stopBot($chatId) {
+        GLOBAL $lock;
+        if ($lock) {
+            $msg = $lock->release() ? 'Successful stop' : 'Failure stop';
+            $this->Answer($chatId, ['text' => Lang($msg)]);
+        }
     }
 
     protected function textToImage($chatId, $prompt) {

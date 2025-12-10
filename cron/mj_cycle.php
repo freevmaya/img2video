@@ -39,7 +39,7 @@ try {
     while ($lock->isFile()) {
         $mj->Update();
         
-        usleep(300);
+        usleep(100);
     }
 
     $dbp->Close();
