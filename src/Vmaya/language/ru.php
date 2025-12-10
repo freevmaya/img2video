@@ -19,5 +19,6 @@ $lang = [
 	'My generations'=>'Мои генерации',
 	'Subscription'=>'Подписка',
 	'Your image in progress'=>'Ваше изображение в процессе',
-	'Choose the option you like best'=>'Выберите вариант который вам больше нравится'
+	'Choose the option you like best'=>'Выберите вариант который вам больше нравится',
+	'Your photo is ready'=>'Ваше фото готово'
 ];

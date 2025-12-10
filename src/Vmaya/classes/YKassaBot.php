@@ -8,11 +8,8 @@ subscribe - подписка
 
 abstract class YKassaBot extends BaseBot {
 
-    protected $balance;
-
-    protected function initUser($update) {
-        parent::initUser($update);
-        $this->balance = (new TransactionsModel())->Balance($this->getUserId());
+    public function Balance() {
+        return (new TransactionsModel())->Balance($this->getUserId());
     }
 
     protected function callbackProcess($callback, $chatId, $messageId, $data) {
@@ -46,9 +43,9 @@ abstract class YKassaBot extends BaseBot {
             $imgPrice = round($stype['price'] / $stype['image_limit']);
             $videoPrice = round($stype['price'] / $stype['video_limit']);
 
-            $limitsText = sprintf(Lang('Enough for %s images or %s videos'), round($this->balance / $imgPrice), round($this->balance / $videoPrice));
+            $limitsText = sprintf(Lang('Enough for %s images or %s videos'), round($this->Balance() / $imgPrice), round($this->Balance() / $videoPrice));
             
-            $this->Answer($chatId, ['text' => sprintf(Lang("Your balance %s"), $this->balance.' '.@$area['currency'])."\n\n".$limitsText]);
+            $this->Answer($chatId, ['text' => sprintf(Lang("Your balance %s"), $this->Balance().' '.@$area['currency'])."\n\n".$limitsText]);
         }
     }
 
@@ -217,11 +214,11 @@ abstract class YKassaBot extends BaseBot {
     }
 
     protected function isAllowedImage() {
-        return $this->balance > 0;
+        return $this->Balance() >= (new TransactionsModel)->GetPrice($this->getUserId(), 'image_limit');
     }
 
     protected function isAllowedVideo() {
-        return $this->balance > 0;
+        return $this->Balance() >= (new TransactionsModel)->GetPrice($this->getUserId(), 'video_limit');
     }
 
     protected function notEnough($chatId) {

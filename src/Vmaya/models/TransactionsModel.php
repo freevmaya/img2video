@@ -34,6 +34,27 @@ class TransactionsModel extends BaseModel {
 		return $dbp->line("SELECT * FROM {$this->getTable()} WHERE `user_id`={$userId} AND `type` = 'subscribe' ORDER BY `id` DESC");
 	}
 
+	public function GetPrice($userId, $limitName='image_limit') {
+		if ($subcribe = $this->LastSubscribe($userId)) {
+			try {
+				$data = json_decode($subcribe['data'], true);
+				$soption = (new SubscribeOptions())->getItem($data['type_id']);
+
+				return $soption['price'] / $soption[$limitName];
+			} catch (Exception $e) {
+				trace_error("Failure get price: ".$e->getMessage());
+			}
+		}
+		return 0;
+	}
+
+	public function PayUpscale($userId, $data=[]) {
+		$price = $this->GetPrice($userId, 'image_limit');
+		if ($price > 0)
+			return $this->Add($userId, '', -$price, 'expense', $data);
+		else return false;
+	}
+
 	public function getFields() {
 		return [
 			'id' => [

@@ -68,10 +68,8 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function processTask($parts) {
-        if (count($parts) > 2) {
-            trace($parts);
+        if (count($parts) > 2)
             $this->serviceApi->Upscale($parts[1], intval($parts[2]));
-        }
     }
 
     protected function messageProcess($chatId, $messageId, $text) {
@@ -152,11 +150,17 @@ class Image2VideoBot extends YKassaBot {
         ];
     }
 
+    private function stopMJCycle() {
+        $file_path = BASEPATH.'cron/mj_cycle.pid';
+            if (file_exists($file_path))
+                return unlink($file_path);
+        return true;
+    }
+
     protected function stopBot($chatId) {
         GLOBAL $lock;
         if ($lock) {
-
-            $result = unlink(BASEPATH.'cron/mj_cycle.pid') && $lock->release();
+            $result = $this->stopMJCycle() && $lock->release();
 
             $msg = $result ? 'Successful stop' : 'Failure stop';
 

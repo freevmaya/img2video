@@ -30,6 +30,15 @@ class MJMainCycle extends MidjourneyAPI {
         }
     }
 
+    protected function doServiceAction($task, $response) {
+        if (isset($response['result'])) {
+            $method = $response['type'].'_do';
+            if (method_exists($this, $method))
+                return $this->$method($task, $response);
+        }
+        return false;
+    }
+
     public function Update() {
         $tasks = $this->modelTask->getItems(['state'=>'active']);
         if (count($tasks) > 0) {
@@ -37,63 +46,113 @@ class MJMainCycle extends MidjourneyAPI {
                 $this->updateTask($task);
             }
         }
-    }   
+    }
 
-    protected function doServiceAction($task, $response) {
+    protected function sendPhoto($chat_id, $file_path, $filename, $caption, $inline_keyboard = null) {
+        if (file_exists($file_path)) {
 
-        if (isset($response['result'])) {
-        	$result = json_decode($response['result'], true);
-        	if (isset($result['url']) && $result['url']) {
+            $params = [
+                'chat_id' => $chat_id,
+                'photo' => InputFile::create($file_path, $filename),
+                'caption' => $caption,
+                'parse_mode' => 'HTML'
+            ];
 
-                $hash = $task['hash'];
-        		$isProgress = $response['status'] == 'progress';
-				$info = pathinfo($result['filename']);
-				$filename = $hash.'.'.$info['extension'];
+            if ($inline_keyboard)
+                $params['reply_markup'] = json_encode([
+                    'inline_keyboard' => $inline_keyboard
+                ]);
 
-				$file_path = ($isProgress?PROCESS_PATH:RESULT_PATH).$filename;
+            $photoMessage = $this->bot->sendPhoto($params);
+            return $photoMessage->getMessageId();
+        } else {
+            trace_error("File ({$file_path}) is not exists");
+            return true;
+        }
 
-				if (!file_exists($file_path))
-        			downloadFile($result['url'], $file_path);
+        return false;
+    }
 
-        		$file_url = ($isProgress?PROCESS_URL:RESULT_URL).$filename;
+    protected function prepareFile($hash, $path, $result) {
+        if (isset($result['url']) && $result['url']) {
 
-                if ($this->lastMessageId)
-                    $this->bot->deleteMessage([
-                        'chat_id' => $task['chat_id'],
-                        'message_id' => $this->lastMessageId
-                    ]);
+            $info = pathinfo($result['filename']);
+            $filename = $hash.'.'.$info['extension'];
 
-                if ($isProgress) {
-            		$photoMessage = $this->bot->sendPhoto([
-    				    'chat_id' => $task['chat_id'],
-    				    'photo' => InputFile::create($file_path, $filename),
-    				    'caption' => Lang("Your image in progress"),
-    				    'parse_mode' => 'HTML'
-    				]);
-                    $this->lastMessageId = $photoMessage->getMessageId();
-                } else {
-                    $photoMessage = $this->bot->sendPhoto([
-                        'chat_id' => $task['chat_id'],
-                        'photo' => InputFile::create($file_path, $filename),
-                        'caption' => Lang('Choose the option you like best'),
-                        'parse_mode' => 'HTML',
-                        'reply_markup' => json_encode([
-                            'inline_keyboard' => [
-                                [
-                                    ['text' => '1', 'callback_data' => "task.{$hash}.1"],
-                                    ['text' => '2', 'callback_data' => "task.{$hash}.2"]
-                                ],[
-                                    ['text' => '3', 'callback_data' => "task.{$hash}.3"],
-                                    ['text' => '4', 'callback_data' => "task.{$hash}.4"]
-                                ]
-                            ]
-                        ])
-                    ]);
+            $file_path = $path.$filename;
+
+            if (!file_exists($file_path)) {
+                $downloadResult = downloadFile($result['url'], $file_path);
+                return $downloadResult['success'];
+            }
+
+            return true;
+        }
+        return false;
+    }
+
+    protected function upscale_do($task, $response) {
+        $result = json_decode($response['result'], true);
+
+        if ($this->prepareFile($task['hash'], RESULT_PATH, $result)) {
+
+            $info = pathinfo($result['filename']);
+            $filename = $task['hash'].'.'.$info['extension'];
+
+            if ($result = $this->sendPhoto($task['chat_id'], RESULT_PATH.$filename, $filename, Lang("Your photo is ready"))) {
+
+                (new TransactionsModel())->PayUpscale($task['user_id'], [
+                    'response_id'=>$response['id'],
+                    'hash'=>$task['hash']
+                ]);
+            }
+
+            return $result;
+        }
+        return false;
+    }
+
+    protected function imagine_do($task, $response) {
+
+        $result = json_decode($response['result'], true);
+        $isProgress = $response['status'] == 'progress';
+        $path = $isProgress?PROCESS_PATH:RESULT_PATH;
+
+        $hash = $task['hash'];
+
+        if ($this->prepareFile($hash, $path, $result)) {
+
+            $info = pathinfo($result['filename']);
+            $filename = $hash.'.'.$info['extension'];
+
+            $file_path = $path.$filename;
+
+            if (is_numeric($this->lastMessageId))
+                $this->bot->deleteMessage([
+                    'chat_id' => $task['chat_id'],
+                    'message_id' => $this->lastMessageId
+                ]);
+
+            if ($isProgress) {
+
+                $result = $this->lastMessageId = $this->sendPhoto($task['chat_id'], $file_path, $filename, Lang("Your image in progress"));
+            } else {
+
+                $result = $this->sendPhoto($task['chat_id'], $file_path, $filename, Lang('Choose the option you like best'),
+                    [
+                        [
+                            ['text' => '1', 'callback_data' => "task.{$hash}.1"],
+                            ['text' => '2', 'callback_data' => "task.{$hash}.2"]
+                        ],[
+                            ['text' => '3', 'callback_data' => "task.{$hash}.3"],
+                            ['text' => '4', 'callback_data' => "task.{$hash}.4"]
+                        ]
+                    ]
+                );
+                if ($result)
                     $this->lastMessageId = null;
-                }
-
-				return $photoMessage->getMessageId() > 0;
-        	}
+            }
+            return $result;
         }
         return false;
     }
