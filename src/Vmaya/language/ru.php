@@ -21,9 +21,11 @@ $lang = [
 	'Your image in progress'=>'Ваше изображение в процессе',
 	'Choose the option you like best'=>'Выберите вариант который вам больше нравится',
 	'Your photo is ready'=>'Ваше фото готово',
+	'Your video is ready'=>'Ваше видео готово',
 	'Help Desk'=>'Служба поддержки',
 	'HelpDeskDescription'=>'Здесь вы можете решить вопросы касающиеся техподдержки, платежей и т.п.',
 	'Go to dialogue'=>'Перейти к диалогу',
 	'This feature is not supported yet'=>'Эта функция пока не поддерживается',
-	'Animate'=>'Анимировать'
+	'Animate'=>'Анимировать',
+	'Animation not found'=>'Анимация не найдена'
 ];
