@@ -156,7 +156,7 @@ class MJMainCycle extends MidjourneyAPI {
         if ($gifPath) {
             return $this->api->sendAnimation([
                 'chat_id' => $chatId,
-                'animation' => InputFile::create($gifPath, $filename),,
+                'animation' => InputFile::create($gifPath, $filename),
                 'caption' => $message,
                 'parse_mode' => 'HTML'
             ]);
