@@ -152,7 +152,7 @@ class MJMainCycle extends MidjourneyAPI {
             ], $params));
         }
 
-        $gifPath = ConvertToGif($webpPath);
+        $gifPath = ConvertToGif($webpFile);
         if ($gifPath) {
             return $this->api->sendAnimation([
                 'chat_id' => $chatId,
