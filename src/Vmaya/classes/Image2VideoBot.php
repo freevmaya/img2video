@@ -69,7 +69,8 @@ class Image2VideoBot extends YKassaBot {
 
     protected function processTask($parts) {
         if (count($parts) > 2) {
-            $this->serviceApi->Upscale($parts[1], $parts[2]);
+            trace($parts);
+            $this->serviceApi->Upscale($parts[1], intval($parts[2]));
         }
     }
 
