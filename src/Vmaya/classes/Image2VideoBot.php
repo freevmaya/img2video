@@ -29,11 +29,11 @@ class Image2VideoBot extends YKassaBot {
 
     protected function startMenuList() {
         $result = [
-            [['text' => '🖼️ Создать изображение', 'callback_data' => 'create_image']],
-            [['text' => '🎥 Создать видео', 'callback_data' => 'create_video']],
-            [['text' => '💰 Баланс', 'callback_data' => 'MySubscribe']],
-            [['text' => '📊 Мои генерации', 'callback_data' => 'my_generations']],
-            [['text' => 'Подписка', 'callback_data' => 'subscribe']]
+            [['text' => '🖼️'.Lang('Create an image'), 'callback_data' => 'create_image']],
+            [['text' => '🎥'.Lang('Create a video'), 'callback_data' => 'create_video']],
+            [['text' => '💰'.Lang('Balance'), 'callback_data' => 'MySubscribe']],
+            [['text' => '📊'.Lang('My generations'), 'callback_data' => 'my_generations']],
+            [['text' => '⭐'.Lang('Subscription'), 'callback_data' => 'subscribe']]
         ];
 
         if ($this->getUserId() == ADMIN_USERID)
@@ -121,7 +121,7 @@ class Image2VideoBot extends YKassaBot {
 
     protected function showMainMenu($chatId) {        
         $this->Answer($chatId, [
-            'text' => 'Выберите действие:',
+            'text' => Lang('Choose action').':',
             'reply_markup' => json_encode(['inline_keyboard' => $this->startMenuList()])
         ]);
     }
