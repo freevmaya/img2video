@@ -136,12 +136,37 @@ class Image2VideoBot extends YKassaBot {
         ])]);
     }
 
+    function gitPull($branch = 'main', $path = null) {
+        $path = $path ?: __DIR__;
+        
+        $command = "cd {$path} && git pull origin {$branch} 2>&1";
+        
+        // Безопасное выполнение
+        $output = [];
+        $return_var = 0;
+        
+        exec($command, $output, $return_var);
+        
+        return [
+            'success' => $return_var === 0,
+            'output' => implode("\n", $output),
+            'return_code' => $return_var
+        ];
+    }
+
     protected function stopBot($chatId) {
         GLOBAL $lock;
         if ($lock) {
 
-            $result = unlink(BASEPATH.'cron/mj_cycle.pid');
-            $msg = $result && $lock->release() ? 'Successful stop' : 'Failure stop';
+            $result = unlink(BASEPATH.'cron/mj_cycle.pid') && $lock->release();
+
+            $msg = $result ? 'Successful stop' : 'Failure stop';
+
+            if ($result) {
+                $git_result = $this->gitPull('main', BASEPATH);
+                $msg .= ' and git pull '.($git_result['success'] ? 'success!' : 'failure');
+            }
+
             $this->Answer($chatId, ['text' => Lang($msg)]);
         }
     }
