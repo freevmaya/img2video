@@ -128,18 +128,22 @@ function ConvertToGif($webpPath) {
         escapeshellarg($webpPath),
         escapeshellarg($gifPath)
     );
+
+    trace($command);
     
     exec($command, $output, $returnCode);
     
-    if (($returnCode === 0) && file_exists($gifPath) && filesize($gifPath) > 1024) {
-        // Оптимизируем
-        $optimizeCmd = sprintf(
-            'gifsicle -O3 --colors 256 %s -o %s',
-            escapeshellarg($gifPath),
-            escapeshellarg($gifPath)
-        );
-        exec($optimizeCmd);
-        
+    if (($returnCode === 0) && file_exists($gifPath)) {
+        if (filesize($gifPath) > 1024) {
+            // Оптимизируем
+            $optimizeCmd = sprintf(
+                'gifsicle -O3 --colors 256 %s -o %s',
+                escapeshellarg($gifPath),
+                escapeshellarg($gifPath)
+            );
+            exec($optimizeCmd);
+        }
+            
         return $gifPath;
     }
     
