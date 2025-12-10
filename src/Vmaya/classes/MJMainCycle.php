@@ -12,7 +12,7 @@ class MJMainCycle extends MidjourneyAPI {
         GLOBAL $lang;
         $fileName = LANGUAGE_PATH.$language_code.'.php';
         if (file_exists($fileName))
-            include_once($fileName);
+            include($fileName);
     }
 
     protected function updateTask($task) {
