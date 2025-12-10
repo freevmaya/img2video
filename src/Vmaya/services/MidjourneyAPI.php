@@ -88,6 +88,7 @@ class MidjourneyAPI implements APIInterface
                 'chat_id'=>$this->bot->CurrentUpdate()->getMessage()->getChat()->getId(),
                 'hash'=>$response['hash']
             ]);
+        else trace($response);
 
         return $response;
     }
