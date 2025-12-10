@@ -80,11 +80,11 @@ class MJMainCycle extends MidjourneyAPI {
                         'reply_markup' => json_encode([
                             'inline_keyboard' => [
                                 [
-                                    ['text' => '1', 'callback_data' => "task_{$hash}_1"],
-                                    ['text' => '2', 'callback_data' => "task_{$hash}_2"]
+                                    ['text' => '1', 'callback_data' => "task.{$hash}.1"],
+                                    ['text' => '2', 'callback_data' => "task.{$hash}.2"]
                                 ],[
-                                    ['text' => '3', 'callback_data' => "task_{$hash}_3"],
-                                    ['text' => '4', 'callback_data' => "task_{$hash}_4"]
+                                    ['text' => '3', 'callback_data' => "task.{$hash}.3"],
+                                    ['text' => '4', 'callback_data' => "task.{$hash}.4"]
                                 ]
                             ]
                         ])
