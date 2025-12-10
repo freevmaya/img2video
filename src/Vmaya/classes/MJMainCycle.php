@@ -15,7 +15,7 @@ class MJMainCycle extends MidjourneyAPI {
     }
 
     protected function updateTask($task) {
-        if ($user = (new TGUserModel())->getItem($tasks['user_id']))
+        if ($user = (new TGUserModel())->getItem($task['user_id']))
             initLang($user['language_code']);
 
         $responses = $this->modelReply->getItems(['processed'=>0, 'hash'=>$task['hash']]);
