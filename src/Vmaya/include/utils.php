@@ -78,7 +78,7 @@ function downloadFile($url, $savePath)
                 'size' => filesize($savePath)
             ];
         } else {
-            $msg = 'Failed to save file';
+            $msg = "Failed to save file ({$url}->{$savePath})";
             trace_error($msg);
             return [
                 'success' => false,
@@ -86,7 +86,7 @@ function downloadFile($url, $savePath)
             ];
         }
     } else {
-        $msg = "Error download file. HTTP: $httpCode, cURL: ".json_encode($error);
+        $msg = "Error download file ({$url}). HTTP: $httpCode, cURL: ".json_encode($error);
         trace_error($msg);
         return [
             'success' => false,

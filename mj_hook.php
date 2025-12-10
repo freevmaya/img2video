@@ -121,7 +121,7 @@
 	function handleResult($data) {
 
 		$result = $data['result'];
-		if (isset($result['url']) && $result['url']) {
+		if (isset($result['url']) && $result['url'] && $data['hash']) {
 			$info = pathinfo($result['filename']);
 			downloadFile($result['url'], RESULT_PATH.$data['hash'].'.'.$info['extension']);
 		}
