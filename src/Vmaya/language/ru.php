@@ -17,5 +17,7 @@ $lang = [
 	'Create a video'=>'Создать видео',
 	'Balance'=>'Баланс',
 	'My generations'=>'Мои генерации',
-	'Subscription'=>'Подписка'
+	'Subscription'=>'Подписка',
+	'Your image in progress'=>'Ваше изображение в процессе',
+	'Choose the option you like best'=>'Выберите вариант который вам больше нравится'
 ];

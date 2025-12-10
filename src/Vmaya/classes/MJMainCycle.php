@@ -5,7 +5,17 @@ use \Telegram\Bot\Exceptions\TelegramResponseException;
 
 class MJMainCycle extends MidjourneyAPI {
 
+    protected function initLang($language_code) {
+        GLOBAL $lang;
+        $fileName = LANGUAGE_PATH.$language_code.'.php';
+        if (file_exists($fileName))
+            include_once($fileName);
+    }
+
     protected function updateTask($task) {
+        if ($user = (new TGUserModel())->getItem($tasks['user_id']))
+            initLang($user['language_code']);
+
         $responses = $this->modelReply->getItems(['processed'=>0, 'hash'=>$task['hash']]);
 
         foreach ($responses as $response) {
@@ -44,12 +54,32 @@ class MJMainCycle extends MidjourneyAPI {
 
         		$file_url = ($isProgress?PROCESS_URL:RESULT_URL).$filename;
 
-        		$response = $this->bot->sendPhoto([
-				    'chat_id' => $task['chat_id'],
-				    'photo' => InputFile::create($file_path, $filename),
-				    'caption' => $isProgress ? "Ваше изображение в процессе" : 'Ваше изображение готово!',
-				    'parse_mode' => 'HTML'
-				]);
+                if ($isProgress) {
+            		$response = $this->bot->sendPhoto([
+    				    'chat_id' => $task['chat_id'],
+    				    'photo' => InputFile::create($file_path, $filename),
+    				    'caption' => Lang("Your image in progress"),
+    				    'parse_mode' => 'HTML'
+    				]);
+                } else {
+                    $response = $this->bot->sendPhoto([
+                        'chat_id' => $task['chat_id'],
+                        'photo' => InputFile::create($file_path, $filename),
+                        'caption' => Lang('Choose the option you like best'),
+                        'parse_mode' => 'HTML',
+                        'reply_markup' => json_encode([
+                            'inline_keyboard' => [
+                                [
+                                    ['text' => '1', 'callback_data' => 'photo_1'],
+                                    ['text' => '2', 'callback_data' => 'photo_2']
+                                ],[
+                                    ['text' => '3', 'callback_data' => 'photo_3'],
+                                    ['text' => '4', 'callback_data' => 'photo_4']
+                                ]
+                            ]
+                        ])
+                    ]);
+                }
 
 				return $response;
         	}
