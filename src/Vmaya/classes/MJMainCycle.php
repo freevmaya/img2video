@@ -45,9 +45,10 @@ class MJMainCycle extends MidjourneyAPI {
         	$result = json_decode($response['result'], true);
         	if (isset($result['url']) && $result['url']) {
 
+                $hash = $task['hash'];
         		$isProgress = $response['status'] == 'progress';
 				$info = pathinfo($result['filename']);
-				$filename = $task['hash'].'.'.$info['extension'];
+				$filename = $hash.'.'.$info['extension'];
 
 				$file_path = ($isProgress?PROCESS_PATH:RESULT_PATH).$filename;
 
@@ -79,11 +80,11 @@ class MJMainCycle extends MidjourneyAPI {
                         'reply_markup' => json_encode([
                             'inline_keyboard' => [
                                 [
-                                    ['text' => '1', 'callback_data' => 'photo_1'],
-                                    ['text' => '2', 'callback_data' => 'photo_2']
+                                    ['text' => '1', 'callback_data' => "task_{$hash}_1"],
+                                    ['text' => '2', 'callback_data' => "task_{$hash}_2"]
                                 ],[
-                                    ['text' => '3', 'callback_data' => 'photo_3'],
-                                    ['text' => '4', 'callback_data' => 'photo_4']
+                                    ['text' => '3', 'callback_data' => "task_{$hash}_3"],
+                                    ['text' => '4', 'callback_data' => "task_{$hash}_4"]
                                 ]
                             ]
                         ])
