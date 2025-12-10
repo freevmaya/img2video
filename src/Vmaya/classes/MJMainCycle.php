@@ -178,14 +178,7 @@ class MJMainCycle extends MidjourneyAPI {
     }
 
     protected function error($error) {
-        if ($this->user) {
-            $params = [
-                'chat_id' => $this->user['id'],
-                'text' => $error,
-                'parse_mode' => 'HTML'
-            ]
-            $this->bot->sendMessage($params);
-        } else trace_error($error);
+        $this->Message(ADMIN_USERID, $error);
     }
 
     public function Message($chatId, $msg, $parse_mode = 'Markdown') {
