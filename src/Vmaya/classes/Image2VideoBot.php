@@ -46,6 +46,9 @@ class Image2VideoBot extends YKassaBot {
 
         $parts = explode('.', $data);
         switch ($parts[0]) {
+            case 'task':
+                $this->processTask($parts);
+                return true;
             case 'create_image':
                 if ($this->isAllowedImage())
                     $this->text2image($chatId);
@@ -61,6 +64,12 @@ class Image2VideoBot extends YKassaBot {
                 return true;
             default: 
                 return parent::callbackProcess($callback, $chatId, $messageId, $data);
+        }
+    }
+
+    protected function processTask($parts) {
+        if (count($parts) > 2) {
+            $this->serviceApi->Upscale($parts[1], $parts[2]);
         }
     }
 
