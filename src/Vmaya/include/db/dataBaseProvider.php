@@ -39,7 +39,7 @@ abstract class dataBaseProvider {
 		//throw new Exception($text, 1);
 	}
     
-    private function log($message) {
+    public function log($message) {
         trace("[dataBaseProvider] " . $message);
     }
 
