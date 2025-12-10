@@ -44,7 +44,8 @@ class Image2VideoBot extends YKassaBot {
 
     protected function callbackProcess($callback, $chatId, $messageId, $data) {
 
-        switch ($data) {
+        $parts = preg_split("/[-.]+/", $data);
+        switch ($parts[0]) {
             case 'create_image':
                 if ($this->isAllowedImage())
                     $this->text2image($chatId);
