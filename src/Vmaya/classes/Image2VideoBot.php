@@ -140,7 +140,7 @@ class Image2VideoBot extends YKassaBot {
         GLOBAL $lock;
         if ($lock) {
 
-            $result = unlink(BASEURL.'/cron/mj_cycle.pid');
+            $result = unlink(BASEPATH.'cron/mj_cycle.pid');
             $msg = $result && $lock->release() ? 'Successful stop' : 'Failure stop';
             $this->Answer($chatId, ['text' => Lang($msg)]);
         }
