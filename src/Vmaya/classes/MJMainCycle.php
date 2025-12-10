@@ -134,6 +134,54 @@ class MJMainCycle extends MidjourneyAPI {
         }
         return false;
     }
+    
+    private function isAnimatedWebP($filePath) {
+        $content = file_get_contents($filePath, false, null, 0, 100);
+        
+        // Проверяем сигнатуру анимированного WebP
+        // Статичный WebP: 'RIFF' + размер + 'WEBPVP8 '
+        // Анимированный: 'RIFF' + размер + 'WEBPVP8X'
+        return strpos($content, 'WEBPVP8X') !== false || 
+               strpos($content, 'ANIM') !== false ||
+               strpos($content, 'ANMF') !== false;
+    }
+
+    protected function sendGeneratedAnimation($chatId, $webpFile, $filename, $message, $params=[]) {
+        
+        if (!$webpFile || !file_exists($webpFile)) {
+            $this->Message($chatId, "⚠️ Анимация не найдена");
+            return;
+        }
+        
+        // Проверяем, анимированный ли это WebP
+        if (!$this->isAnimatedWebP($webpFile)) {
+            // Если не анимированный, отправляем как фото
+            return $this->api->sendPhoto(array_merge([
+                'chat_id' => $chatId,
+                'photo' => InputFile::create($webpFile, $filename),
+                'caption' => "Ваше изображение готово! 🎨"
+            ], $params));
+        }
+        
+        // Отправляем анимированный WebP
+        try {
+            $response = $this->api->sendAnimation(array_merge([
+                'chat_id' => $chatId,
+                'animation' => InputFile::create($webpFile, $filename),
+                'caption' => $message,
+                'width' => 512,
+                'height' => 512,
+                'duration' => 10,
+                'parse_mode' => 'HTML'
+            ], $params));
+            
+            return $response;
+            
+        } catch (Exception $e) {
+            $this->Message($chatId, "❌ Ошибка отправки: " . $e->getMessage());
+            return false;
+        }
+    }
 
     protected function animate_do($task, $response) {
         $result = json_decode($response['result'], true);
@@ -144,7 +192,7 @@ class MJMainCycle extends MidjourneyAPI {
             $info = pathinfo($result['filename']);
             $filename = $hash.'.'.$info['extension'];
 
-            if ($result = $this->sendPhoto($task['chat_id'], RESULT_PATH.$filename, $filename, Lang("Your photo is ready"))) {
+            if ($result = $this->sendGeneratedAnimation($task['chat_id'], RESULT_PATH.$filename, $filename, '🎬 '.Lang("Your photo is ready"))) {
 
                 (new TransactionsModel())->PayUpscale($task['user_id'], [
                     'response_id'=>$response['id'],
