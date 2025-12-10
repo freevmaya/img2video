@@ -154,7 +154,7 @@ class MJMainCycle extends MidjourneyAPI {
 
         $gifPath = ConvertToGif($webpFile);
         if ($gifPath) {
-            return $this->api->sendAnimation([
+            return $this->bot->sendAnimation([
                 'chat_id' => $chatId,
                 'animation' => InputFile::create($gifPath, $filename),
                 'caption' => $message,
