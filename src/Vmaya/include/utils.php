@@ -107,5 +107,43 @@ function HoursDiffDate($dateString, $referenceDate = 'now') {
     
     return $diffHours;
 }
+    
+function isAnimatedWebP($filePath) {
+    $content = file_get_contents($filePath, false, null, 0, 100);
+    
+    // Проверяем сигнатуру анимированного WebP
+    // Статичный WebP: 'RIFF' + размер + 'WEBPVP8 '
+    // Анимированный: 'RIFF' + размер + 'WEBPVP8X'
+    return strpos($content, 'WEBPVP8X') !== false || 
+           strpos($content, 'ANIM') !== false ||
+           strpos($content, 'ANMF') !== false;
+}
+    
+function ConvertToGif($webpPath) {
+    $gifPath = tempnam(sys_get_temp_dir(), 'anim_') . '.gif';
+    
+    // Используем ImageMagick
+    $command = sprintf(
+        'convert %s -coalesce -layers OptimizeFrame %s 2>&1',
+        escapeshellarg($webpPath),
+        escapeshellarg($gifPath)
+    );
+    
+    exec($command, $output, $returnCode);
+    
+    if (($returnCode === 0) && file_exists($gifPath) && filesize($gifPath) > 1024) {
+        // Оптимизируем
+        $optimizeCmd = sprintf(
+            'gifsicle -O3 --colors 256 %s -o %s',
+            escapeshellarg($gifPath),
+            escapeshellarg($gifPath)
+        );
+        exec($optimizeCmd);
+        
+        return $gifPath;
+    }
+    
+    return false;
+}
 
 ?>

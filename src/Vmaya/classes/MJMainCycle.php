@@ -134,17 +134,6 @@ class MJMainCycle extends MidjourneyAPI {
         }
         return false;
     }
-    
-    private function isAnimatedWebP($filePath) {
-        $content = file_get_contents($filePath, false, null, 0, 100);
-        
-        // Проверяем сигнатуру анимированного WebP
-        // Статичный WebP: 'RIFF' + размер + 'WEBPVP8 '
-        // Анимированный: 'RIFF' + размер + 'WEBPVP8X'
-        return strpos($content, 'WEBPVP8X') !== false || 
-               strpos($content, 'ANIM') !== false ||
-               strpos($content, 'ANMF') !== false;
-    }
 
     protected function sendAnimation($chatId, $webpFile, $filename, $message, $params=[]) {
         
@@ -154,13 +143,23 @@ class MJMainCycle extends MidjourneyAPI {
         }
         
         // Проверяем, анимированный ли это WebP
-        if (!$this->isAnimatedWebP($webpFile)) {
+        if (!isAnimatedWebP($webpFile)) {
             // Если не анимированный, отправляем как фото
             return $this->bot->sendPhoto(array_merge([
                 'chat_id' => $chatId,
                 'photo' => InputFile::create($webpFile, $filename),
                 'caption' => '🎨 '.Lang("Your photo is ready")
             ], $params));
+        }
+
+        $gifPath = ConvertToGif($webpPath);
+        if ($gifPath) {
+            return $this->api->sendAnimation([
+                'chat_id' => $chatId,
+                'animation' => InputFile::create($gifPath, $filename),,
+                'caption' => $message,
+                'parse_mode' => 'HTML'
+            ]);
         }
         
         // Отправляем анимированный WebP
