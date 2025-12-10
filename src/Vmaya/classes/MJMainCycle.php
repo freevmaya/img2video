@@ -135,6 +135,28 @@ class MJMainCycle extends MidjourneyAPI {
         return false;
     }
 
+    protected function animate_do($task, $response) {
+        $result = json_decode($response['result'], true);
+        $hash = $task['hash'];
+
+        if ($this->prepareFile($hash, RESULT_PATH, $result)) {
+
+            $info = pathinfo($result['filename']);
+            $filename = $hash.'.'.$info['extension'];
+
+            if ($result = $this->sendPhoto($task['chat_id'], RESULT_PATH.$filename, $filename, Lang("Your photo is ready"))) {
+
+                (new TransactionsModel())->PayUpscale($task['user_id'], [
+                    'response_id'=>$response['id'],
+                    'hash'=>$hash
+                ]);
+            }
+
+            return $result;
+        }
+        return false;
+    }
+
     protected function imagine_do($task, $response) {
 
         $result = json_decode($response['result'], true);
