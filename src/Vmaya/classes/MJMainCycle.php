@@ -111,17 +111,22 @@ class MJMainCycle extends MidjourneyAPI {
 
     protected function upscale_do($task, $response) {
         $result = json_decode($response['result'], true);
+        $hash = $task['hash'];
 
-        if ($this->prepareFile($task['hash'], RESULT_PATH, $result)) {
+        if ($this->prepareFile($hash, RESULT_PATH, $result)) {
 
             $info = pathinfo($result['filename']);
-            $filename = $task['hash'].'.'.$info['extension'];
+            $filename = $hash.'.'.$info['extension'];
 
-            if ($result = $this->sendPhoto($task['chat_id'], RESULT_PATH.$filename, $filename, Lang("Your photo is ready"))) {
+            if ($result = $this->sendPhoto($task['chat_id'], RESULT_PATH.$filename, $filename, Lang("Your photo is ready", [
+                    [
+                        ['text' => Lang('Animate'), 'callback_data' => "task.{$hash}.animate"],
+                    ]
+                ]))) {
 
                 (new TransactionsModel())->PayUpscale($task['user_id'], [
                     'response_id'=>$response['id'],
-                    'hash'=>$task['hash']
+                    'hash'=>$hash
                 ]);
             }
 
@@ -164,8 +169,6 @@ class MJMainCycle extends MidjourneyAPI {
                         ],[
                             ['text' => '3', 'callback_data' => "task.{$hash}.3"],
                             ['text' => '4', 'callback_data' => "task.{$hash}.4"]
-                        ],[
-                            ['text' => Lang('Animate'), 'callback_data' => "task.{$hash}.animate"],
                         ]
                     ]
                 );
