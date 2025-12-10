@@ -167,7 +167,7 @@ class MJMainCycle extends MidjourneyAPI {
         try {
             $response = $this->bot->sendAnimation(array_merge([
                 'chat_id' => $chatId,
-                'animation' => fopen($webpFile, 'r'),
+                'animation' => InputFile::create($webpFile, $filename),
                 'caption' => $message,
                 'width' => 512,
                 'height' => 512,
