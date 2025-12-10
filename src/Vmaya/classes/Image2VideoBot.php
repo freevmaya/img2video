@@ -72,8 +72,12 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function processTask($parts) {
-        if (count($parts) > 2)
-            $this->serviceApi->Upscale($parts[1], intval($parts[2]));
+        if (count($parts) > 2) {
+            $action = $parts[2];
+            if ($action == 'animate')
+                $this->serviceApi->Animate($parts[1]);
+            else $this->serviceApi->Upscale($parts[1], intval($action));
+        }
     }
 
     protected function messageProcess($chatId, $messageId, $text) {

@@ -64,6 +64,18 @@ class MidjourneyAPI implements APIInterface
         return $this->makeRequest('/midjourney/v2/upscale', $data);
     }
 
+    public function Animate($hash, $choice='high') // or low
+    {
+        $data = [
+            'hash'          => $hash,
+            'choice'        => $choice,
+            'webhook_url'   => $this->webhook_url,
+            'webhook_type'  => 'result'
+        ];
+
+        return $this->makeRequest('/midjourney/v2/animate', $data);
+    }
+
     private function makeRequest($endpoint, $data)
     {
         $ch = curl_init($this->baseUrl . $endpoint);

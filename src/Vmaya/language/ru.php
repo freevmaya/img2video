@@ -24,5 +24,6 @@ $lang = [
 	'Help Desk'=>'Служба поддержки',
 	'HelpDeskDescription'=>'Здесь вы можете решить вопросы касающиеся техподдержки, платежей и т.п.',
 	'Go to dialogue'=>'Перейти к диалогу',
-	'This feature is not supported yet'=>'Эта функция пока не поддерживается'
+	'This feature is not supported yet'=>'Эта функция пока не поддерживается',
+	'Animate'=>'Анимировать'
 ];

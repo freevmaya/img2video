@@ -163,6 +163,8 @@ class MJMainCycle extends MidjourneyAPI {
                         ],[
                             ['text' => '3', 'callback_data' => "task.{$hash}.3"],
                             ['text' => '4', 'callback_data' => "task.{$hash}.4"]
+                        ],[
+                            ['text' => Lang('Animate'), 'callback_data' => "task.{$hash}.animate"],
                         ]
                     ]
                 );
