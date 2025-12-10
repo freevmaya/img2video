@@ -192,10 +192,10 @@ class MJMainCycle extends MidjourneyAPI {
             $info = pathinfo($result['filename']);
             $filename = $hash.'.'.$info['extension'];
 
-            if ($result = $this->sendAnimation($task['chat_id'], RESULT_PATH.$filename, $filename, '🎬 '.Lang("Your video is ready")), [
+            if ($result = $this->sendAnimation($task['chat_id'], RESULT_PATH.$filename, $filename, '🎬 '.Lang("Your video is ready"), [
                     'width' => $result['width'],
                     'height' => $result['height']
-                ]) {
+                ])) {
 
                 (new TransactionsModel())->PayUpscale($task['user_id'], [
                     'response_id'=>$response['id'],
