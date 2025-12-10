@@ -5,7 +5,36 @@
 	class mySQLProvider extends dataBaseProvider {
 		protected $mysqli;
 		protected $result_type;
+    	protected $reconnectAttempts = 3;
+    	protected $reconnectDelay = 0.2; // секунды
 
+    	// Добавляем метод для проверки и восстановления соединения
+	    public function checkConnection() {
+	        if (!$this->mysqli || !$this->mysqli->ping()) {
+	            $this->log("MySQL connection lost, reconnecting...");
+	            $this->reconnect();
+	            return false;
+	        }
+	        return true;
+	    }
+    
+	    private function isConnectionError($error) {
+	        $connectionErrors = [
+	            'MySQL server has gone away',
+	            'Lost connection to MySQL server',
+	            'Connection timed out',
+	            'Broken pipe',
+	            'server has gone away'
+	        ];
+	        
+	        foreach ($connectionErrors as $connectionError) {
+	            if (stripos($error, $connectionError) !== false) {
+	                return true;
+	            }
+	        }
+	        
+	        return false;
+	    }
 
 		function __construct($host, $dbname, $user='', $passwd='') {
 			parent::__construct($host, $dbname, $user, $passwd);
@@ -18,7 +47,27 @@
 		    	$this->error($this->mysqli->connect_errno.', '.$this->mysqli->error);
 		}
 
-		public function close() {
+		private function reconnect() {
+	        if ($this->mysqli)
+	            @$this->mysqli->close();
+	        
+	        for ($i = 0; $i < $this->reconnectAttempts; $i++) {
+	            try {
+	                $this->connect($this->host, $this->dbname, $this->user, $this->passwd);
+	                $this->log("MySQL reconnected successfully");
+	                return true;
+	            } catch (Exception $e) {
+	                $this->log("Reconnect attempt " . ($i + 1) . " failed: " . $e->getMessage());
+	                if ($i < $this->reconnectAttempts - 1) {
+	                    sleep($this->reconnectDelay);
+	                }
+	            }
+	        }
+	        
+	        throw new Exception("Failed to reconnect to MySQL after {$this->reconnectAttempts} attempts");
+	    }
+
+		public function Close() {
 			$this->mysqli->close();
 		}
 
@@ -49,25 +98,52 @@
 
 				$stmt->close();
 			} catch (Exception $e) {
+				if ($this->isConnectionError($e->getMessage())) {
+	                $this->reconnect();
+	                return $this->query($query);
+	            }
 				$this->error('mysql_error='.$e->getMessage().' query='.$query.', data: '.json_encode($params));
+	            throw $e;
 			}
 
 			return $result;
 	    }
 
+	    private function catchError($e) {
+			if ($this->isConnectionError($e->getMessage())) {
+                $this->reconnect();
+                return $this->query($query);
+            }
+            $this->error('mysql_error='.$e->getMessage().' query='.$query);
+            throw $e;
+	    }
+
 		public function query($query) {
 			$result = false;
+
 			try {
 				$result = $this->mysqli->query($query);
 			} catch (Exception $e) {
-				$this->error('mysql_error='.$e->getMessage().' query='.$query);
+				$this->catchError($e);
 			}
 
 			return $result;
 		}
 
 		public function isTableExists($tableName) {
-			return $this->mysqli->query("SHOW TABLES LIKE '{$tableName}'")->num_rows == 1;
+			try {
+				return $this->mysqli->query("SHOW TABLES LIKE '{$tableName}'")->num_rows == 1;
+			} catch (Exception $e) {
+				$this->catchError($e);
+			}
+		}
+
+		public function escape_string($string) {
+			try {
+				return $this->mysqli->escape_string($string);
+			} catch (Exception $e) {
+				$this->catchError($e);
+			}
 		}
 
 		protected function dbAsArray($query) {
@@ -98,10 +174,6 @@
 
 		public function lastID() {
 			return $this->one("SELECT LAST_INSERT_ID()");
-		}
-
-		public function escape_string($string) {
-			return $this->mysqli->escape_string($string);
 		}
 
 	    private function isDateTime($value)

@@ -1,5 +1,5 @@
 <?
-class dataBaseProvider {
+abstract class dataBaseProvider {
 	protected $host; 
 	protected $dbname; 
 	protected $user; 
@@ -22,40 +22,26 @@ class dataBaseProvider {
 		);
 	}
 
-	public function connect($host, $dbname, $user='', $passwd='') {
-
-	}
-
-	public function query($query) {
-
-	}
-
-	protected function dbAsArray($query) {
-	}
-
-	protected function dbLine($query) {
-	}
-
-	protected function dbOne($query) {
-
-	}
-
-	public function lastID() {
-
-	}
-
-	public function close() {
-
-	}
+	abstract public function connect($host, $dbname, $user='', $passwd='');
+	abstract public function query($query);
+	abstract protected function dbAsArray($query);
+	abstract protected function dbLine($query);
+	abstract protected function dbOne($query);
+	abstract public function lastID();
+	abstract public function Close();
 
 	public function setCacheProvider($cache) {
 		$this->cache = $cache;
 	}
 
 	public function error($text) {
-		trace_error($text);
+		trace_error("[dataBaseProvider] ".$text);
 		//throw new Exception($text, 1);
 	}
+    
+    private function log($message) {
+        trace("[dataBaseProvider] " . $message);
+    }
 
 	public function safeVal($str) {
 		return $str;
