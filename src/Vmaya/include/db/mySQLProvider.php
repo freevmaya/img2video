@@ -100,7 +100,7 @@
 			} catch (Exception $e) {
 				if ($this->isConnectionError($e->getMessage())) {
 	                $this->reconnect();
-	                return $this->query($query);
+	                return $this->bquery($query, $types, $params);
 	            }
 				$this->error('mysql_error='.$e->getMessage().' query='.$query.', data: '.json_encode($params));
 	            throw $e;
