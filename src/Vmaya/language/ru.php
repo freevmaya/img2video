@@ -23,5 +23,6 @@ $lang = [
 	'Your photo is ready'=>'Ваше фото готово',
 	'Help Desk'=>'Служба поддержки',
 	'HelpDeskDescription'=>'Здесь вы можете решить вопросы касающиеся техподдержки, платежей и т.п.',
-	'Go to dialogue'=>'Перейти к диалогу'
+	'Go to dialogue'=>'Перейти к диалогу',
+	'This feature is not supported yet'=>'Эта функция пока не поддерживается'
 ];

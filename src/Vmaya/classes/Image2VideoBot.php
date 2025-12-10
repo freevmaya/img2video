@@ -202,8 +202,8 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function text2video($chatId) {
-        $this->Answer($chatId, ['text' => Lang("Send a prompt")]);
-        $this->setSession("expect", 'textToVideo');
+        $this->Answer($chatId, ['text' => Lang("This feature is not supported yet")]);
+        //$this->setSession("expect", 'textToVideo');
     }
 }
 ?>
