@@ -121,11 +121,14 @@
 		public function query($query) {
 			$result = false;
 
-			try {
-				$result = $this->mysqli->query($query);
-			} catch (Exception $e) {
-				$this->catchError($e);
-			}
+			if (!empty($query)) {
+
+				try {
+					$result = $this->mysqli->query($query);
+				} catch (Exception $e) {
+					$this->catchError($e);
+				}
+			} else $this->error("Query cannot be empty");
 
 			return $result;
 		}
