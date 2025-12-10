@@ -76,6 +76,10 @@ class MidjourneyAPI implements APIInterface
         return $this->makeRequest('/midjourney/v2/animate', $data);
     }
 
+    protected function error($error) {
+
+    }
+
     private function makeRequest($endpoint, $data)
     {
         $ch = curl_init($this->baseUrl . $endpoint);
@@ -95,15 +99,22 @@ class MidjourneyAPI implements APIInterface
         curl_close($ch);
         trace($response);
 
-        $hash = isset($response['hash']) ? $response['hash'] : false;
+        if (isset($response['error']))
+            $this->error($endpoint.': '.$response['error']);
+        else {
 
-        if ($hash && $this->modelTask)
-            $this->modelTask->Update([
-                'user_id'=>$this->bot->getUserId(),
-                'chat_id'=>$this->bot->CurrentUpdate()->getMessage()->getChat()->getId(),
-                'hash'=>$response['hash']
-            ]);
+            $hash = isset($response['hash']) ? $response['hash'] : false;
 
-        return $hash;
+            if ($hash && $this->modelTask)
+                $this->modelTask->Update([
+                    'user_id'=>$this->bot->getUserId(),
+                    'chat_id'=>$this->bot->CurrentUpdate()->getMessage()->getChat()->getId(),
+                    'hash'=>$response['hash']
+                ]);
+
+            return $hash;
+        }
+
+        return false;
     }
 }

@@ -6,6 +6,7 @@ use \Telegram\Bot\Exceptions\TelegramResponseException;
 class MJMainCycle extends MidjourneyAPI {
 
     private $lastMessageId;
+    protected $user;
 
     protected function initLang($language_code) {
         GLOBAL $lang;
@@ -15,8 +16,8 @@ class MJMainCycle extends MidjourneyAPI {
     }
 
     protected function updateTask($task) {
-        if ($user = (new TGUserModel())->getItem($task['user_id']))
-            $this->initLang($user['language_code']);
+        if ($this->user = (new TGUserModel())->getItem($task['user_id']))
+            $this->initLang($this->user['language_code']);
 
         $responses = $this->modelReply->getItems(['processed'=>0, 'hash'=>$task['hash']]);
 
@@ -174,6 +175,17 @@ class MJMainCycle extends MidjourneyAPI {
             return $result;
         }
         return false;
+    }
+
+    protected function error($error) {
+        if ($this->user) {
+            $params = [
+                'chat_id' => $this->user['id'],
+                'text' => $error,
+                'parse_mode' => 'HTML'
+            ]
+            $this->bot->sendMessage($params);
+        } else trace_error($error);
     }
 
     public function Message($chatId, $msg, $parse_mode = 'Markdown') {
