@@ -20,23 +20,38 @@ class MJMainCycle extends MidjourneyAPI {
 
         $responses = $this->modelReply->getItems(['processed'=>0, 'hash'=>$task['hash']]);
 
-        foreach ($responses as $response) {
-            if ($this->doServiceAction($task, $response)) {
-                $this->modelReply->Update([
-                    'id'=>$response['id'], 'processed'=>1
-                ]);
-                break;
+        if (count($responses) == 0)
+            $this->modelTask->Update([
+                'id'=>$task['id'], 'state'=>'failure'
+            ]);
+        else {
+            foreach ($responses as $response) {
+                if ($this->doServiceAction($task, $response)) {
+                    $this->modelReply->Update([
+                        'id'=>$response['id'], 'processed'=>1
+                    ]);
+
+                    if ($response['status'] == 'done') {
+                        $this->modelTask->Update([
+                            'id'=>$task['id'], 'state'=>'finished'
+                        ]);
+                    }
+                    break;
+                }
             }
         }
     }
 
     protected function doServiceAction($task, $response) {
-        if (isset($response['result'])) {
+        if (isset($response['result']) && !empty($response['result'])) {
             $method = $response['type'].'_do';
             if (method_exists($this, $method))
                 return $this->$method($task, $response);
-        }
-        return false;
+            else {
+                trace_error("The method is missing: {$method}");
+                return false;
+            }
+        } else return true;
     }
 
     public function Update() {
