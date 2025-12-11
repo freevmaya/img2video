@@ -42,6 +42,10 @@ class MJModel extends BaseModel {
 			'processed' => [
 				'label'=> 'processed',
 				'dbtype' => 'i'
+			],
+			'fail_count' => [
+				'label'=> 'fail_count',
+				'dbtype' => 'i'
 			]
 		];
 	}
