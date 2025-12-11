@@ -66,10 +66,11 @@ class MJMainCycle extends MidjourneyAPI {
                                 $this->finishTask($task, 'failure');
                                 $this->finishResponse($response);
 
-                                $this->Message($task['user_id'], Lang("DownloadFailure"), [
-                                    [
-                                        ['text' => '💬'.Lang('Help Desk'), 'callback_data' => 'support']
-                                    ]
+                                $this->Message($task['user_id'], ['text' => Lang("DownloadFailure"), 'reply_markup'=> json_encode([
+                                        'inline_keyboard' => [
+                                            [['text' => '💬'.Lang('Help Desk'), 'callback_data' => 'support']]
+                                        ]
+                                    ])
                                 ]);
                             } else $this->modelReply->Update([
                                 'id'=>$response['id'], 'fail_count'=>$response['fail_count'] + 1
