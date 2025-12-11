@@ -150,4 +150,24 @@ function ConvertToGif($webpPath) {
     return false;
 }
 
+function ConvertWebPToMP4($webpPath) {
+    $mp4Path = tempnam(sys_get_temp_dir(), 'webp_') . '.mp4';
+    
+    // Используем ffmpeg для конвертации
+    $command = sprintf(
+        'ffmpeg -i %s -vf "scale=512:512:force_original_aspect_ratio=decrease,pad=512:512:(ow-iw)/2:(oh-ih)/2" -c:v libx264 -preset fast -crf 23 -pix_fmt yuv420p %s 2>&1',
+        escapeshellarg($webpPath),
+        escapeshellarg($mp4Path)
+    );
+    
+    exec($command, $output, $returnCode);
+    
+    if ($returnCode !== 0 || !file_exists($mp4Path)) {
+        error_log("FFmpeg conversion failed: " . implode("\n", $output));
+        return false;
+    }
+    
+    return $mp4Path;
+}
+
 ?>

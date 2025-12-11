@@ -152,6 +152,20 @@ class MJMainCycle extends MidjourneyAPI {
             ], $params));
         }
 
+        $mp4Path = ConvertWebPToMP4($webpPath);
+    
+        if ($mp4Path) {
+            return $this->bot->sendVideo([
+                'chat_id' => $chatId,
+                'video' => fopen($mp4Path, 'r'),
+                'caption' => $message,
+                'width' => 512,
+                'height' => 512,
+                'supports_streaming' => true
+            ]);
+        }
+
+        /*
         $gifPath = ConvertToGif($webpFile);
         if ($gifPath) {
             return $this->bot->sendAnimation([
@@ -160,7 +174,7 @@ class MJMainCycle extends MidjourneyAPI {
                 'caption' => $message,
                 'parse_mode' => 'HTML'
             ]);
-        }
+        }*/
         
         // Отправляем анимированный WebP
         try {

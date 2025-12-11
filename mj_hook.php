@@ -42,6 +42,7 @@
 		if (empty($input)) {
 		    http_response_code(400);
 		    file_put_contents(LOG_ERROR_FILE, 'ERROR: Empty request body'. "\n", FILE_APPEND);
+		    echo "EMPTY";
 		    exit;
 		}
 
@@ -51,6 +52,7 @@
 		if (json_last_error() !== JSON_ERROR_NONE) {
 		    http_response_code(400);
 		    file_put_contents(LOG_ERROR_FILE, 'ERROR: Invalid JSON, '.json_last_error_msg(). "\n", FILE_APPEND);
+		    echo "EMPTY";
 		    exit;
 		}
 
@@ -62,6 +64,7 @@
 		    if (!hash_equals($expected_signature, $signature)) {
 		        http_response_code(401);
 		        file_put_contents(LOG_ERROR_FILE, 'ERROR: Invalid signature'. "\n", FILE_APPEND);
+		    	echo "EMPTY";
 		        exit;
 		    }
 		}
