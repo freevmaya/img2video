@@ -314,8 +314,6 @@ class MJMainCycle extends MidjourneyAPI {
             'parse_mode' => $parse_mode
         ], is_string($msg) ? ['text' => $msg] : $msg);
 
-        print_r($params);
-
         return $this->bot->sendMessage($params);
     }
 }
