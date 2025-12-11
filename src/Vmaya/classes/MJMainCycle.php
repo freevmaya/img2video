@@ -74,7 +74,9 @@ class MJMainCycle extends MidjourneyAPI {
                             } else $this->modelReply->Update([
                                 'id'=>$response['id'], 'fail_count'=>$response['fail_count'] + 1
                             ]);
-                        } else $this->finishResponse($response);
+                        } else $this->modelReply->Update([
+                            'id'=>$response['id'], 'fail_count'=>1, 'processed'=>1
+                        ]);
                     }
                 } else $this->finishResponse($response);
                 return true;
