@@ -70,7 +70,9 @@ class MJMainCycle extends MidjourneyAPI {
                                     ['text' => '💬'.Lang('Help Desk'), 'callback_data' => 'support']
                                 ]
                             ]);
-                        } 
+                        } else $this->modelReply->Update([
+                            'id'=>$response['id'], 'fail_count'=>$response['fail_count'] + 1
+                        ]);
                     }
                 } else $this->finishResponse($response);
                 return true;
