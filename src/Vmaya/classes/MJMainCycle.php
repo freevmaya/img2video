@@ -41,12 +41,16 @@ class MJMainCycle extends MidjourneyAPI {
                     }
                     break;
                 } else {
-                    if ($response['fail_count'] > 10) {
+                    if ($response['fail_count'] >= 10) {
                         $this->modelTask->Update([
                             'id'=>$task['id'], 'state'=>'failure'
                         ]);
 
-                        $this->Message($task['user_id'], Lang("DownloadFailure"));
+                        $this->Message($task['user_id'], Lang("DownloadFailure"), [
+                            [
+                                ['text' => '💬'.Lang('Help Desk'), 'callback_data' => 'support']
+                            ]
+                        ]);
                     } else {
                         $this->modelReply->Update([
                             'id'=>$response['id'], 'fail_count'=>$response['fail_count'] + 1
