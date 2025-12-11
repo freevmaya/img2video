@@ -105,12 +105,14 @@ class MidjourneyAPI implements APIInterface
 
             $hash = isset($response['hash']) ? $response['hash'] : false;
 
-            if ($hash && $this->modelTask)
+            if ($hash && $this->modelTask) {
                 $this->modelTask->Update([
                     'user_id'=>$this->bot->getUserId(),
                     'chat_id'=>$this->bot->CurrentUpdate()->getMessage()->getChat()->getId(),
                     'hash'=>$response['hash']
                 ]);
+                $this->bot->Answer($this->bot->getUserId(), ['text' => Lang("The task has been accepted")]);
+            }
 
             return $hash;
         }
