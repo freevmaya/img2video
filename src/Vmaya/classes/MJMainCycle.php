@@ -22,51 +22,61 @@ class MJMainCycle extends MidjourneyAPI {
         $responses = $this->modelReply->getItems(['processed'=>0, 'hash'=>$task['hash']]);
 
         if (count($responses) == 0) {
-            if (HoursDiffDate($task['date']) > 1) {
-                $this->modelTask->Update([
-                    'id'=>$task['id'], 'state'=>'failure'
-                ]);
-            }
+            if (HoursDiffDate($task['date']) > 1)
+                $this->finishTask($task, 'failure');
         } else {
             foreach ($responses as $response) {
                 if ($this->doServiceAction($task, $response)) {
-                    $this->modelReply->Update([
-                        'id'=>$response['id'], 'processed'=>1
-                    ]);
-
-                    if ($response['status'] == 'done') {
-                        $this->modelTask->Update([
-                            'id'=>$task['id'], 'state'=>'finished'
-                        ]);
-                    }
+                    if ($response['status'] == 'done')
+                        $this->finishTask($task);
                     break;
-                } else {
-                    if ($response['fail_count'] >= 10) {
-                        $this->modelTask->Update([
-                            'id'=>$task['id'], 'state'=>'failure'
-                        ]);
-
-                        $this->Message($task['user_id'], Lang("DownloadFailure"), [
-                            [
-                                ['text' => '💬'.Lang('Help Desk'), 'callback_data' => 'support']
-                            ]
-                        ]);
-                    } else {
-                        $this->modelReply->Update([
-                            'id'=>$response['id'], 'fail_count'=>$response['fail_count'] + 1
-                        ]);
-                    }
-                }
+                } 
             }
         }
+    }
+
+    protected function finishTask($task, $state='finished') {        
+        $this->modelTask->Update([
+            'id'=>$task['id'], 'state'=>'failure'
+        ]);
+    }
+
+    protected function finishResponse($response) {        
+        $this->modelReply->Update([
+            'id'=>$response['id'], 'processed'=>1
+        ]);
     }
 
     protected function doServiceAction($task, $response) {
         if (isset($response['result']) && !empty($response['result'])) {
             $method = $response['type'].'_do';
-            if (method_exists($this, $method))
-                return $this->$method($task, $response);
+            if (method_exists($this, $method)) {
+
+                $result = json_decode(@$response['result'], true);
+                if ($url = @$result['url']) {
+
+                    if ($this->$method($task, $response)) {
+                        $this->finishResponse($response);
+                        return true;
+                    }
+                    else {
+                        if ($response['fail_count'] >= 10) {
+
+                            $this->finishTask($task, 'failure');
+                            $this->finishResponse($response);
+
+                            $this->Message($task['user_id'], Lang("DownloadFailure"), [
+                                [
+                                    ['text' => '💬'.Lang('Help Desk'), 'callback_data' => 'support']
+                                ]
+                            ]);
+                        } 
+                    }
+                } else $this->finishResponse($response);
+                return true;
+            }
             else {
+                $this->finishResponse($response);
                 trace_error("The method is missing: {$method}");
                 return false;
             }
