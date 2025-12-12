@@ -10,5 +10,5 @@ use App\Services\API\KlingApi;
 $dbp = new mySQLProvider(_dbhost, _dbname_default, _dbuser, _dbpassword);
 
 $api = new KlingApi(KL_ACCESS_KEY, KL_SECRET_KEY);
-$api->generateVideoFromImage('https://vmaya.ru/img2video/downloads/results/FaceGerl01.jpg', 'The girl smiles and then turns around as if someone called out to her from the left.');
+$api->generateVideoFromImage('https://vmaya.ru/img2video/downloads/20220708_122639.jpg', 'The man in the photo smiles and then turns his back. In the background, lifts are working and moving.');
 $dbp->Close();
