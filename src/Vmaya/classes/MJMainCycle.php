@@ -68,7 +68,7 @@ class MJMainCycle extends MidjourneyAPI {
 
                                 $this->Message($task['user_id'], ['text' => Lang("DownloadFailure"), 'reply_markup'=> json_encode([
                                         'inline_keyboard' => [
-                                            [['text' => '💬'.Lang('Help Desk'), 'callback_data' => 'support']]
+                                            [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']]
                                         ]
                                     ])
                                 ]);

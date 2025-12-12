@@ -6,6 +6,7 @@ logs/*
 config/*
 config*.php
 downloads
+combined.txt
 
 *.sublime-project
 *.sublime-workspace
