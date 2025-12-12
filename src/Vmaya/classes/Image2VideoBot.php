@@ -104,7 +104,9 @@ class Image2VideoBot extends YKassaBot {
         } else {
             $message = $this->currentUpdate['message'];
             if ($photo = @$message['photo'])
-                $this->image2video_photo($chatId, $text);
+                if ($this->isAllowedVideo())
+                    $this->image2video_photo($chatId, $text);
+                else $this->notEnough($chatId);
         }
     }
 
