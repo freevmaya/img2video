@@ -12,7 +12,7 @@ class KlingApi extends BaseKlingApi
                                 $bot=null)
     {
     	parent::__construct($accessKey, $secretKey, $model_name);
-        $this->bot          = $bot;
+        $this->bot = $bot;
     }
 
     protected function extendOptions() {
@@ -31,7 +31,7 @@ class KlingApi extends BaseKlingApi
         	$params = [
         		'hash'=>$data['task_id'],
         		'service'=>'kling'
-        	]
+        	];
 
         	if ($this->bot) {
         		$params['user_id'] = $this->bot->getUserId();
