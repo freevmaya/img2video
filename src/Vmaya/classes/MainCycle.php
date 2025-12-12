@@ -81,14 +81,14 @@ class MainCycle {
                 $file_path = RESULT_PATH.$filename;
 
                 if (file_exists($file_path)) {                    
-                    $this->sendMp4($task['chat_id'], $file_path, $filename, Lang('Your video is ready'));
+                    $this->sendMp4($task, $file_path, $filename, Lang('Your video is ready'));
                     $this->finishTask($task);
                     $this->kling_finishResponse($response);
                     return true;
                 } else {
                     $downloadResult = downloadFile($response['result_url'], $file_path);
                     if ($downloadResult['success']) {
-                        $this->sendMp4($task['chat_id'], $file_path, $filename, Lang('Your video is ready'));
+                        $this->sendMp4($task, $file_path, $filename, Lang('Your video is ready'));
                         $this->finishTask($task);
                         $this->kling_finishResponse($response);
                         return true;
@@ -252,20 +252,29 @@ class MainCycle {
         return false;
     }
 
-    protected function sendMp4($chatId, $filePath, $filename, $message, $params=[]) {
+    protected function sendMp4($task, $filePath, $filename, $message, $params=[]) {
         if (!$filePath || !file_exists($filePath)) {
             $this->Message($chatId, '⚠️ '.Lang('Animation not found'));
             return;
         }
 
-        return $this->api->sendVideo([
-            'chat_id' => $chatId,
+        $result = $this->api->sendVideo([
+            'chat_id' => $task['chat_id'],
             'video' => fopen($filePath, 'r'),
             'caption' => $message,
             'width' => 512,
             'height' => 512,
             'supports_streaming' => true
         ]);
+
+        if ($result) {            
+
+            (new TransactionsModel())->PayVideo($task['user_id'], [
+                'hash'=>$task['hash']
+            ]);
+        }
+
+        return $result;
     }
 
     protected function sendAnimation($chatId, $webpFile, $filename, $message, $params=[]) {

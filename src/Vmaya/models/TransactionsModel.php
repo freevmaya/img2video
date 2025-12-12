@@ -48,6 +48,13 @@ class TransactionsModel extends BaseModel {
 		return 0;
 	}
 
+	public function PayVideo($userId, $data=[]) {
+		$price = $this->GetPrice($userId, 'video_limit');
+		if ($price > 0)
+			return $this->Add($userId, '', -$price, 'expense', $data);
+		else return false;
+	}
+
 	public function PayUpscale($userId, $data=[]) {
 		$price = $this->GetPrice($userId, 'image_limit');
 		if ($price > 0)
