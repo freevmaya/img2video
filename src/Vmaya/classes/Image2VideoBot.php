@@ -101,6 +101,10 @@ class Image2VideoBot extends YKassaBot {
         if ($expect = $this->expect) {
             if (method_exists($this, $expect))
                 $this->$expect($chatId, $text);
+        } else {
+            $message = $this->currentUpdate['message'];
+            if ($photo = @$message['photo'])
+                $this->image2video_photo($chatId, $text);
         }
     }
 
