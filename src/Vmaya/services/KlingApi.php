@@ -23,7 +23,7 @@ class KlingApi extends BaseKlingApi
 
     protected function makeRequest($endpoint, $data)
     {        
-        $response = $this->makeRequest($endpoint, $data);
+        $response = parent::makeRequest($endpoint, $data);
 
         if (isset($response['data']) && (@$response['code'] == 0)) {
         	$data = $response['data'];
