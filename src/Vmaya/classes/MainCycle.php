@@ -383,11 +383,11 @@ class MainCycle {
                 $result = $this->sendPhoto($task['chat_id'], $file_path, $filename, Lang('Choose the option you like best'),
                     [
                         [
-                            ['text' => '1', 'callback_data' => "task.{$hash}.1"],
-                            ['text' => '2', 'callback_data' => "task.{$hash}.2"]
+                            ['text' => '1', 'callback_data' => "task.{$hash}.upscale.1"],
+                            ['text' => '2', 'callback_data' => "task.{$hash}.upscale.2"]
                         ],[
-                            ['text' => '3', 'callback_data' => "task.{$hash}.3"],
-                            ['text' => '4', 'callback_data' => "task.{$hash}.4"]
+                            ['text' => '3', 'callback_data' => "task.{$hash}.upscale.3"],
+                            ['text' => '4', 'callback_data' => "task.{$hash}.upscale.4"]
                         ]
                     ]
                 );

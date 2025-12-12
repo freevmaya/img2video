@@ -35,7 +35,7 @@ class Image2VideoBot extends YKassaBot {
     protected function startMenuList() {
         $result = [
             //[['text' => '🖼️'.Lang('Create an image'), 'callback_data' => 'create_image']],
-            [['text' => '🎥'.Lang('Create a video'), 'callback_data' => 'create_video']],
+            [['text' => '🎥'.Lang('Bring a photo to life'), 'callback_data' => 'create_video']],
             [['text' => '💰'.Lang('Balance'), 'callback_data' => 'MySubscribe']],
             [['text' => '📊'.Lang('My generations'), 'callback_data' => 'my_generations']],
             [['text' => '⭐'.Lang('Subscription'), 'callback_data' => 'subscribe']],
@@ -53,7 +53,7 @@ class Image2VideoBot extends YKassaBot {
         $parts = explode('.', $data);
         switch ($parts[0]) {
             case 'task':
-                $this->processTask($parts);
+                $this->processTask($chatId, $parts);
                 return true;
             case 'create_image':
                 if ($this->isAllowedImage())
@@ -76,36 +76,78 @@ class Image2VideoBot extends YKassaBot {
         }
     }
 
-    protected function processTask($parts) {
+    protected function processTask($chatId, $parts) {
         if (count($parts) > 2) {
             $action = $parts[2];
-            if ($action == 'animate')
-                $this->mj_api->Animate($parts[1]);
-            else $this->mj_api->Upscale($parts[1], intval($action));
+            switch ($action) {
+                case 'animate':
+                    $this->mj_api->Animate($parts[1]);
+                    break;
+                case 'upscale':
+                    $this->mj_api->Upscale($parts[1], intval($parts[3]));
+                    break;
+                case 'klingVideo':
+                    if ($parts[1] == 'userText')
+                        $prompt = $this->popSession('userText');
+                    else $prompt = Lang('imageToVideoPrompts')[intval($parts[1])];
+                    $this->klingGenerateVideo($chatId, $prompt);
+                    break;
+            }
         }
     }
 
     protected function messageProcess($chatId, $messageId, $text) {
 
         if ($expect = $this->expect) {
-            if (method_exists($this, $expect)) {
+            if (method_exists($this, $expect))
                 $this->$expect($chatId, $text);
-            }
-            else {
-                switch ($expect) {
-                    case 'image2video_photo':
-                        if ($photo = @$this->currentUpdate['message']['photo']) {
-                            $best_photo = $photo[count($photo) - 1];
-                            $file_url = $this->GetFileUrl($best_photo['file_id']);
-                            trace($file_url);
-                        } else $this->image2video($chatId);
-                        break;
-                    default:
-                        break;
-
-                }
-            }
         }
+    }
+
+    protected function klingGenerateVideo($chatId, $prompt) {
+        $file_id = $this->popSession('file_id');
+        if (($image_url = $this->GetFileUrl($file_id)) && !empty($prompt)) {
+
+            if (!empty($image_url) && !empty($prompt)) {
+                $this->kling_api->generateVideoFromImage($image_url, $prompt);
+                $this->Answer($chatId, Lang('Sent'));
+            }
+            else $this->Wrong($chatId);
+        } else $this->Wrong($chatId);
+    }
+
+    protected function image2video_photo_prompt($chatId, $prompt) {
+        $this->klingGenerateVideo($chatId, $prompt);
+    }
+
+    protected function image2video_photo($chatId, $text) {
+
+        $message = $this->currentUpdate['message'];
+
+        if ($photo = @$message['photo']) {
+            $best_photo = $photo[count($photo) - 1];
+
+            $this->setSession('file_id', $best_photo['file_id']); 
+            $this->setSession('expect', 'image2video_photo_prompt');     
+
+            $promptList = Lang('imageToVideoPrompts');
+            $menu = [];
+
+            $caption = $message['caption'] ?? $text;
+
+            if (!empty($caption)) {
+                $this->setSession('userText', $caption); 
+                $menu[] = [['text' => $caption, 'callback_data' => "task.userText.klingVideo"]];
+            }
+
+            foreach ($promptList as $i=>$prompt)
+                $menu[] = [['text' => Lang($prompt), 'callback_data' => "task.{$i}.klingVideo"]];
+
+
+            $this->Answer($chatId, ['text' => Lang("Send a prompt for video"), 'reply_markup'=> json_encode([
+                'inline_keyboard' => $menu
+            ])]);
+        } else $this->image2video($chatId);
     }
 
     protected function replyToMessage($reply, $chatId, $messageId, $text) {

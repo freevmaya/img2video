@@ -3,6 +3,7 @@
 namespace App\Services\API;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use App\Services\API\BaseKlingApi;
 
 class KlingApi extends BaseKlingApi
 {

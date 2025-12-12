@@ -96,6 +96,15 @@ abstract class BaseBot {
         }
     }
 
+    public function Wrong($chatId) {
+        $this->Answer($chatId, ['text' => Lang("Something wrong"), 'reply_markup'=> json_encode([
+                'inline_keyboard' => [
+                    [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']]
+                ]
+            ])
+        ]);
+    }
+
     public function Answer($chatId, $msg, $messageId = false, $reply_to_message_id = false, $parse_mode = 'Markdown') {
 
         $params = array_merge([
