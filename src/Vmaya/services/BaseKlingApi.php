@@ -53,7 +53,7 @@ class BaseKlingApi implements APIInterface
     	], $this->extendOptions(), $options));    	
     }
 
-    private function makeRequest($endpoint, $data)
+    protected function makeRequest($endpoint, $data)
     {
         $ch = curl_init($this->baseUrl . $endpoint);
 
