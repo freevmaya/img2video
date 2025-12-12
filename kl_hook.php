@@ -144,8 +144,10 @@ function handleUnknownKlingData($data) {
     );
 }
 
+$headers = getallheaders();
+
 // Получаем сырые данные
-if (DEV) {
+if (DEV || empty($headers)) {
     // Тестовые данные для разработки
     Main('{
     "Accept-Encoding": "gzip,deflate",
@@ -156,5 +158,5 @@ if (DEV) {
     "Content-Type": "application\/json; charset=utf-8"
 }','{"task_id":"828338674605228111","task_status":"succeed","task_info":{},"task_result":{"images":[],"videos":[{"id":"828338674655576157","url":"https://v15-kling-fdl.klingai.com/bs2/upload-ylab-stunt-sgp/muse/828300247523786832/VIDEO/20251212/99e04ae9253aac4e9920610dd9f3ef7b-0c0e4ce5-6f55-435e-9734-a8218e8b48de.mp4?cacheKey=ChtzZWN1cml0eS5rbGluZy5tZXRhX2VuY3J5cHQSsAEwd4TlaeLgxoTSHX1RjEOf6eVidKMOqheW7TnaHGLDgG4s5KzZY3cXoI6_9Q1JjhNzN3zZVKoKtPvVEP8Fu2GCNs4ChHjO5Kf5KrO8PG3qjCIUcDWtca-YOlT7NVfXzeOGNXgfShPxaSTZVLz6f_wqIOjpj3Inr-EioEqe4oht7tLl3JV5k2-n_HqgrDHXo87K_cMjnySDAdD55W13uH0Xw5E36QCV_l-o9Wb8Hw63tBoS09j_LL38Qv8Yv5Zh0thEYW8BIiCVKkZZs1dTJFJ5YR2rGkEICRxh9DPse3Iq3gnn56vqZigFMAE&x-kcdn-pid=112781&Expires=1768112080&Signature=iicF7LURaAXhHw-UsAi6CyOIgGbGwTxtxvRzIaWCbRXii7DVfHXoE92~d446sOjtyoS7XYJf2eFRQP903IacRIIEl2YozO0Vf6J2Aie79hPg4UaqleCMStz9L05BWUJlnl3z4pN8ctI5n7RDBrmml7oy7HOoWM9kZNkfWIfdBCW-2IOYDIp7t8NZNgMBkhKYTOFP4jWuAC1opcUVfLYgTCwsValasDilbyD7mMMMVzbcZCLgd4~gu3mJpzZu1Asb5eNnrJS7XijpZleUi8VkFhjNYY2HkjI7PRo9C25SZXkIfsp2G0FJxQyqfL3EzA~MB5PB7oN~JEzB-YsW8elsTA__&Key-Pair-Id=K1FG4T7LWJK0FU","duration":"5.1"}],"audios":[]},"task_status_msg":"","created_at":1765519848595,"updated_at":1765520080995}');
 } else {
-    Main(getallheaders(), file_get_contents('php://input'));
+    Main($headers, file_get_contents('php://input'));
 }
