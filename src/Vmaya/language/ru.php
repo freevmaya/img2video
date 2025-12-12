@@ -19,6 +19,7 @@ $lang = [
 	'My generations'=>'Мои генерации',
 	'Subscription'=>'Подписка',
 	'Your image in progress'=>'Ваше изображение в процессе',
+	'Your video in progress'=>'Ваше видео в процессе',
 	'Choose the option you like best'=>'Выберите вариант который вам больше нравится',
 	'Your photo is ready'=>'Ваше фото готово',
 	'Your video is ready'=>'Ваше видео готово',
@@ -29,5 +30,6 @@ $lang = [
 	'Animate'=>'Анимировать',
 	'Animation not found'=>'Анимация не найдена',
 	'DownloadFailure'=>'Что то пошло не так и мы не можем скачать файл. Просим прощения за неудобства. Обратитесь в тех. поддержку.',
-	'The task has been accepted'=>'Задание принято'
+	'The task has been accepted'=>'Задание принято',
+	'Send you photo'=>'Отправьте ваше фото'
 ];

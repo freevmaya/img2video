@@ -9,7 +9,7 @@ use \Telegram\Bot\Api;
 use \App\Services\API\MidjourneyAPI;
 
 // === ИНИЦИАЛИЗАЦИЯ БЛОКИРОВКИ ===
-$lock = new ProcessLock(__DIR__ . '/mj_cycle.pid');
+$lock = new ProcessLock(__DIR__ . '/main_cycle.pid');
 
 if (!$lock->acquire()) {
     exit(0);
@@ -32,7 +32,7 @@ try {
 
     $dbp = new mySQLProvider(_dbhost, _dbname_default, _dbuser, _dbpassword);
 
-    $mj = new MJMainCycle(MJ_APIKEY, MJ_HOOK_URL, MJ_ACCOUNTHASH, $telegram, new TaskModel(), new MJModel());
+    $mj = new MainCycle($telegram);
 
     //Основной цикл
     while ($lock->isFile()) {

@@ -12,14 +12,18 @@ use \App\Services\API\MidjourneyAPI;
 
 class Image2VideoBot extends YKassaBot {
 
-    protected $serviceApi;
+    protected $mj_api;
+    protected $kling_api;
     protected $expect;
 
     protected function initUser($update) {
         parent::initUser($update);
-        if ($this->getUserId())
-            $this->serviceApi = new MidjourneyAPI(MJ_APIKEY, MJ_HOOK_URL, MJ_ACCOUNTHASH, 
-                                    $this, new TaskModel(), new MJModel());
+        if ($this->getUserId()) {
+            $taskModel = new TaskModel();
+            $this->mj_api = new MidjourneyAPI(MJ_APIKEY, MJ_HOOK_URL, MJ_ACCOUNTHASH, 
+                                    $this, $taskModel, new MJModel());
+            $this->kling_api = new KlingApi(KL_ACCESS_KEY, KL_SECRET_KEY, $taskModel);
+        }
     }
 
     protected function runUpdate($update) {
@@ -29,7 +33,7 @@ class Image2VideoBot extends YKassaBot {
 
     protected function startMenuList() {
         $result = [
-            [['text' => '🖼️'.Lang('Create an image'), 'callback_data' => 'create_image']],
+            //[['text' => '🖼️'.Lang('Create an image'), 'callback_data' => 'create_image']],
             [['text' => '🎥'.Lang('Create a video'), 'callback_data' => 'create_video']],
             [['text' => '💰'.Lang('Balance'), 'callback_data' => 'MySubscribe']],
             [['text' => '📊'.Lang('My generations'), 'callback_data' => 'my_generations']],
@@ -57,7 +61,7 @@ class Image2VideoBot extends YKassaBot {
                 return true;
             case 'create_video':
                 if ($this->isAllowedVideo())
-                    $this->text2video($chatId);
+                    $this->image2video($chatId);
                 else $this->notEnough($chatId);
                 return true;
             case 'support':
@@ -75,8 +79,8 @@ class Image2VideoBot extends YKassaBot {
         if (count($parts) > 2) {
             $action = $parts[2];
             if ($action == 'animate')
-                $this->serviceApi->Animate($parts[1]);
-            else $this->serviceApi->Upscale($parts[1], intval($action));
+                $this->mj_api->Animate($parts[1]);
+            else $this->mj_api->Upscale($parts[1], intval($action));
         }
     }
 
@@ -88,12 +92,12 @@ class Image2VideoBot extends YKassaBot {
             }
             else {
                 switch ($expect) {
-                    case 'photo':
+                    case 'image2video_photo':
                         if ($photo = @$this->currentUpdate['message']['photo']) {
                             $best_photo = $photo[count($photo) - 1];
                             $file_url = $this->GetFileUrl($best_photo['file_id']);
                             trace($file_url);
-                        }
+                        } else $this->image2video($chatId);
                         break;
                     default:
                         break;
@@ -191,7 +195,7 @@ class Image2VideoBot extends YKassaBot {
 
     protected function textToImage($chatId, $prompt) {
         $this->Answer($chatId, ['text' => "Prompt: ".$prompt]);
-        $this->serviceApi->generateImage($prompt);
+        $this->mj_api->generateImage($prompt);
     }
 
     protected function textToVideo($chatId, $prompt) {
@@ -199,13 +203,13 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function text2image($chatId) {
-        $this->Answer($chatId, ['text' => Lang("Send a prompt")]);
+        $this->Answer($chatId, Lang("Send a prompt"));
         $this->setSession("expect", 'textToImage');
     }
 
-    protected function text2video($chatId) {
-        $this->Answer($chatId, ['text' => Lang("This feature is not supported yet")]);
-        //$this->setSession("expect", 'textToVideo');
+    protected function image2video($chatId) {
+        $this->Answer($chatId, Lang("Send you photo"));
+        $this->setSession("expect", 'image2video_photo');
     }
 }
 ?>

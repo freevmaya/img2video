@@ -19,6 +19,10 @@ class KlingModel extends BaseModel {
 				'label' => 'processed',
 				'dbtype' => 'i'
 			],
+			'fail_count' => [
+				'label' => 'fail_count',
+				'dbtype' => 'i'
+			],
 			'status' => [
 				'label' => 'status',
 				'dbtype' => 's'
