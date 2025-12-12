@@ -103,156 +103,27 @@ function handleKlingTaskUpdate($data) {
     
     // Сохраняем в базу данных
     saveKlingTaskToDB($data);
-    
-    // Обрабатываем статус задачи
-    $status = $data['status'] ?? 'unknown';
-    
-    switch ($status) {
-        case 'success':
-        case 'completed':
-            handleKlingSuccess($data);
-            break;
-            
-        case 'processing':
-        case 'in_progress':
-            handleKlingProgress($data);
-            break;
-            
-        case 'failed':
-        case 'error':
-            handleKlingError($data);
-            break;
-            
-        default:
-            handleUnknownKlingStatus($data);
-            break;
-    }
 }
 
 function saveKlingTaskToDB($data) {
-    GLOBAL $dbp;
-    
-    // Определяем структуру таблицы для Kling задач
-    // Создайте таблицу если её нет:
-    // CREATE TABLE IF NOT EXISTS kling_tasks (
-    //     id INT AUTO_INCREMENT PRIMARY KEY,
-    //     task_id VARCHAR(255) UNIQUE,
-    //     user_id INT,
-    //     chat_id BIGINT,
-    //     prompt TEXT,
-    //     status VARCHAR(50),
-    //     result_url TEXT,
-    //     progress INT DEFAULT 0,
-    //     error_message TEXT,
-    //     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    //     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    // );
-    
-    $task_id = $dbp->safeVal($data['task_id'] ?? '');
-    $status = $dbp->safeVal($data['status'] ?? '');
-    $result_url = $dbp->safeVal($data['video_url'] ?? $data['image_url'] ?? '');
-    $progress = isset($data['progress']) ? intval($data['progress']) : 0;
-    $error_message = $dbp->safeVal($data['error_message'] ?? '');
-    
-    // Проверяем, существует ли уже запись
-    $existing = $dbp->line("SELECT id FROM kling_tasks WHERE task_id = '{$task_id}'");
-    
-    if ($existing) {
-        // Обновляем существующую запись
-        $query = "UPDATE kling_tasks SET 
-                  status = '{$status}', 
-                  result_url = '{$result_url}', 
-                  progress = {$progress}, 
-                  error_message = '{$error_message}',
-                  updated_at = NOW()
-                  WHERE task_id = '{$task_id}'";
-    } else {
-        // Вставляем новую запись
-        // Предполагаем, что user_id и chat_id передаются в callback_data или сохраняются отдельно
-        $user_id = isset($data['user_id']) ? intval($data['user_id']) : 0;
-        $chat_id = isset($data['chat_id']) ? intval($data['chat_id']) : 0;
-        $prompt = $dbp->safeVal($data['prompt'] ?? '');
-        
-        $query = "INSERT INTO kling_tasks 
-                  (task_id, user_id, chat_id, prompt, status, result_url, progress, error_message, created_at, updated_at) 
-                  VALUES ('{$task_id}', {$user_id}, {$chat_id}, '{$prompt}', '{$status}', '{$result_url}', {$progress}, '{$error_message}', NOW(), NOW())";
-    }
-    
-    $dbp->query($query);
-    
-    // Также сохраняем в общую таблицу API коммуникаций, если она существует
-    if ($dbp->isTableExists('api_comm')) {
-        $hash = $task_id;
-        $webhook_type = 'result';
-        $type = 'kling_video'; // или 'kling_image'
-        $result_data = json_encode($data);
-        
-        $api_query = "INSERT INTO api_comm 
-                      (hash, webhook_type, prompt, type, status, result, created_at, processed) 
-                      VALUES ('{$hash}', '{$webhook_type}', '{$prompt}', '{$type}', '{$status}', '{$result_data}', NOW(), 0)
-                      ON DUPLICATE KEY UPDATE 
-                      status = '{$status}', 
-                      result = '{$result_data}', 
-                      processed = 0";
-        
-        $dbp->query($api_query);
-    }
-}
 
-function handleKlingSuccess($data) {
-    file_put_contents(LOG_FILE, 
-        date('Y-m-d H:i:s') . " - Kling Task Success:\n" . 
-        json_encode($data, JSON_PRETTY_PRINT)."\n---\n",
-        FILE_APPEND
-    );
-    
-    // Скачиваем результат, если есть URL
-    if (isset($data['video_url']) || isset($data['image_url'])) {
-        $url = $data['video_url'] ?? $data['image_url'];
-        $task_id = $data['task_id'] ?? 'unknown';
-        
-        $info = pathinfo($url);
-        $extension = $info['extension'] ?? 'mp4';
-        $filename = $task_id . '.' . $extension;
-        
-        downloadFile($url, RESULT_PATH . $filename);
-        
-        // Уведомляем пользователя через Telegram бота
-        notifyUserAboutKlingResult($data, RESULT_PATH . $filename);
-    }
-}
+    $result_url = '';
+    if ($task_result = @$data['task_result']) {
 
-function handleKlingProgress($data) {
-    file_put_contents(LOG_FILE, 
-        date('Y-m-d H:i:s') . " - Kling Task Progress:\n" . 
-        json_encode($data, JSON_PRETTY_PRINT)."\n---\n",
-        FILE_APPEND
-    );
-    
-    // Можно отправить уведомление о прогрессе пользователю
-    if (isset($data['progress']) && isset($data['task_id'])) {
-        $progress = intval($data['progress']);
-        $task_id = $data['task_id'];
+        if (isset($task_result['videos'][0]))
+            $result_url = @$task_result['videos'][0]['url'];
+        else if (isset($task_result['images'][0]))
+            $result_url = @$task_result['images'][0]['url'];
+        else if (isset($task_result['audios'][0]))
+            $result_url = @$task_result['audios'][0]['url'];
+    }
         
-        // Сохраняем промежуточный файл, если есть preview
-        if (isset($data['preview_url'])) {
-            $filename = $task_id . '.progress.' . $progress . '.jpg';
-            downloadFile($data['preview_url'], PROCESS_PATH . $filename);
-        }
-    }
-}
-
-function handleKlingError($data) {
-    file_put_contents(LOG_ERROR_FILE, 
-        date('Y-m-d H:i:s') . " - Kling Task Error:\n" . 
-        json_encode($data, JSON_PRETTY_PRINT)."\n---\n",
-        FILE_APPEND
-    );
-    
-    // Уведомляем пользователя об ошибке
-    if (isset($data['task_id']) && isset($data['error_message'])) {
-        notifyUserAboutKlingError($data);
-    }
+    (new KlingModel())->Update([
+        'task_id' => $data['task_id'] ?? '',
+        'status' => $data['task_status'] ?? '',
+        'result_url'=>$result_url,
+        'error_message'=>$data['error_message'] ?? ''
+    ]);
 }
 
 function handleKlingEvent($data) {
@@ -273,56 +144,17 @@ function handleUnknownKlingData($data) {
     );
 }
 
-function handleUnknownKlingStatus($data) {
-    file_put_contents(LOG_UNKNOWN_FILE, 
-        date('Y-m-d H:i:s') . " - Unknown Kling Status:\n" . 
-        json_encode($data, JSON_PRETTY_PRINT)."\n---\n",
-        FILE_APPEND
-    );
-}
-
-function notifyUserAboutKlingResult($data, $file_path) {
-    // Здесь должна быть логика уведомления пользователя через Telegram бота
-    // Используйте существующую инфраструктуру бота из проекта
-    
-    // Примерная структура:
-    // 1. Получить user_id и chat_id из базы данных по task_id
-    // 2. Отправить сообщение через Telegram API
-    // 3. Прикрепить видео/изображение
-    
-    file_put_contents(LOG_FILE, 
-        date('Y-m-d H:i:s') . " - Should notify user about Kling result\n" . 
-        "File: " . $file_path . "\n" .
-        "Data: " . json_encode($data, JSON_PRETTY_PRINT)."\n---\n",
-        FILE_APPEND
-    );
-}
-
-function notifyUserAboutKlingError($data) {
-    // Логика уведомления пользователя об ошибке
-    
-    file_put_contents(LOG_FILE, 
-        date('Y-m-d H:i:s') . " - Should notify user about Kling error\n" . 
-        "Error: " . ($data['error_message'] ?? 'Unknown error') . "\n" .
-        "Task ID: " . ($data['task_id'] ?? 'Unknown') . "\n---\n",
-        FILE_APPEND
-    );
-}
-
 // Получаем сырые данные
 if (DEV) {
     // Тестовые данные для разработки
-    Main([
-        'Host' => 'vmaya.ru',
-        'Content-Type' => 'application/json',
-        'Authorization' => 'Bearer test_token'
-    ], json_encode([
-        'task_id' => 'test_task_123',
-        'status' => 'completed',
-        'video_url' => 'https://example.com/video.mp4',
-        'progress' => 100,
-        'prompt' => 'Test prompt'
-    ]));
+    Main('{
+    "Accept-Encoding": "gzip,deflate",
+    "User-Agent": "Apache-HttpClient\/4.5.13 (Java\/11.0.14-internal)",
+    "Connection": "Keep-Alive",
+    "Host": "vmaya.ru",
+    "Content-Length": "1207",
+    "Content-Type": "application\/json; charset=utf-8"
+}','{"task_id":"828338674605228111","task_status":"succeed","task_info":{},"task_result":{"images":[],"videos":[{"id":"828338674655576157","url":"https://v15-kling-fdl.klingai.com/bs2/upload-ylab-stunt-sgp/muse/828300247523786832/VIDEO/20251212/99e04ae9253aac4e9920610dd9f3ef7b-0c0e4ce5-6f55-435e-9734-a8218e8b48de.mp4?cacheKey=ChtzZWN1cml0eS5rbGluZy5tZXRhX2VuY3J5cHQSsAEwd4TlaeLgxoTSHX1RjEOf6eVidKMOqheW7TnaHGLDgG4s5KzZY3cXoI6_9Q1JjhNzN3zZVKoKtPvVEP8Fu2GCNs4ChHjO5Kf5KrO8PG3qjCIUcDWtca-YOlT7NVfXzeOGNXgfShPxaSTZVLz6f_wqIOjpj3Inr-EioEqe4oht7tLl3JV5k2-n_HqgrDHXo87K_cMjnySDAdD55W13uH0Xw5E36QCV_l-o9Wb8Hw63tBoS09j_LL38Qv8Yv5Zh0thEYW8BIiCVKkZZs1dTJFJ5YR2rGkEICRxh9DPse3Iq3gnn56vqZigFMAE&x-kcdn-pid=112781&Expires=1768112080&Signature=iicF7LURaAXhHw-UsAi6CyOIgGbGwTxtxvRzIaWCbRXii7DVfHXoE92~d446sOjtyoS7XYJf2eFRQP903IacRIIEl2YozO0Vf6J2Aie79hPg4UaqleCMStz9L05BWUJlnl3z4pN8ctI5n7RDBrmml7oy7HOoWM9kZNkfWIfdBCW-2IOYDIp7t8NZNgMBkhKYTOFP4jWuAC1opcUVfLYgTCwsValasDilbyD7mMMMVzbcZCLgd4~gu3mJpzZu1Asb5eNnrJS7XijpZleUi8VkFhjNYY2HkjI7PRo9C25SZXkIfsp2G0FJxQyqfL3EzA~MB5PB7oN~JEzB-YsW8elsTA__&Key-Pair-Id=K1FG4T7LWJK0FU","duration":"5.1"}],"audios":[]},"task_status_msg":"","created_at":1765519848595,"updated_at":1765520080995}');
 } else {
     Main(getallheaders(), file_get_contents('php://input'));
 }

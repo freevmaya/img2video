@@ -56,6 +56,8 @@ class BaseKlingApi implements APIInterface
     private function makeRequest($endpoint, $data)
     {
         $ch = curl_init($this->baseUrl . $endpoint);
+
+        trace($data);
         
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,

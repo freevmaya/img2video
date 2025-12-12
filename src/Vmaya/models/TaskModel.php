@@ -11,12 +11,20 @@ class TaskModel extends BaseModel {
 				'type' => 'hidden',
 				'dbtype' => 'i'
 			],
-			'user_id' => [
-				'type' => 'user_id ',
-				'dbtype' => 'i'
+			'service' => [
+				'type' => 'service ',
+				'dbtype' => 's'
+			],
+			'date' => [
+				'type' => 'chat_id ',
+				'dbtype' => 's'
 			],
 			'chat_id' => [
 				'type' => 'chat_id ',
+				'dbtype' => 'i'
+			],
+			'user_id' => [
+				'type' => 'user_id ',
 				'dbtype' => 'i'
 			],
 			'hash' => [

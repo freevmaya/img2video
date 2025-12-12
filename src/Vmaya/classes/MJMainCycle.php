@@ -95,7 +95,7 @@ class MJMainCycle extends MidjourneyAPI {
     }
 
     public function Update() {
-        $tasks = $this->modelTask->getItems(['state'=>'active']);
+        $tasks = $this->modelTask->getItems(['state'=>'active', 'service'=>'mj']);
         if (count($tasks) > 0) {
             foreach ($tasks as $task) {
                 $this->updateTask($task);
