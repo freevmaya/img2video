@@ -26,10 +26,7 @@ class KlingApi extends BaseKlingApi
 
     protected function makeRequest($endpoint, $data)
     {
-        $response = ['data'=>[
-        	'code'=>0,
-        	'task_id'=>1234567890
-        ]];//parent::makeRequest($endpoint, $data);
+        $response = parent::makeRequest($endpoint, $data);
 
         if (isset($response['data']) && (@$response['code'] == 0)) {
         	$data = $response['data'];
