@@ -9,7 +9,7 @@ class KlingApi extends BaseKlingApi
     protected $bot;
 
     public function __construct($accessKey, $secretKey, $model_name='kling-v1', 
-                                $bot)
+                                $bot=null)
     {
     	parent::__construct($accessKey, $secretKey, $model_name);
         $this->bot          = $bot;
@@ -38,7 +38,7 @@ class KlingApi extends BaseKlingApi
         		$params['chat_id'] = $this->bot->CurrentUpdate()->getMessage()->getChat()->getId();
         	}
 
-        	$this->modelTask->Update($params);
+        	(new TaskModel())->Update($params);
         }
 
         return $response;
