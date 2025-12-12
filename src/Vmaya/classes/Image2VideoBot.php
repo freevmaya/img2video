@@ -9,6 +9,7 @@ subscribe - подписка
 */
 
 use \App\Services\API\MidjourneyAPI;
+use \App\Services\API\KlingApi;
 
 class Image2VideoBot extends YKassaBot {
 
