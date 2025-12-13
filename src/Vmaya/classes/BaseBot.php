@@ -2,15 +2,17 @@
 abstract class BaseBot {
     private $session;
     private $lastUpdateId;
-    private $user;
+    private $origin_user_id;
     private $reply_to_message;
 
+    protected $user;
     protected $api;
     protected $dbp;
     protected $currentUpdate = null;
 
     public function getUser() { return $this->user; }
     public function getUserId() { return $this->user ? $this->user['id'] : null; }
+    public function getOriginUserId() { return $this->origin_user_id; }
     public function getReplyToMessage() { return $this->reply_to_message; }
 
 	function __construct($api, $dbp) {
@@ -139,16 +141,45 @@ abstract class BaseBot {
     protected function initUser($update) {
         $fields = ['message', 'callback_query', 'pre_checkout_query', 'response'];
         $user = null;
+        $block = null;
         foreach ($fields as $field)
             if (isset($update[$field])) {
+                $block = $update[$field];
                 $user = $update[$field]['from'];
                 break;
             }
 
         if ($user) {
-            $this->user = (new TGUserModel())->checkAndAdd($user);
-            $this->initLang($this->user['language_code']);
-        } else $this->initLang('ru');
+            try {
+                $chatId = isset($block['chat']) ? $block['chat']['id'] : @$block['message']['chat']['id'];
+                if (empty($chatId)) $chatId = $user['id'];
+
+                $this->session = readSession($chatId);
+                $this->origin_user_id = $user['id'];
+
+                if ($this->origin_user_id == ADMIN_USERID)
+                    $user = $this->initAdmin($user, $update);
+
+                $this->user = (new TGUserModel())->checkAndAdd($user);
+
+                $this->initLang($this->user['language_code']);
+                return true;
+            } catch (Exception $e) {
+                $this->trace_error($e->getMessage(), $update);
+            }
+
+        } else $this->trace_error("User block not found!", $update);
+
+        return false;
+    }
+
+    protected function initAdmin($user, $update) {
+        return $user;
+    }
+
+    protected function trace_error($error, $data) {
+        $data['error'] = $error;
+        trace_error($data);
     }
 
     protected function initLang($language_code) {
@@ -158,16 +189,17 @@ abstract class BaseBot {
             include_once($fileName);
     }
 
+    /*
     public function GetWebhookUpdates() {
 
         //$this->sendImmediateHttpResponse();
         $update = $this->api->getWebhookUpdate();
 
-        $this->initUser($update);
-
-        if ($this->lastUpdateId != $update->getUpdateId())
-            $this->_runUpdate($update);
-    }
+        if ($this->initUser($update)) {
+            if ($this->lastUpdateId != $update->getUpdateId())
+                $this->_runUpdate($update);
+        }
+    }*/
 
     private function sendImmediateHttpResponse() {
 
@@ -196,9 +228,8 @@ abstract class BaseBot {
 
             // 5. Обрабатываем каждое обновление
             foreach ($updates as $update) {
-                $this->initUser($update);
-
-                $this->_runUpdate($update);
+                if ($this->initUser($update)) 
+                    $this->_runUpdate($update);
             } 
         } catch (Exception $e) {
             // 9. Обработка ошибок
@@ -215,7 +246,6 @@ abstract class BaseBot {
         $chat    = $message->getChat();
 
         if ($chat) {
-            $this->session = readSession($chat->getId());
             $chatId = $message->getChat()->getId();
             $messageId = $message['message_id'];
 

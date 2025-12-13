@@ -25,7 +25,7 @@ class fdbg {
 
         if (!is_string($str)) $str = json_encode($str, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
         
-        $str = toUTF($str);
+        //$str = toUTF($str);
 
         $paramsStr = json_encode(array_merge($_GET, $_POST), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 

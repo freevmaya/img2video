@@ -16,15 +16,20 @@ class Image2VideoBot extends YKassaBot {
     protected $mj_api;
     protected $kling_api;
     protected $expect;
+    protected $taskModel;
+
+    protected function initialize() {
+        parent::initialize();
+        $this->taskModel = new TaskModel();
+    }
 
     protected function initUser($update) {
-        parent::initUser($update);
-        if ($this->getUserId()) {
-            $taskModel = new TaskModel();
+        if (($result = parent::initUser($update)) && $this->getUserId()) {
             $this->mj_api = new MidjourneyAPI(MJ_APIKEY, MJ_HOOK_URL, MJ_ACCOUNTHASH, 
-                                    $this, $taskModel, new MJModel());
-            $this->kling_api = new KlingApi(KL_ACCESS_KEY, KL_SECRET_KEY, $taskModel, 'kling-v1', $this);
+                                    $this, $this->taskModel, new MJModel());
+            $this->kling_api = new KlingApi(KL_ACCESS_KEY, KL_SECRET_KEY, $this->taskModel, 'kling-v1', $this);
         }
+        return $result;
     }
 
     protected function runUpdate($update) {
@@ -42,8 +47,9 @@ class Image2VideoBot extends YKassaBot {
             [['text' => '💬'.Lang('Help Desk'), 'callback_data' => 'support']]
         ];
 
-        if ($this->getUserId() == ADMIN_USERID)
-            $result[] = [['text' => 'Остановить', 'callback_data' => 'stopBot']];
+        if ($this->getOriginUserId() == ADMIN_USERID) {
+            $result[] = [['text' => 'Остановить', 'callback_data' => 'stopBot'], ['text' => 'Сменить ID', 'callback_data' => 'changeId']];
+        }
 
         return $result;
     }
@@ -71,9 +77,34 @@ class Image2VideoBot extends YKassaBot {
             case 'stopBot':
                 $this->stopBot($chatId);
                 return true;
+            case 'changeId':
+                $this->changeId($chatId);
+                return true;
             default: 
                 return parent::callbackProcess($callback, $chatId, $messageId, $data);
         }
+    }
+
+    protected function initAdmin($user, $update) {
+        $user = parent::initAdmin($user, $update);
+
+        if ($newId = $this->getSession("replace_user_id"))
+            $user['id'] = $newId;
+
+        return $user;
+    }
+
+    protected function changeId($chatId) {
+
+        $this->Answer($chatId, Lang("Enter new user ID"));
+        $this->setSession("expect", 'replaceUserId');
+    }
+
+    protected function replaceUserId($chatId, $text) {
+        $newId = intval($text);
+        if ($newId == 0)
+            $this->popSession("replace_user_id");
+        else $this->setSession("replace_user_id", $newId);
     }
 
     protected function processTask($chatId, $parts) {
@@ -97,7 +128,7 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function messageProcess($chatId, $messageId, $text) {
-        
+
         $message = $this->currentUpdate['message'];
         if ($photo = @$message['photo']) {
             if ($this->isAllowedVideo())
