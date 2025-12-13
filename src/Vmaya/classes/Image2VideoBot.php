@@ -97,16 +97,15 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function messageProcess($chatId, $messageId, $text) {
-
-        if ($expect = $this->expect) {
+        
+        $message = $this->currentUpdate['message'];
+        if ($photo = @$message['photo']) {
+            if ($this->isAllowedVideo())
+                $this->image2video_photo($chatId, $text);
+            else $this->notEnough($chatId);
+        } else if ($expect = $this->expect) {
             if (method_exists($this, $expect))
                 $this->$expect($chatId, $text);
-        } else {
-            $message = $this->currentUpdate['message'];
-            if ($photo = @$message['photo'])
-                if ($this->isAllowedVideo())
-                    $this->image2video_photo($chatId, $text);
-                else $this->notEnough($chatId);
         }
     }
 
