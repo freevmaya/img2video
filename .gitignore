@@ -5,6 +5,7 @@
 logs/*
 config/*
 sessions/*
+/sessions
 config*.php
 downloads
 combined.txt
@@ -14,7 +15,7 @@ combined.txt
 
 git-push-requlay.cmd
 
-vendor
+/vendor
 
 ###
 # OS generated
@@ -26,4 +27,3 @@ vendor
 .Trashes
 ehthumbs.db
 Thumbs.db
-/sessions
