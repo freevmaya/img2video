@@ -242,6 +242,25 @@ class Image2VideoBot extends YKassaBot {
         ])]);
     }
 
+    protected function mySubscribe($chatId) {
+
+        $tmodel = new TransactionsModel();
+
+        if ($subscribe = $tmodel->LastSubscribe($this->getUserId())) {
+            $area = (new AreasModel())->getItem($this->getUser()['area_id']);
+
+            $data = json_decode($subscribe['data'], true);
+            $stype = (new SubscribeOptions())->getItem($data['type_id']);
+
+            $imgPrice = round($stype['price'] / $stype['image_limit']);
+            $videoPrice = round($stype['price'] / $stype['video_limit']);
+
+            $limitsText = sprintf(Lang('Enough for %s images or %s videos'), round($this->Balance() / $imgPrice), round($this->Balance() / $videoPrice));
+            
+            $this->Answer($chatId, ['text' => sprintf(Lang("Your balance %s"), $this->Balance().' '.@$area['currency'])."\n\n".$limitsText]);
+        }
+    }
+
     protected function textToImage($chatId, $prompt) {
         $this->Answer($chatId, ['text' => "Prompt: ".$prompt]);
         $this->mj_api->generateImage($prompt);

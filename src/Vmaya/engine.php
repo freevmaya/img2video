@@ -1,7 +1,7 @@
 <?
 	$is_dev = PHP_OS == "WINNT";
 
-	include(dirname(__FILE__).'/config/config'.($is_dev ? '-local' : '').'.php');
+	include(dirname(__DIR__, 3).'/config/config'.($is_dev ? '-local' : '').'.php');
 
 	define('RESULT_PATH', BASEPATH.'downloads'.DS.'results'.DS);
 	define('PROCESS_PATH', BASEPATH.'downloads'.DS.'progress'.DS);

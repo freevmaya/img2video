@@ -1,9 +1,11 @@
 <?
-	function getSession($chatId) {
-	    $file = BASEPATH."sessions/{$chatId}.json";
-	    if (file_exists($file)) {
-	        return json_decode(file_get_contents($file), true);
-	    }
+	function readSession($chatId) {
+		if (!empty($chatId)) {
+		    $file = BASEPATH."sessions/{$chatId}.json";
+		    if (file_exists($file)) {
+		        return json_decode(file_get_contents($file), true);
+		    }
+		}
 	    return [];
 	}
 

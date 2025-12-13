@@ -70,7 +70,7 @@ abstract class BaseBot {
 
         if (isset($this->session[$name])) {
             $result = $this->session[$name];
-            $this->session[$name] = null;
+            unset($this->session[$name]);
             saveSession($this->currentUpdate->getMessage()->getChat()->getId(), $this->session);
         } else $result = null;
 
@@ -215,12 +215,16 @@ abstract class BaseBot {
         $this->currentUpdate = $update;
 
         $message = $update->getMessage();
-        $chat = $message->getChat();
+        $chat    = $message->getChat();
 
         if ($chat) {
-            $this->session = getSession($chat->getId());
+            $this->session = readSession($chat->getId());
             $chatId = $message->getChat()->getId();
             $messageId = $message['message_id'];
+
+            if (@$message['from']['is_bot'])
+                $this->setSession('lastBotMessageId', $messageId);
+
             $text = $message->getText();
 
             $this->reply_to_message = isset($message['reply_to_message']) ? $message['reply_to_message'] : null;
@@ -235,6 +239,8 @@ abstract class BaseBot {
             else if ($this->reply_to_message)
                 $this->replyToMessage($this->reply_to_message, $chatId, $messageId, $text);
             else $this->messageProcess($chatId, $messageId, $text);
+        } else {
+            $this->session = [];
         }
     }
 
