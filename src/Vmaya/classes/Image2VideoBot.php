@@ -44,7 +44,8 @@ class Image2VideoBot extends YKassaBot {
             [['text' => '💰'.Lang('Balance'), 'callback_data' => 'MySubscribe']],
             //[['text' => '📊'.Lang('My generations'), 'callback_data' => 'my_generations']],
             [['text' => '⭐'.Lang('Subscription'), 'callback_data' => 'subscribe']],
-            [['text' => '💬'.Lang('Help Desk'), 'callback_data' => 'support']]
+            [['text' => '💬'.Lang('Help Desk'), 'callback_data' => 'support']],
+            [['text' => '❕'.Lang('Agreement'), 'callback_data' => 'agreement']]
         ];
 
         if ($this->getOriginUserId() == ADMIN_USERID) {
@@ -80,6 +81,9 @@ class Image2VideoBot extends YKassaBot {
             case 'changeId':
                 $this->changeId($chatId);
                 return true;
+            case 'agreement':
+                $this->agreement($chatId);
+                return true;
             default: 
                 return parent::callbackProcess($callback, $chatId, $messageId, $data);
         }
@@ -98,6 +102,14 @@ class Image2VideoBot extends YKassaBot {
 
         $this->Answer($chatId, Lang("Enter new user ID"));
         $this->setSession("expect", 'replaceUserId');
+    }
+
+    protected function agreement($chatId) {
+        $fileName = LANGUAGE_PATH.$this->user['language_code'].DS.'agreement.txt';
+        if (file_exists($fileName)) {            
+            $text = file_get_contents($fileName);
+            $this->Answer($chatId, $text);
+        }
     }
 
     protected function replaceUserId($chatId, $text) {
@@ -265,7 +277,7 @@ class Image2VideoBot extends YKassaBot {
     protected function Support($chatId) {
 
         $link = 'tg://user?id='.SUPPORT_USERID;
-        $this->Answer($chatId, ['text' => Lang("HelpDeskDescription"), 'reply_markup'=> json_encode([
+        $this->Answer($chatId, ['text' => sprintf(Lang("HelpDeskDescription"), $this->getUserId()), 'reply_markup'=> json_encode([
             'inline_keyboard' => [
                 [['text' => Lang("Go to dialogue"), 'url' => $link]]
             ]
