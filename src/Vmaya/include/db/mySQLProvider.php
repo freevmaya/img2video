@@ -41,10 +41,20 @@
 			$this->result_type = MYSQLI_ASSOC;
 		}
 
-		public function connect($host, $dbname, $user='', $passwd='') {
+		public function connect($host, $dbname, $user='', $passwd='', $charset='utf8') {
 			$this->mysqli = new mysqli($host, $user, $passwd, $dbname);
 		    if ($this->mysqli->connect_errno) 
 		    	$this->error($this->mysqli->connect_errno.', '.$this->mysqli->error);
+		    else if (!empty($charset)) {
+		    	$this->mysqli->query("set collation_connection={$charset}_general_ci,
+    				collation_database={$charset}_general_ci,
+    				character_set_client={$charset},
+    				character_set_connection={$charset},
+    				character_set_database={$charset},
+    				character_set_results={$charset},
+    				charset {$charset},
+    				names {$charset}");
+		    }
 		}
 
 		private function reconnect() {

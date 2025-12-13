@@ -113,31 +113,22 @@ abstract class BaseBot {
             'parse_mode' => $parse_mode
         ], is_string($msg) ? ['text' => $msg] : $msg);
 
-        if ($messageId) {
 
-            $params['message_id'] = $messageId;
+        $message = $this->currentUpdate->getMessage();
 
-            return $this->api->editMessageText([
-                'chat_id' => $chatId,
-                'message_id' => $messageId,
-                'text' => $msg,
-                'parse_mode' => $parse_mode
-            ]);
-        } else {
+        if ($reply_to_message_id)
+            $params['reply_to_message_id'] = $reply_to_message_id;
+        else if (isset($message['message_thread_id'])) {
 
-            $message = $this->currentUpdate->getMessage();
-
-            if ($reply_to_message_id)
-                $params['reply_to_message_id'] = $reply_to_message_id;
-            else if (isset($message['message_thread_id'])) {
-
-                if ($this->reply_to_message && ($this->reply_to_message['message_id'] == $message['message_thread_id']))
-                     $params['reply_to_message_id'] = $message['message_thread_id'];
-                else $params['message_thread_id'] = $message['message_thread_id'];
-            }
-
-            return $this->api->sendMessage($params);
+            if ($this->reply_to_message && ($this->reply_to_message['message_id'] == $message['message_thread_id']))
+                 $params['reply_to_message_id'] = $message['message_thread_id'];
+            else $params['message_thread_id'] = $message['message_thread_id'];
         }
+
+        if ($messageId) {
+            $params['message_id'] = $messageId;
+            return $this->api->editMessageText($params);
+        } else return $this->api->sendMessage($params);
     }
 
     /*
