@@ -21,9 +21,13 @@ class SubscribeOptions extends BaseModel {
 			"LEFT JOIN `areas` a ON a.id=u.area_id ".
 			"WHERE u.id={$userId} AND a.default_subscribe_id=so.id";
 
-		trace($query);
-		$soption = $dbp->line($query);
-		return $soption['price'] / $soption[$limitName];
+		//trace($query);
+		if ($soption = $dbp->line($query))
+			return $soption['price'] / $soption[$limitName];
+		else {
+			trace_error("User not found: ".$query);
+			return 100;
+		}
 	}
 
 	public function getFields() {

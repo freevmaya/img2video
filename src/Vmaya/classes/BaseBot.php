@@ -137,7 +137,6 @@ abstract class BaseBot {
     }*/
 
     protected function initUser($update) {
-
         $fields = ['message', 'callback_query', 'pre_checkout_query', 'response'];
         $user = null;
         foreach ($fields as $field)
@@ -164,8 +163,7 @@ abstract class BaseBot {
         //$this->sendImmediateHttpResponse();
         $update = $this->api->getWebhookUpdate();
 
-        if (!$this->user) 
-            $this->initUser($update);
+        $this->initUser($update);
 
         if ($this->lastUpdateId != $update->getUpdateId())
             $this->_runUpdate($update);
@@ -198,8 +196,7 @@ abstract class BaseBot {
 
             // 5. Обрабатываем каждое обновление
             foreach ($updates as $update) {
-                if (!$this->user) 
-                    $this->initUser($update);
+                $this->initUser($update);
 
                 $this->_runUpdate($update);
             } 
