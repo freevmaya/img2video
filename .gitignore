@@ -4,6 +4,7 @@
 *.log.*
 logs/*
 config/*
+sessions/*
 config*.php
 downloads
 combined.txt
