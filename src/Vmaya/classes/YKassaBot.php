@@ -157,7 +157,7 @@ abstract class YKassaBot extends BaseBot {
 
                         $transaction_id = (new TransactionsModel())->Add($this->getUser()['id'], $payload, $amount, 'prepare', $data);
 
-                        $response = $this->api->sendInvoice([
+                        $params = [
                             'chat_id' => $chatId,
                             'title' => $stype['name'],                      // Название товара (1-32 символа)
                             'description' => $stype['description'],         // Описание (1-255 символов)
@@ -166,7 +166,11 @@ abstract class YKassaBot extends BaseBot {
                             'currency' => $currency,                        // Код валюты (USD, RUB, EUR и т.д.)
                             'prices' => $prices,                            // Массив с ценами
                             'start_parameter' => 'test',                    // Параметр для deep linking
-                        ]);
+                        ];
+
+                        trace($params);
+
+                        $response = $this->api->sendInvoice($params);
                 
                         $result = [
                             'success' => true,
