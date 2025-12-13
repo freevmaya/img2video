@@ -1,7 +1,7 @@
 <?                  
 $db      = null;
 $dbname  = _dbname_default;
-$charset = 'cp1251';
+$charset = 'utf8';
 
 function connect_mysql() {
     GLOBAL $db, $host, $user, $password, $dbname, $charset;
