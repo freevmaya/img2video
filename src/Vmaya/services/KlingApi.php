@@ -49,7 +49,7 @@ class KlingApi extends BaseKlingApi
         	if ($this->bot) {
         		$params['user_id'] = $this->bot->getUserId();
         		$params['chat_id'] = $this->bot->CurrentUpdate()->getMessage()->getChat()->getId();
-        	}
+        	} else trace_error("Property KlingApi::bot is null");
 
         	$this->modelTask->Update($params);
         }

@@ -23,7 +23,7 @@ class Image2VideoBot extends YKassaBot {
             $taskModel = new TaskModel();
             $this->mj_api = new MidjourneyAPI(MJ_APIKEY, MJ_HOOK_URL, MJ_ACCOUNTHASH, 
                                     $this, $taskModel, new MJModel());
-            $this->kling_api = new KlingApi(KL_ACCESS_KEY, KL_SECRET_KEY, $taskModel);
+            $this->kling_api = new KlingApi(KL_ACCESS_KEY, KL_SECRET_KEY, $taskModel, 'kling-v1', $this);
         }
     }
 
@@ -116,7 +116,7 @@ class Image2VideoBot extends YKassaBot {
 
             if (!empty($image_url) && !empty($prompt)) {
                 $this->kling_api->generateVideoFromImage($image_url, $prompt);
-                $this->Answer($chatId, Lang('Sent'), $lastMessageId);
+                $this->Answer($chatId, Lang('Sent. This may take several minutes.'), $lastMessageId);
             }
             else $this->Wrong($chatId);
         } else $this->Wrong($chatId);
