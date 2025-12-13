@@ -90,7 +90,7 @@ class Image2VideoBot extends YKassaBot {
                     if ($parts[1] == 'userText')
                         $prompt = $this->popSession('userText');
                     else $prompt = Lang('imageToVideoPrompts')[intval($parts[1])];
-                    $this->klingGenerateVideo($chatId, $prompt);
+                    $this->klingGenerateVideo($chatId, $prompt, $this->getSession('lastBotMessageId'));
                     break;
             }
         }
@@ -110,13 +110,13 @@ class Image2VideoBot extends YKassaBot {
         }
     }
 
-    protected function klingGenerateVideo($chatId, $prompt) {
+    protected function klingGenerateVideo($chatId, $prompt, $lastMessageId=false) {
         $file_id = $this->popSession('file_id');
         if (($image_url = $this->GetFileUrl($file_id)) && !empty($prompt)) {
 
             if (!empty($image_url) && !empty($prompt)) {
                 $this->kling_api->generateVideoFromImage($image_url, $prompt);
-                $this->Answer($chatId, Lang('Sent'));
+                $this->Answer($chatId, Lang('Sent'), $lastMessageId);
             }
             else $this->Wrong($chatId);
         } else $this->Wrong($chatId);
