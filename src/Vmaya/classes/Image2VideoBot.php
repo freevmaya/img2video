@@ -48,9 +48,10 @@ class Image2VideoBot extends YKassaBot {
             [['text' => '❕'.Lang('Agreement'), 'callback_data' => 'agreement']]
         ];
 
+        /*
         if ($this->getOriginUserId() == ADMIN_USERID) {
             $result[] = [['text' => 'Остановить', 'callback_data' => 'stopBot'], ['text' => 'Сменить ID', 'callback_data' => 'changeId']];
-        }
+        }*/
 
         return $result;
     }
