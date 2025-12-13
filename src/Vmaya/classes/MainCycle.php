@@ -70,7 +70,7 @@ class MainCycle {
     protected function kling_doServiceAction($task, $response)
     {
         if (($response['status'] == 'processing') || ($response['status'] == 'submitted')) {
-            $this->Message($task['user_id'], Lang('Your video in progress'));
+            $this->Message($task['chat_id'], Lang('Your video in progress'));
             $this->kling_finishResponse($response);
         } else if ($response['status'] == 'succeed') {
 
@@ -98,7 +98,7 @@ class MainCycle {
                             $this->finishTask($task, 'failure');
                             $this->kling_finishResponse($response);
 
-                            $this->Message($task['user_id'], ['text' => Lang("DownloadFailure"), 'reply_markup'=> json_encode([
+                            $this->Message($task['chat_id'], ['text' => Lang("DownloadFailure"), 'reply_markup'=> json_encode([
                                     'inline_keyboard' => [
                                         [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']]
                                     ]
@@ -146,7 +146,7 @@ class MainCycle {
                                 $this->finishTask($task, 'failure');
                                 $this->mj_finishResponse($response);
 
-                                $this->Message($task['user_id'], ['text' => Lang("DownloadFailure"), 'reply_markup'=> json_encode([
+                                $this->Message($task['chat_id'], ['text' => Lang("DownloadFailure"), 'reply_markup'=> json_encode([
                                         'inline_keyboard' => [
                                             [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']]
                                         ]
@@ -254,7 +254,7 @@ class MainCycle {
 
     protected function sendMp4($task, $filePath, $filename, $message, $params=[]) {
         if (!$filePath || !file_exists($filePath)) {
-            $this->Message($chatId, '⚠️ '.Lang('Animation not found'));
+            $this->Message($task['chat_id'], '⚠️ '.Lang('Animation not found'));
             return;
         }
 
