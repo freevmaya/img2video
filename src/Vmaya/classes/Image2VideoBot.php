@@ -234,7 +234,7 @@ class Image2VideoBot extends YKassaBot {
 
     protected function Support($chatId) {
 
-        $link = 'tg://user?id='.ADMIN_USERID;
+        $link = 'tg://user?id='.SUPPORT_USERID;
         $this->Answer($chatId, ['text' => Lang("HelpDeskDescription"), 'reply_markup'=> json_encode([
             'inline_keyboard' => [
                 [['text' => Lang("Go to dialogue"), 'url' => $link]]
@@ -258,7 +258,11 @@ class Image2VideoBot extends YKassaBot {
             $limitsText = sprintf(Lang('Enough for %s images or %s videos'), round($this->Balance() / $imgPrice), round($this->Balance() / $videoPrice));
             
             $this->Answer($chatId, ['text' => sprintf(Lang("Your balance %s"), $this->Balance().' '.@$area['currency'])."\n\n".$limitsText]);
-        }
+        } else $this->Answer($chatId, ['text' => Lang("No subscription"), 'reply_markup'=> json_encode([
+            'inline_keyboard' => [
+                [['text' => '⭐'.Lang('Subscription'), 'callback_data' => 'subscribe']]
+            ]
+        ])]);
     }
 
     protected function textToImage($chatId, $prompt) {

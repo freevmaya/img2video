@@ -11,6 +11,11 @@ class TGUserModel extends BaseModel {
 		return $fullUserName ? $fullUserName : $user['username'];
 	}
 
+	public static function getArea($user_id) {
+		GLOBAL $dbp;
+		return $dbp->line("SELECT a.* FROM tg_users u LEFT JOIN areas a ON u.area_id=a.id");
+	}
+
 	public function checkAndAdd($record) {
 		GLOBAL $dbp;
 

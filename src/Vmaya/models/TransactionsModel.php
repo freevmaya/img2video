@@ -44,7 +44,7 @@ class TransactionsModel extends BaseModel {
 			} catch (Exception $e) {
 				trace_error("Failure get price: ".$e->getMessage());
 			}
-		}
+		} else return SubscribeOptions::GetPrice($userId, $limitName);
 		return 0;
 	}
 

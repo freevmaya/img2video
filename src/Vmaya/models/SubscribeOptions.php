@@ -13,6 +13,19 @@ class SubscribeOptions extends BaseModel {
 		return [];
 	}
 
+	public static function GetPrice($userId, $limitName='image_limit') {
+		GLOBAL $dbp;
+
+		$query = "SELECT so.* FROM `tg_users` u ".
+			"LEFT JOIN `subscribe_options` so ON u.area_id=so.area_id ".
+			"LEFT JOIN `areas` a ON a.id=u.area_id ".
+			"WHERE u.id={$userId} AND a.default_subscribe_id=so.id";
+
+		trace($query);
+		$soption = $dbp->line($query);
+		return $soption['price'] / $soption[$limitName];
+	}
+
 	public function getFields() {
 		return [
 			'id' => [

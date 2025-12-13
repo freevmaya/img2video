@@ -9,6 +9,7 @@ $lang = [
 	'My expenses'=>'Мои расходы',
 	'Your balance %s'=>'Ваш баланс %s',
 	'Insufficient balance'=>'Недостаточно средств',
+	'No subscription'=>'Нет подписки',
 	'Purchase a subscription'=>'Купить подписку',
 	'Enough for %s images or %s videos'=>'Хватит на %s изображений или %s видео',
 	'Send a prompt'=>"Отправить промпт.\n\n(Промпт - это текстовое описание того, что вы хотите чтобы ИИ сгенерировал)",

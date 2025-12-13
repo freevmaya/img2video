@@ -220,7 +220,7 @@ abstract class YKassaBot extends BaseBot {
         $keyboard = [];
 
         foreach ($list as $item)
-            $keyboard[] = [['text' => $item['name']." - ".$item['price'].$item['currency'], 'callback_data' => 'subscribe-'.$item['id']]];
+            $keyboard[] = [['text' => $item['price'].' '.$item['currency'].' - '.$item['name'], 'callback_data' => 'subscribe-'.$item['id']]];
         return $keyboard;
     }
 
