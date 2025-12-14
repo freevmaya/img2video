@@ -141,7 +141,7 @@ class MainCycle {
                     }
                     else {
                         if ($response['status'] == 'done') {
-                            if ($response['fail_count'] >= NUMBER_DOWNLOAD_ATTEMPTS) {
+                            if ($response['fail_count'] >= 3) {
 
                                 $this->finishTask($task, 'failure');
                                 $this->mj_finishResponse($response);
@@ -162,6 +162,7 @@ class MainCycle {
                             ]);
                             return true;
                         }
+                        sleep(1);
                     }
                 } else $this->mj_finishResponse($response);
                 return true;
@@ -213,10 +214,13 @@ class MainCycle {
         $command = 'python3 '.BASEPATH."scraper_download.py \"{$url}\" \"{$file_path}\"";
 
         exec($command, $output);
-        
-        trace($command."\\nResult: ".json_encode($output));
 
-        return intval($output) == 1;
+        $result = intval($output[count($output) - 1]);
+        
+        if ($result != 1)
+            trace_error($command."; Result: ".$result);
+
+        return $result == 1;
     }
 
     protected function mj_prepareFile($task, $path, $result) {
@@ -230,11 +234,9 @@ class MainCycle {
 
             if (!file_exists($file_path)) {
                 $url = $this->mj_convertUrl($url, $task);
+                trace($url);
+                return $this->scraperDownload($url, $file_path);
 
-                $downloadResult = downloadFile($url, $file_path);
-                if (!$downloadResult['success'])
-                    return $this->scraperDownload($url, $file_path);
-                
                 /*
                 $downloadResult = downloadFile($url, $file_path);
                 if (!$downloadResult['success']) {
