@@ -128,10 +128,9 @@ class MainCycle {
     }
 
     protected function mj_doServiceAction($task, $response) {
+        print_r($response);
         if (isset($response['result']) && !empty($response['result'])) {
             $method = 'mj_'.$response['type'];
-
-            echo "{$method}\n";
             if (method_exists($this, $method)) {
 
                 $result = json_decode(@$response['result'], true);
