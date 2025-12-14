@@ -239,7 +239,7 @@ class MainCycle {
 
         if (str_contains($request_data['endpoint'], 'upscale')) {
 
-            $pattern = /_([a-z\d-]+).png/;
+            $pattern = '/_([a-z\d-]+).png/';
 
             if (preg_match($pattern, $url, $matches)) {
                 trace($matches);
@@ -250,7 +250,7 @@ class MainCycle {
 
         } else if (str_contains($request_data['endpoint'], 'imagine')) {
 
-            $pattern = /\/([a-z\d-]+)_grid_([\d]+)/;
+            $pattern = '/\/([a-z\d-]+)_grid_([\d]+)/';
 
             if (preg_match($pattern, $url, $matches)) {
                 trace($matches);
