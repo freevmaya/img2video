@@ -210,7 +210,7 @@ class MainCycle {
 
     protected function scraperDownload($url, $file_path) {
         $output = null;
-        $command = 'python '.BASEPATH."scraper_download.py \"{$url}\" \"{$file_path}\"";
+        $command = 'python3 '.BASEPATH."scraper_download.py \"{$url}\" \"{$file_path}\"";
 
         exec($command, $output);
         
