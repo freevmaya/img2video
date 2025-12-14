@@ -230,17 +230,36 @@ class MainCycle {
 
 
     protected function mj_convertUrl($url, $task) {
-        //https://cdn.discordapp.com/attachments/1446773822048174091/1447904727693135994/4a163b28-2f4a-449d-b81f-035326b7f489_grid_0. -> https://cdn.midjourney.com/4a163b28-2f4a-449d-b81f-035326b7f489/grid_0.png
 
         //https://cdn.discordapp.com/attachments/1446773822048174091/1447904740305408051/vmaya5252_Cyberpunk_samurai_meditating_in_a_neon-lit_rain-soake_4a163b28-2f4a-449d-b81f-035326b7f489.png?ex=693951de&is=6938005e&hm=ee91699be73bd5abbb889d01d6d67b4ae2c1a2403b88e2f20e7772962490680c& -> https://cdn.midjourney.com/4a163b28-2f4a-449d-b81f-035326b7f489/0_0.png
 
+        //https://cdn.discordapp.com/attachments/1446773822048174091/1447904727693135994/4a163b28-2f4a-449d-b81f-035326b7f489_grid_0. -> https://cdn.midjourney.com/4a163b28-2f4a-449d-b81f-035326b7f489/grid_0.png
+
         $request_data = json_decode($task['request_data'], true);
 
-        if (str_contains($request_data['endpoint'], 'upscale'))
-            $relativePath = $task['hash'].'/0_'.$task['choice'].'.png';
-        else if (str_contains($request_data['endpoint'], 'imagine'))
-            $relativePath = $task['hash'].'/grid_0.png';
-        else if (str_contains($request_data['endpoint'], 'animate')) {
+        if (str_contains($request_data['endpoint'], 'upscale')) {
+
+            $pattern = /_([a-z\d-]+).png/;
+
+            if (preg_match($pattern, $url, $matches)) {
+                trace($matches);
+                $relativePath = $matches[1].'/0_'.$task['choice'].'.png';
+            }
+            else
+                return $url;
+
+        } else if (str_contains($request_data['endpoint'], 'imagine')) {
+
+            $pattern = /\/([a-z\d-]+)_grid_([\d]+)/;
+
+            if (preg_match($pattern, $url, $matches)) {
+                trace($matches);
+                $relativePath = $matches[1].'/grid_0.png';
+            }
+            else
+                return $url;
+
+        } else if (str_contains($request_data['endpoint'], 'animate')) {
             $pattern = '/within_a__([\w\d-]+)\.webp/';
 
             if (preg_match($pattern, $url, $matches))
