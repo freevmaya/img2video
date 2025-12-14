@@ -208,13 +208,13 @@ class MainCycle {
         return false;
     }
 
-    protected function mj_prepareFile($hash, $path, $result) {
+    protected function mj_prepareFile($task, $path, $result) {
         if (isset($result['url']) && $result['url']) {
 
-            $url = $this->mj_convertUrl($result['url']);
+            $url = $this->mj_convertUrl($result['url'], $task);
 
             $info = pathinfo($url);
-            $filename = $hash.'.'.$info['extension'];
+            $filename = $task['hash'].'.'.$info['extension'];
 
             $file_path = $path.$filename;
 
@@ -256,7 +256,7 @@ class MainCycle {
         $result = json_decode($response['result'], true);
         $hash = $task['hash'];
 
-        if ($this->mj_prepareFile($hash, RESULT_PATH, $result)) {
+        if ($this->mj_prepareFile($task, RESULT_PATH, $result)) {
 
             $info = pathinfo($result['filename']);
             $filename = $hash.'.'.$info['extension'];
@@ -282,7 +282,7 @@ class MainCycle {
         $result = json_decode($response['result'], true);
         $hash = $task['hash'];
 
-        if ($this->mj_prepareFile($hash, RESULT_PATH, $result)) {
+        if ($this->mj_prepareFile($task, RESULT_PATH, $result)) {
 
             $info = pathinfo($result['filename']);
             $filename = $hash.'.'.$info['extension'];
@@ -311,7 +311,7 @@ class MainCycle {
 
         $hash = $task['hash'];
 
-        if ($this->mj_prepareFile($hash, $path, $result)) {
+        if ($this->mj_prepareFile($task, $path, $result)) {
 
             $info = pathinfo($result['filename']);
             $filename = $hash.'.'.$info['extension'];
