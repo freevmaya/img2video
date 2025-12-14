@@ -229,7 +229,13 @@ class MainCycle {
             $file_path = $path.$filename;
 
             if (!file_exists($file_path)) {
+                $url = $this->mj_convertUrl($url, $task);
 
+                $downloadResult = downloadFile($url, $file_path);
+                if (!$downloadResult['success'])
+                    return $this->scraperDownload($url, $file_path);
+                
+                /*
                 $downloadResult = downloadFile($url, $file_path);
                 if (!$downloadResult['success']) {
                     if (!$this->scraperDownload($url, $file_path)) {
@@ -239,7 +245,7 @@ class MainCycle {
                         if (!$downloadResult['success'])
                             return $this->scraperDownload($url, $file_path);
                     }
-                }
+                }*/
             }
 
             return true;
