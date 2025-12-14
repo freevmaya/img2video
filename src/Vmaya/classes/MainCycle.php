@@ -214,9 +214,11 @@ class MainCycle {
         $command = 'python3 '.BASEPATH."scraper_download.py \"{$url}\" \"{$file_path}\"";
 
         exec($command, $output);
+        $result = 0;
 
-        $result = intval($output[count($output) - 1]);
-        
+        if ($output && (count($output) > 0))
+            $result = intval($output[count($output) - 1]);
+            
         if ($result != 1)
             trace_error($command."; Result: ".$result);
 
