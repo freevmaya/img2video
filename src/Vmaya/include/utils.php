@@ -86,8 +86,8 @@ function downloadFile($url, $savePath)
             ];
         }
     } else {
-        $msg = "Error download file ({$url}). HTTP: $httpCode, cURL: ".json_encode($error);
-        trace_error($msg);
+        //$msg = "Error download file ({$url}). HTTP: $httpCode, cURL: ".json_encode($error);
+        //trace_error($msg);
         return [
             'success' => false,
             'error' => $msg
