@@ -11,6 +11,8 @@ if len(sys.argv) > 2:
     #print('Status Code:', response.status_code)
     #print('File size (bytes):', len(response.content))
 
+    print(sys.argv)
+
     if response.status_code == 200:
         with open(sys.argv[2], 'wb') as f:
             f.write(response.content)
