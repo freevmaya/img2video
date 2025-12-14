@@ -210,12 +210,11 @@ class MainCycle {
 
     protected function scraperDownload($url, $file_path) {
         $output = null;
-        $command = 'py '.BASEPATH."scraper_download.py {$url} {$file_path}";
+        $command = 'py '.BASEPATH."scraper_download.py \"{$url}\" \"{$file_path}\"";
 
-        trace($command);
         exec($command, $output);
         
-        trace($output);
+        trace($command."\\nResult: ".$output);
 
         return intval($output) == 1;
     }
@@ -224,7 +223,7 @@ class MainCycle {
         if (isset($result['url']) && $result['url']) {
 
             $url = $result['url'];
-            $info = pathinfo($url);
+            $info = pathinfo(explode('?', $url)[0]);
             $filename = $task['hash'].'.'.$info['extension'];
 
             $file_path = $path.$filename;
