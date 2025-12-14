@@ -127,54 +127,6 @@ class MainCycle {
         ]);
     }
 
-    protected function mj_doServiceAction($task, $response) {
-        if (isset($response['result']) && !empty($response['result'])) {
-            $method = 'mj_'.$response['type'];
-            if (method_exists($this, $method)) {
-                if ($response['status'] == 'done') {
-                    $result = json_decode(@$response['result'], true);
-                    if ($url = @$result['url']) {
-
-                        if ($this->$method($task, $response)) {
-                            $this->mj_finishResponse($response);
-                            return true;
-                        }
-                        else {
-                            
-                            if ($response['fail_count'] >= 6) {
-
-                                $this->finishTask($task, 'failure');
-                                $this->mj_finishResponse($response);
-
-                                $this->Message($task['chat_id'], ['text' => Lang("DownloadFailure"), 'reply_markup'=> json_encode([
-                                        'inline_keyboard' => [
-                                            [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']]
-                                        ]
-                                    ])
-                                ]);
-                            } else {
-                                $this->mj_model->Update([
-                                    'id'=>$response['id'], 'fail_count'=>$response['fail_count'] + 1
-                                ]);
-                                sleep(10);
-                            }
-                            return false;
-                        }
-                    } else $this->mj_finishResponse($response);
-                    return true;
-                } else {
-                    $this->mj_finishResponse($response);
-                    return true;
-                } 
-            }
-            else {
-                $this->mj_finishResponse($response);
-                trace_error("The method is missing: {$method}");
-                return false;
-            }
-        } else return true;
-    }
-
     public function Update() {
         $tasks = $this->modelTask->getItems(['state'=>'active']);
         if (count($tasks) > 0) {
@@ -237,7 +189,8 @@ class MainCycle {
             if (!file_exists($file_path)) {
                 $url = $this->mj_convertUrl($url, $task);
                 trace($url);
-                return $this->scraperDownload($url, $file_path);
+                if ($this->scraperDownload($url, $file_path))
+                    return $file_path;
 
                 /*
                 $downloadResult = downloadFile($url, $file_path);
@@ -250,9 +203,7 @@ class MainCycle {
                             return $this->scraperDownload($url, $file_path);
                     }
                 }*/
-            }
-
-            return $file_path;
+            } else return $file_path;
         }
         return false;
     }
@@ -319,6 +270,54 @@ class MainCycle {
         
         return 'https://cdn.midjourney.com/'.$relativePath;
         */
+    }
+
+    protected function mj_doServiceAction($task, $response) {
+        if (isset($response['result']) && !empty($response['result'])) {
+            $method = 'mj_'.$response['type'];
+            if (method_exists($this, $method)) {
+                if ($response['status'] == 'done') {
+                    $result = json_decode(@$response['result'], true);
+                    if ($url = @$result['url']) {
+
+                        if ($this->$method($task, $response)) {
+                            $this->mj_finishResponse($response);
+                            return true;
+                        }
+                        else {
+                            
+                            if ($response['fail_count'] >= 6) {
+
+                                $this->finishTask($task, 'failure');
+                                $this->mj_finishResponse($response);
+
+                                $this->Message($task['chat_id'], ['text' => Lang("DownloadFailure"), 'reply_markup'=> json_encode([
+                                        'inline_keyboard' => [
+                                            [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']]
+                                        ]
+                                    ])
+                                ]);
+                            } else {
+                                $this->mj_model->Update([
+                                    'id'=>$response['id'], 'fail_count'=>$response['fail_count'] + 1
+                                ]);
+                                sleep(10);
+                            }
+                            return false;
+                        }
+                    } else $this->mj_finishResponse($response);
+                    return true;
+                } else {
+                    $this->mj_finishResponse($response);
+                    return true;
+                } 
+            }
+            else {
+                $this->mj_finishResponse($response);
+                trace_error("The method is missing: {$method}");
+                return false;
+            }
+        } else return true;
     }
 
     protected function mj_upscale($task, $response) {
