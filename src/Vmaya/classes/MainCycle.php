@@ -141,7 +141,7 @@ class MainCycle {
                     }
                     else {
                         if ($response['status'] == 'done') {
-                            if ($response['fail_count'] >= 3) {
+                            if ($response['fail_count'] >= 4) {
 
                                 $this->finishTask($task, 'failure');
                                 $this->mj_finishResponse($response);
@@ -152,9 +152,12 @@ class MainCycle {
                                         ]
                                     ])
                                 ]);
-                            } else $this->mj_model->Update([
-                                'id'=>$response['id'], 'fail_count'=>$response['fail_count'] + 1
-                            ]);
+                            } else {
+                                $this->mj_model->Update([
+                                    'id'=>$response['id'], 'fail_count'=>$response['fail_count'] + 1
+                                ]);
+                                sleep(5);
+                            }
                             return false;
                         } else {
                             $this->mj_model->Update([
@@ -162,7 +165,6 @@ class MainCycle {
                             ]);
                             return true;
                         }
-                        sleep(1);
                     }
                 } else $this->mj_finishResponse($response);
                 return true;
