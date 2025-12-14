@@ -208,23 +208,39 @@ class MainCycle {
         return false;
     }
 
+    protected function scraperDownload($url, $file_path) {
+        $output = null;
+        $command = 'py '.BASEPATH."scraper_download.py {$url} {$file_path}";
+
+        trace($command);
+        exec($command, $output);
+        
+        trace($output);
+
+        return intval($output) == 1;
+    }
+
     protected function mj_prepareFile($task, $path, $result) {
         if (isset($result['url']) && $result['url']) {
 
+            $url = $result['url'];
             $info = pathinfo($url);
             $filename = $task['hash'].'.'.$info['extension'];
 
             $file_path = $path.$filename;
 
             if (!file_exists($file_path)) {
-                $url = $this->mj_convertUrl($result['url'], $task);
 
                 $downloadResult = downloadFile($url, $file_path);
                 if (!$downloadResult['success']) {
-                    
-                }
+                    if (!$this->scraperDownload($url, $file_path)) {
+                        $url = $this->mj_convertUrl($url, $task);
 
-                return $downloadResult['success'];
+                        $downloadResult = downloadFile($url, $file_path);
+                        if (!$downloadResult['success'])
+                            return $this->scraperDownload($url, $file_path);
+                    }
+                }
             }
 
             return true;
