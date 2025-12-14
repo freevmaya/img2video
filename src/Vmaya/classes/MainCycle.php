@@ -128,7 +128,6 @@ class MainCycle {
     }
 
     protected function mj_doServiceAction($task, $response) {
-        print_r($response);
         if (isset($response['result']) && !empty($response['result'])) {
             $method = 'mj_'.$response['type'];
             if (method_exists($this, $method)) {
