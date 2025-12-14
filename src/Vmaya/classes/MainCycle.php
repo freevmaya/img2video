@@ -252,7 +252,7 @@ class MainCycle {
                 }*/
             }
 
-            return true;
+            return $file_path;
         }
         return false;
     }
@@ -325,12 +325,12 @@ class MainCycle {
         $result = json_decode($response['result'], true);
         $hash = $task['hash'];
 
-        if ($this->mj_prepareFile($task, $response, RESULT_PATH, $result)) {
+        if ($file_path = $this->mj_prepareFile($task, $response, RESULT_PATH, $result)) {
 
             $info = pathinfo($result['filename']);
             $filename = $hash.'.'.$info['extension'];
 
-            if ($result = $this->sendPhoto($task['chat_id'], RESULT_PATH.$filename, $filename, Lang("Your photo is ready"), [
+            if ($result = $this->sendPhoto($task['chat_id'], $file_path, $filename, Lang("Your photo is ready"), [
                     [
                         ['text' => Lang('Animate'), 'callback_data' => "task.{$hash}.animate"],
                     ]
@@ -351,12 +351,12 @@ class MainCycle {
         $result = json_decode($response['result'], true);
         $hash = $task['hash'];
 
-        if ($this->mj_prepareFile($task, $response, RESULT_PATH, $result)) {
+        if ($file_path = $this->mj_prepareFile($task, $response, RESULT_PATH, $result)) {
 
             $info = pathinfo($result['filename']);
             $filename = $hash.'.'.$info['extension'];
 
-            if ($result = $this->sendAnimation($task['chat_id'], RESULT_PATH.$filename, $filename, '🎬 '.Lang("Your video is ready"), [
+            if ($result = $this->sendAnimation($task['chat_id'], $file_path, $filename, '🎬 '.Lang("Your video is ready"), [
                     'width' => $result['width'],
                     'height' => $result['height']
                 ])) {
@@ -380,12 +380,10 @@ class MainCycle {
 
         $hash = $task['hash'];
 
-        if ($this->mj_prepareFile($task, $response, $path, $result)) {
+        if ($file_path = $this->mj_prepareFile($task, $response, $path, $result)) {
 
             $info = pathinfo($result['filename']);
             $filename = $hash.'.'.$info['extension'];
-
-            $file_path = $path.$filename;
 
             if (is_numeric($this->lastMessageId))
                 $this->api->deleteMessage([
@@ -398,6 +396,7 @@ class MainCycle {
                 $result = $this->lastMessageId = $this->sendPhoto($task['chat_id'], $file_path, $filename, Lang("Your image in progress"));
             } else {
 
+                /* Временно отменяем выбор изображения
                 $result = $this->sendPhoto($task['chat_id'], $file_path, $filename, Lang('Choose the option you like best'),
                     [
                         [
@@ -409,6 +408,20 @@ class MainCycle {
                         ]
                     ]
                 );
+                */
+
+                if ($result = $this->sendPhoto($task['chat_id'], $file_path, $filename, Lang("Your photo is ready"), [
+                        [
+                            ['text' => Lang('Animate'), 'callback_data' => "task.{$hash}.animate"],
+                        ]
+                    ])) {
+
+                    (new TransactionsModel())->PayUpscale($task['user_id'], [
+                        'response_id'=>$response['id'],
+                        'hash'=>$hash
+                    ]);
+                }
+
                 if ($result)
                     $this->lastMessageId = null;
             }
