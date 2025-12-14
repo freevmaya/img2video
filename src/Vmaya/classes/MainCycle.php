@@ -211,7 +211,7 @@ class MainCycle {
     protected function mj_prepareFile($task, $path, $result) {
         if (isset($result['url']) && $result['url']) {
 
-            $url = $this->mj_convertUrl($result['url'], $task);
+            $url = $result['url'];//$this->mj_convertUrl($result['url'], $task);
 
             $info = pathinfo($url);
             $filename = $task['hash'].'.'.$info['extension'];

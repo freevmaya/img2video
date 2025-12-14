@@ -6,6 +6,7 @@ logs/*
 config/*
 sessions/*
 /sessions
+/test
 config*.php
 downloads
 combined.txt
