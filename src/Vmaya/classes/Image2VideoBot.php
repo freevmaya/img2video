@@ -39,7 +39,7 @@ class Image2VideoBot extends YKassaBot {
 
     protected function startMenuList() {
         $result = [
-            //[['text' => '🖼️'.Lang('Create an image'), 'callback_data' => 'create_image']],
+            [['text' => '🖼️'.Lang('Create an image'), 'callback_data' => 'create_image']],
             [['text' => '🎥'.Lang('Bring a photo to life'), 'callback_data' => 'create_video']],
             [['text' => '💰'.Lang('Balance'), 'callback_data' => 'MySubscribe']],
             //[['text' => '📊'.Lang('My generations'), 'callback_data' => 'my_generations']],
@@ -48,10 +48,9 @@ class Image2VideoBot extends YKassaBot {
             [['text' => '❕'.Lang('Agreement'), 'callback_data' => 'agreement']]
         ];
 
-        /*
         if ($this->getOriginUserId() == ADMIN_USERID) {
             $result[] = [['text' => 'Остановить', 'callback_data' => 'stopBot'], ['text' => 'Сменить ID', 'callback_data' => 'changeId']];
-        }*/
+        }
 
         return $result;
     }
@@ -227,11 +226,12 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function start($chatId) {
-        $keyboard = array_merge($this->startMenuList(), $this->subscribeTypeList());
+        //$keyboard = array_merge($this->startMenuList(), $this->subscribeTypeList());
 
-        $this->Answer($chatId, ['text' => Lang("BotDescription"), 'reply_markup'=> json_encode([
-            'inline_keyboard' => $keyboard
-        ])]);
+        $this->Answer($chatId, [
+            'text' => Lang("BotDescription"), 
+            'reply_markup'=> json_encode(['inline_keyboard' => $this->startMenuList()])
+        ]);
     }
 
     function gitPull($branch = 'main', $path = null) {

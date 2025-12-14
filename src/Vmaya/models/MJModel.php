@@ -2,7 +2,7 @@
 class MJModel extends BaseModel {
 	
 	protected function getTable() {
-		return 'api_comm';
+		return 'mj_tasks';
 	}
 
 	public function getFields() {

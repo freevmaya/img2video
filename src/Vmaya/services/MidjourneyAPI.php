@@ -95,9 +95,15 @@ class MidjourneyAPI implements APIInterface
             ]
         ]);
 
-        $response = json_decode(curl_exec($ch), true);
-        curl_close($ch);
+        if (DEV) {
+            echo "DEV MJ REQUEST!";
+            $response = [
+                'hash'=>md5(strtotime('now'))
+            ];
+        } else $response = json_decode(curl_exec($ch), true);
         trace($response);
+
+        curl_close($ch);
 
         if (isset($response['error']))
             $this->error($endpoint.': '.$response['error']);
@@ -106,12 +112,15 @@ class MidjourneyAPI implements APIInterface
             $hash = isset($response['hash']) ? $response['hash'] : false;
 
             if ($hash && $this->modelTask) {
+
+                $chat_id = $this->bot->CurrentUpdate()->getMessage()->getChat()->getId();
                 $this->modelTask->Update([
                     'user_id'=>$this->bot->getUserId(),
-                    'chat_id'=>$this->bot->CurrentUpdate()->getMessage()->getChat()->getId(),
-                    'hash'=>$response['hash']
+                    'chat_id'=>$chat_id,
+                    'hash'=>$response['hash'] = $hash,
+                    'request_data'=>array_merge($data, ['endpoint'=>$endpoint])
                 ]);
-                $this->bot->Answer($this->bot->getUserId(), ['text' => Lang("The task has been accepted")]);
+                $this->bot->Answer($chat_id, ['text' => Lang("The task has been accepted")]);
             }
 
             return $hash;

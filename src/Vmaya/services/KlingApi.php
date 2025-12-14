@@ -24,7 +24,7 @@ class KlingApi extends BaseKlingApi
         ];
     }
 
-    protected function makeRequest($endpoint, $data)
+    protected function makeRequest($endpoint, $request_data)
     {
         if (DEV) {
             echo "DEV REQUEST!";
@@ -34,7 +34,7 @@ class KlingApi extends BaseKlingApi
                     'task_id' => '123456789'
                 ]
             ];
-        } else $response = parent::makeRequest($endpoint, $data);
+        } else $response = parent::makeRequest($endpoint, $request_data);
 
         if (isset($response['data']) && (@$response['code'] == 0)) {
         	$data = $response['data'];
@@ -43,7 +43,8 @@ class KlingApi extends BaseKlingApi
         		'hash'=>$data['task_id'],
         		'service'=>'kling',
                 'user_id'=>ADMIN_USERID,
-                'chat_id'=>ADMIN_USERID
+                'chat_id'=>ADMIN_USERID,
+                'request_data'=>array_merge($request_data, ['endpoint'=>$endpoint])
         	];
 
         	if ($this->bot) {

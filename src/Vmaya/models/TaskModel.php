@@ -34,6 +34,10 @@ class TaskModel extends BaseModel {
 			'state' => [
 				'type' => 'state',
 				'dbtype' => 's'
+			],
+			'request_data' => [
+				'type' => 'request_data',
+				'dbtype' => 's'
 			]
 		];
 	}

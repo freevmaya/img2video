@@ -129,7 +129,7 @@ class MainCycle {
 
     protected function mj_doServiceAction($task, $response) {
         if (isset($response['result']) && !empty($response['result'])) {
-            $method = $response['type'].'_do';
+            $method = 'mj_'.$response['type'];
             if (method_exists($this, $method)) {
 
                 $result = json_decode(@$response['result'], true);
@@ -208,16 +208,18 @@ class MainCycle {
         return false;
     }
 
-    protected function prepareFile($hash, $path, $result) {
+    protected function mj_prepareFile($hash, $path, $result) {
         if (isset($result['url']) && $result['url']) {
 
-            $info = pathinfo($result['filename']);
+            $url = $this->mj_convertUrl($result['url']);
+
+            $info = pathinfo($url);
             $filename = $hash.'.'.$info['extension'];
 
             $file_path = $path.$filename;
 
             if (!file_exists($file_path)) {
-                $downloadResult = downloadFile($result['url'], $file_path);
+                $downloadResult = downloadFile($url, $file_path);
                 return $downloadResult['success'];
             }
 
@@ -226,11 +228,35 @@ class MainCycle {
         return false;
     }
 
-    protected function upscale_do($task, $response) {
+
+    protected function mj_convertUrl($url, $task) {
+        //https://cdn.discordapp.com/attachments/1446773822048174091/1447904727693135994/4a163b28-2f4a-449d-b81f-035326b7f489_grid_0. -> https://cdn.midjourney.com/4a163b28-2f4a-449d-b81f-035326b7f489/grid_0.png
+
+        //https://cdn.discordapp.com/attachments/1446773822048174091/1447904740305408051/vmaya5252_Cyberpunk_samurai_meditating_in_a_neon-lit_rain-soake_4a163b28-2f4a-449d-b81f-035326b7f489.png?ex=693951de&is=6938005e&hm=ee91699be73bd5abbb889d01d6d67b4ae2c1a2403b88e2f20e7772962490680c& -> https://cdn.midjourney.com/4a163b28-2f4a-449d-b81f-035326b7f489/0_0.png
+
+        $request_data = json_decode($task['request_data'], true);
+
+        if (str_contains($request_data['endpoint'], 'upscale'))
+            $relativePath = $task['hash'].'/0_'.$task['choice'].'.png';
+        else if (str_contains($request_data['endpoint'], 'imagine'))
+            $relativePath = $task['hash'].'/grid_0.png';
+        else if (str_contains($request_data['endpoint'], 'animate')) {
+            $pattern = '/within_a__([\w\d-]+)\.webp/';
+
+            if (preg_match($pattern, $url, $matches))
+                $relativePath = 'video/'.$matches[1].'/0.mp4';
+            else
+                return $url;
+        }
+        
+        return 'https://cdn.midjourney.com/'.$relativePath;
+    }
+
+    protected function mj_upscale($task, $response) {
         $result = json_decode($response['result'], true);
         $hash = $task['hash'];
 
-        if ($this->prepareFile($hash, RESULT_PATH, $result)) {
+        if ($this->mj_prepareFile($hash, RESULT_PATH, $result)) {
 
             $info = pathinfo($result['filename']);
             $filename = $hash.'.'.$info['extension'];
@@ -247,6 +273,76 @@ class MainCycle {
                 ]);
             }
 
+            return $result;
+        }
+        return false;
+    }
+
+    protected function mj_animate($task, $response) {
+        $result = json_decode($response['result'], true);
+        $hash = $task['hash'];
+
+        if ($this->mj_prepareFile($hash, RESULT_PATH, $result)) {
+
+            $info = pathinfo($result['filename']);
+            $filename = $hash.'.'.$info['extension'];
+
+            if ($result = $this->sendAnimation($task['chat_id'], RESULT_PATH.$filename, $filename, '🎬 '.Lang("Your video is ready"), [
+                    'width' => $result['width'],
+                    'height' => $result['height']
+                ])) {
+
+                (new TransactionsModel())->PayUpscale($task['user_id'], [
+                    'response_id'=>$response['id'],
+                    'hash'=>$hash
+                ]);
+            }
+
+            return $result;
+        }
+        return false;
+    }
+
+    protected function mj_imagine($task, $response) {
+
+        $result = json_decode($response['result'], true);
+        $isProgress = $response['status'] == 'progress';
+        $path = $isProgress?PROCESS_PATH:RESULT_PATH;
+
+        $hash = $task['hash'];
+
+        if ($this->mj_prepareFile($hash, $path, $result)) {
+
+            $info = pathinfo($result['filename']);
+            $filename = $hash.'.'.$info['extension'];
+
+            $file_path = $path.$filename;
+
+            if (is_numeric($this->lastMessageId))
+                $this->api->deleteMessage([
+                    'chat_id' => $task['chat_id'],
+                    'message_id' => $this->lastMessageId
+                ]);
+
+            if ($isProgress) {
+
+                $result = $this->lastMessageId = $this->sendPhoto($task['chat_id'], $file_path, $filename, Lang("Your image in progress"));
+            } else {
+
+                $result = $this->sendPhoto($task['chat_id'], $file_path, $filename, Lang('Choose the option you like best'),
+                    [
+                        [
+                            ['text' => '1', 'callback_data' => "task.{$hash}.upscale.1"],
+                            ['text' => '2', 'callback_data' => "task.{$hash}.upscale.2"]
+                        ],[
+                            ['text' => '3', 'callback_data' => "task.{$hash}.upscale.3"],
+                            ['text' => '4', 'callback_data' => "task.{$hash}.upscale.4"]
+                        ]
+                    ]
+                );
+                if ($result)
+                    $this->lastMessageId = null;
+            }
             return $result;
         }
         return false;
@@ -336,76 +432,6 @@ class MainCycle {
             $this->Message($chatId, "❌ Ошибка отправки: " . $e->getMessage());
             return false;
         }
-    }
-
-    protected function animate_do($task, $response) {
-        $result = json_decode($response['result'], true);
-        $hash = $task['hash'];
-
-        if ($this->prepareFile($hash, RESULT_PATH, $result)) {
-
-            $info = pathinfo($result['filename']);
-            $filename = $hash.'.'.$info['extension'];
-
-            if ($result = $this->sendAnimation($task['chat_id'], RESULT_PATH.$filename, $filename, '🎬 '.Lang("Your video is ready"), [
-                    'width' => $result['width'],
-                    'height' => $result['height']
-                ])) {
-
-                (new TransactionsModel())->PayUpscale($task['user_id'], [
-                    'response_id'=>$response['id'],
-                    'hash'=>$hash
-                ]);
-            }
-
-            return $result;
-        }
-        return false;
-    }
-
-    protected function imagine_do($task, $response) {
-
-        $result = json_decode($response['result'], true);
-        $isProgress = $response['status'] == 'progress';
-        $path = $isProgress?PROCESS_PATH:RESULT_PATH;
-
-        $hash = $task['hash'];
-
-        if ($this->prepareFile($hash, $path, $result)) {
-
-            $info = pathinfo($result['filename']);
-            $filename = $hash.'.'.$info['extension'];
-
-            $file_path = $path.$filename;
-
-            if (is_numeric($this->lastMessageId))
-                $this->api->deleteMessage([
-                    'chat_id' => $task['chat_id'],
-                    'message_id' => $this->lastMessageId
-                ]);
-
-            if ($isProgress) {
-
-                $result = $this->lastMessageId = $this->sendPhoto($task['chat_id'], $file_path, $filename, Lang("Your image in progress"));
-            } else {
-
-                $result = $this->sendPhoto($task['chat_id'], $file_path, $filename, Lang('Choose the option you like best'),
-                    [
-                        [
-                            ['text' => '1', 'callback_data' => "task.{$hash}.upscale.1"],
-                            ['text' => '2', 'callback_data' => "task.{$hash}.upscale.2"]
-                        ],[
-                            ['text' => '3', 'callback_data' => "task.{$hash}.upscale.3"],
-                            ['text' => '4', 'callback_data' => "task.{$hash}.upscale.4"]
-                        ]
-                    ]
-                );
-                if ($result)
-                    $this->lastMessageId = null;
-            }
-            return $result;
-        }
-        return false;
     }
 
     protected function error($error) {
