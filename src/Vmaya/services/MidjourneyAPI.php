@@ -118,7 +118,7 @@ class MidjourneyAPI implements APIInterface
                     'user_id'=>$this->bot->getUserId(),
                     'chat_id'=>$chat_id,
                     'hash'=>$response['hash'] = $hash,
-                    'request_data'=>array_merge($data, ['endpoint'=>$endpoint])
+                    'request_data'=> json_encode(array_merge($data, ['endpoint'=>$endpoint]))
                 ]);
                 $this->bot->Answer($chat_id, ['text' => Lang("The task has been accepted")]);
             }
