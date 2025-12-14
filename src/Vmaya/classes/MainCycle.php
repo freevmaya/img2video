@@ -211,7 +211,7 @@ class MainCycle {
 
     protected function scraperDownload($url, $file_path) {
         $output = null;
-        $command = 'python3 '.BASEPATH."scraper_download.py \"{$url}\" \"{$file_path}\"";
+        $command = 'py '.BASEPATH."scraper_download.py \"{$url}\" \"{$file_path}\"";
 
         exec($command, $output);
         $result = 0;
@@ -264,8 +264,28 @@ class MainCycle {
 
         //https://cdn.discordapp.com/attachments/1446773822048174091/1447904727693135994/4a163b28-2f4a-449d-b81f-035326b7f489_grid_0. -> https://cdn.midjourney.com/4a163b28-2f4a-449d-b81f-035326b7f489/grid_0.png
 
-        $request_data = json_decode($task['request_data'], true);
+        $paterns = [ 
+            '/\/([a-z\d-]+)_grid_([\d]+)/'  => '%s/grid_0.png',
+            '/_([a-z\d-]+).png\?/'            => '%s/0_%s.png',
+            '/within_a__([\w\d-]+)\.webp/'  => 'video/%s/0.mp4'
+        ];
 
+        foreach ($paterns as $pattern=>$replace) {
+            if (preg_match($pattern, $url, $matches) && (count($matches) > 1)) {
+
+                $choice = 0;
+                if (!empty($request_data = $task['request_data']) && 
+                    ($request_data = json_encode($request_data, true)) &&
+                    isset($request_data['choice']))
+                    $choice = $request_data['choice'];
+
+                $relativePath = sprintf($replace, $matches[1], $choice);
+                trace($matches);        
+                return 'https://cdn.midjourney.com/'.$relativePath;
+            }
+        }
+
+        /*
         if (str_contains($request_data['endpoint'], 'upscale')) {
 
             $pattern = '/_([a-z\d-]+).png/';
@@ -298,6 +318,7 @@ class MainCycle {
         }
         
         return 'https://cdn.midjourney.com/'.$relativePath;
+        */
     }
 
     protected function mj_upscale($task, $response) {
