@@ -214,7 +214,7 @@ class MainCycle {
 
         exec($command, $output);
         
-        trace($command."\\nResult: ".$output);
+        trace($command."\\nResult: ".json_encode($output));
 
         return intval($output) == 1;
     }
