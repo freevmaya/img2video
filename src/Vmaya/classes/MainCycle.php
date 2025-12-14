@@ -141,7 +141,7 @@ class MainCycle {
                     }
                     else {
                         if ($response['status'] == 'done') {
-                            if ($response['fail_count'] >= 4) {
+                            if ($response['fail_count'] >= 6) {
 
                                 $this->finishTask($task, 'failure');
                                 $this->mj_finishResponse($response);
@@ -156,7 +156,7 @@ class MainCycle {
                                 $this->mj_model->Update([
                                     'id'=>$response['id'], 'fail_count'=>$response['fail_count'] + 1
                                 ]);
-                                sleep(5);
+                                sleep(10);
                             }
                             return false;
                         } else {
