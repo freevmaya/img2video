@@ -131,16 +131,16 @@ class MainCycle {
         if (isset($response['result']) && !empty($response['result'])) {
             $method = 'mj_'.$response['type'];
             if (method_exists($this, $method)) {
+                if ($response['status'] == 'done') {
+                    $result = json_decode(@$response['result'], true);
+                    if ($url = @$result['url']) {
 
-                $result = json_decode(@$response['result'], true);
-                if ($url = @$result['url']) {
-
-                    if ($this->$method($task, $response)) {
-                        $this->mj_finishResponse($response);
-                        return true;
-                    }
-                    else {
-                        if ($response['status'] == 'done') {
+                        if ($this->$method($task, $response)) {
+                            $this->mj_finishResponse($response);
+                            return true;
+                        }
+                        else {
+                            
                             if ($response['fail_count'] >= 6) {
 
                                 $this->finishTask($task, 'failure');
@@ -159,15 +159,13 @@ class MainCycle {
                                 sleep(10);
                             }
                             return false;
-                        } else {
-                            $this->mj_model->Update([
-                                'id'=>$response['id'], 'fail_count'=>1, 'processed'=>1
-                            ]);
-                            return true;
                         }
-                    }
-                } else $this->mj_finishResponse($response);
-                return true;
+                    } else $this->mj_finishResponse($response);
+                    return true;
+                } else {
+                    $this->mj_finishResponse($response);
+                    return true;
+                } 
             }
             else {
                 $this->mj_finishResponse($response);
@@ -227,12 +225,12 @@ class MainCycle {
         return $result == 1;
     }
 
-    protected function mj_prepareFile($task, $path, $result) {
+    protected function mj_prepareFile($task, $response, $path, $result) {
         if (isset($result['url']) && $result['url']) {
 
             $url = $result['url'];
             $info = pathinfo(explode('?', $url)[0]);
-            $filename = $task['hash'].'.'.$info['extension'];
+            $filename = $task['hash'].'-'.$response['id'].'.'.$info['extension'];
 
             $file_path = $path.$filename;
 
@@ -327,7 +325,7 @@ class MainCycle {
         $result = json_decode($response['result'], true);
         $hash = $task['hash'];
 
-        if ($this->mj_prepareFile($task, RESULT_PATH, $result)) {
+        if ($this->mj_prepareFile($task, $response, RESULT_PATH, $result)) {
 
             $info = pathinfo($result['filename']);
             $filename = $hash.'.'.$info['extension'];
@@ -353,7 +351,7 @@ class MainCycle {
         $result = json_decode($response['result'], true);
         $hash = $task['hash'];
 
-        if ($this->mj_prepareFile($task, RESULT_PATH, $result)) {
+        if ($this->mj_prepareFile($task, $response, RESULT_PATH, $result)) {
 
             $info = pathinfo($result['filename']);
             $filename = $hash.'.'.$info['extension'];
@@ -382,7 +380,7 @@ class MainCycle {
 
         $hash = $task['hash'];
 
-        if ($this->mj_prepareFile($task, $path, $result)) {
+        if ($this->mj_prepareFile($task, $response, $path, $result)) {
 
             $info = pathinfo($result['filename']);
             $filename = $hash.'.'.$info['extension'];
