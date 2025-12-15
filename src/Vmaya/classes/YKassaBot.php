@@ -216,7 +216,7 @@ abstract class YKassaBot extends BaseBot {
         ];
         $this->Answer($chatId, ['text' => Lang("Insufficient balance"), 'reply_markup'=> json_encode([
             'inline_keyboard' => $keyboard
-        ])]);
+        ])], $this->getSession('lastBotMessageId'));
     }
 
     protected function subscribeTypeList() {
@@ -241,7 +241,7 @@ abstract class YKassaBot extends BaseBot {
 
         $this->Answer($chatId, ['text' => Lang("Subscription options"), 'reply_markup'=> json_encode([
             'inline_keyboard' => $keyboard
-        ])]);
+        ])], $this->getSession('lastBotMessageId'));
     }
 }
 

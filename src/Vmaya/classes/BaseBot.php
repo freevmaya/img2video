@@ -70,11 +70,13 @@ abstract class BaseBot {
 
     protected function popSession($name) {
 
+        $result = null;
         if (isset($this->session[$name])) {
             $result = $this->session[$name];
             unset($this->session[$name]);
-            saveSession($this->currentUpdate->getMessage()->getChat()->getId(), $this->session);
-        } else $result = null;
+            if ($this->currentUpdate)
+                saveSession($this->currentUpdate->getMessage()->getChat()->getId(), $this->session);
+        }
 
         return $result;
     }
@@ -98,13 +100,13 @@ abstract class BaseBot {
         }
     }
 
-    public function Wrong($chatId) {
+    public function Wrong($chatId, $messageId = false) {
         $this->Answer($chatId, ['text' => Lang("Something wrong"), 'reply_markup'=> json_encode([
                 'inline_keyboard' => [
                     [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']]
                 ]
             ])
-        ]);
+        ], $this->getSession('lastBotMessageId'));
     }
 
     public function Answer($chatId, $msg, $messageId = false, $reply_to_message_id = false, $parse_mode = 'Markdown') {
@@ -129,8 +131,14 @@ abstract class BaseBot {
 
         if ($messageId) {
             $params['message_id'] = $messageId;
-            return $this->api->editMessageText($params);
-        } else return $this->api->sendMessage($params);
+            $result = $this->api->editMessageText($params);
+        } else {
+            $result = $this->api->sendMessage($params);
+        }
+
+        if (isset($result['message_id']))
+            $this->setSession('lastBotMessageId', $result['message_id']);
+        return $result;
     }
 
     /*
@@ -248,9 +256,6 @@ abstract class BaseBot {
         if ($chat) {
             $chatId = $message->getChat()->getId();
             $messageId = $message['message_id'];
-
-            if (@$message['from']['is_bot'])
-                $this->setSession('lastBotMessageId', $messageId);
 
             $text = $message->getText();
 

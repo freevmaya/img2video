@@ -28,8 +28,8 @@ class TGUserModel extends BaseModel {
 			if (!$a_user) {
 
 				$username = toUTF($record['username']);
-				$first_name = toUTF($record['first_name']);
-				$last_name = toUTF($record['last_name']);
+				$first_name = toUTF(@$record['first_name']);
+				$last_name = toUTF(@$record['last_name']);
 
 				$area = (new AreasModel())->ByLanguage($record['language_code']);
 

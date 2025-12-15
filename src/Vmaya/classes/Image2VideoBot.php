@@ -100,7 +100,7 @@ class Image2VideoBot extends YKassaBot {
 
     protected function changeId($chatId) {
 
-        $this->Answer($chatId, Lang("Enter new user ID"));
+        $this->Answer($chatId, Lang("Enter new user ID"), $this->getSession('lastBotMessageId'));
         $this->setSession("expect", 'replaceUserId');
     }
 
@@ -108,7 +108,7 @@ class Image2VideoBot extends YKassaBot {
         $fileName = LANGUAGE_PATH.$this->user['language_code'].DS.'agreement.txt';
         if (file_exists($fileName)) {            
             $text = file_get_contents($fileName);
-            $this->Answer($chatId, $text);
+            $this->Answer($chatId, $text, $this->getSession('lastBotMessageId'));
         }
     }
 
@@ -133,7 +133,7 @@ class Image2VideoBot extends YKassaBot {
                     if ($parts[1] == 'userText')
                         $prompt = $this->popSession('userText');
                     else $prompt = Lang('imageToVideoPrompts')[intval($parts[1])];
-                    $this->klingGenerateVideo($chatId, $prompt, $this->getSession('lastBotMessageId'));
+                    $this->klingGenerateVideo($chatId, $prompt);
                     break;
             }
         }
@@ -152,16 +152,16 @@ class Image2VideoBot extends YKassaBot {
         }
     }
 
-    protected function klingGenerateVideo($chatId, $prompt, $lastMessageId=false) {
+    protected function klingGenerateVideo($chatId, $prompt) {
         $file_id = $this->popSession('file_id');
         if (($image_url = $this->GetFileUrl($file_id)) && !empty($prompt)) {
 
             if (!empty($image_url) && !empty($prompt)) {
                 $this->kling_api->generateVideoFromImage($image_url, $prompt);
-                $this->Answer($chatId, Lang('Sent. This may take several minutes.'), $lastMessageId);
+                $this->Answer($chatId, Lang('Sent. This may take several minutes.'), $this->getSession('lastBotMessageId'));
             }
-            else $this->Wrong($chatId);
-        } else $this->Wrong($chatId);
+            else $this->Wrong($chatId, $this->getSession('lastBotMessageId'));
+        } else $this->Wrong($chatId, $this->getSession('lastBotMessageId'));
     }
 
     protected function image2video_photo_prompt($chatId, $prompt) {
@@ -271,7 +271,7 @@ class Image2VideoBot extends YKassaBot {
                 $msg .= ' and git pull '.($git_result['success'] ? 'success!' : 'failure');
             }
 
-            $this->Answer($chatId, ['text' => Lang($msg)]);
+            $this->Answer($chatId, ['text' => Lang($msg)], $this->getSession('lastBotMessageId'));
         }
     }
 
@@ -282,7 +282,7 @@ class Image2VideoBot extends YKassaBot {
             'inline_keyboard' => [
                 [['text' => Lang("Go to dialogue"), 'url' => $link]]
             ]
-        ])]);
+        ])], $this->getSession('lastBotMessageId'));
     }
 
     protected function mySubscribe($chatId) {
@@ -300,30 +300,30 @@ class Image2VideoBot extends YKassaBot {
 
             $limitsText = sprintf(Lang('Enough for %s images or %s videos'), round($this->Balance() / $imgPrice), round($this->Balance() / $videoPrice));
             
-            $this->Answer($chatId, ['text' => sprintf(Lang("Your balance %s"), $this->Balance().' '.@$area['currency'])."\n\n".$limitsText]);
+            $this->Answer($chatId, ['text' => sprintf(Lang("Your balance %s"), $this->Balance().' '.@$area['currency'])."\n\n".$limitsText], $this->getSession('lastBotMessageId'));
         } else $this->Answer($chatId, ['text' => Lang("No subscription"), 'reply_markup'=> json_encode([
             'inline_keyboard' => [
                 [['text' => '⭐'.Lang('Subscription'), 'callback_data' => 'subscribe']]
             ]
-        ])]);
+        ])], $this->getSession('lastBotMessageId'));
     }
 
     protected function textToImage($chatId, $prompt) {
-        $this->Answer($chatId, ['text' => "Prompt: ".$prompt]);
+        $this->Answer($chatId, ['text' => "Prompt: ".$prompt], $this->getSession('lastBotMessageId'));
         $this->mj_api->generateImage($prompt);
     }
 
     protected function textToVideo($chatId, $prompt) {
-        $this->Answer($chatId, ['text' => "Prompt: ".$prompt]);
+        $this->Answer($chatId, ['text' => "Prompt: ".$prompt], $this->getSession('lastBotMessageId'));
     }
 
     protected function text2image($chatId) {
-        $this->Answer($chatId, Lang("Send a prompt"));
+        $this->Answer($chatId, Lang("Send a prompt"), $this->getSession('lastBotMessageId'));
         $this->setSession("expect", 'textToImage');
     }
 
     protected function image2video($chatId) {
-        $this->Answer($chatId, Lang("Send you photo"));
+        $this->Answer($chatId, Lang("Send you photo"), $this->getSession('lastBotMessageId'));
         $this->setSession("expect", 'image2video_photo');
     }
 }
