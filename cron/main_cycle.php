@@ -2,11 +2,16 @@
 
 
 declare(ticks = 1);
+
 require dirname(__DIR__).'/vendor/autoload.php';
 require dirname(__DIR__).'/src/Vmaya/engine.php';
 
+require SERVICES_PATH.'cycle/BaseCycle.php';
+require SERVICES_PATH.'cycle/MjCycle.php';
+require SERVICES_PATH.'cycle/KlingCycle.php';
+
 use \Telegram\Bot\Api;
-use \App\Services\API\MidjourneyAPI;
+use App\Services\API\cycle;
 
 // === ИНИЦИАЛИЗАЦИЯ БЛОКИРОВКИ ===
 $lock = new ProcessLock(__DIR__ . '/main_cycle.pid');
@@ -32,7 +37,7 @@ try {
 
     $dbp = new mySQLProvider(_dbhost, _dbname_default, _dbuser, _dbpassword);
 
-    $mj = new MainCycle($telegram);
+    $mj = new MainCycleEx($telegram);
 
     //Основной цикл
     while ($lock->isFile()) {
@@ -45,7 +50,6 @@ try {
     
 } catch (Exception $e) {
     trace_error("Fatal bot error: " . $e->getMessage());
-
-    $dbp->Close();
+    echo $e->getMessage();
     exit(1);
 }
