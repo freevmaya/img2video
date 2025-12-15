@@ -71,7 +71,7 @@ class MjCycle extends BaseCycle {
                                 $this->parent->finishTask($task, 'failure');
                                 $this->finishResponse($response);
 
-                                $this->parent->Message($task['chat_id'], ['text' => Lang("DownloadFailure"), 'reply_markup'=> json_encode([
+                                $this->parent->Message($task['chat_id'], ['text' => sprintf(Lang("DownloadFailure"), $task['id']), 'reply_markup'=> json_encode([
                                         'inline_keyboard' => [
                                             [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']]
                                         ]

@@ -98,7 +98,7 @@ class MainCycle {
                             $this->finishTask($task, 'failure');
                             $this->kling_finishResponse($response);
 
-                            $this->Message($task['chat_id'], ['text' => Lang("DownloadFailure"), 'reply_markup'=> json_encode([
+                            $this->Message($task['chat_id'], ['text' => sprintf(Lang("DownloadFailure"), $task['id']), 'reply_markup'=> json_encode([
                                     'inline_keyboard' => [
                                         [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']]
                                     ]
@@ -291,7 +291,7 @@ class MainCycle {
                                 $this->finishTask($task, 'failure');
                                 $this->mj_finishResponse($response);
 
-                                $this->Message($task['chat_id'], ['text' => Lang("DownloadFailure"), 'reply_markup'=> json_encode([
+                                $this->Message($task['chat_id'], ['text' => sprintf(Lang("DownloadFailure"), $task['id']), 'reply_markup'=> json_encode([
                                         'inline_keyboard' => [
                                             [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']]
                                         ]
