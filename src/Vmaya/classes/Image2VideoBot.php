@@ -29,7 +29,7 @@ class Image2VideoBot extends YKassaBot {
         if (($result = parent::initUser($update)) && $this->getUserId()) {
             $this->mj_api = new MidjourneyAPI(MJ_APIKEY, MJ_HOOK_URL, MJ_ACCOUNTHASH, 
                                     $this, $this->taskModel, new MJModel());
-            $this->kling_api = new KlingApi(KL_ACCESS_KEY, KL_SECRET_KEY, $this->taskModel, 'kling-v1', $this);
+            $this->kling_api = new KlingApi(KL_ACCESS_KEY, KL_SECRET_KEY, $this->taskModel, 'kling-v2-5-turbo', $this);
         }
         return $result;
     }
