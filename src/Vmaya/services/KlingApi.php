@@ -53,6 +53,7 @@ class KlingApi extends BaseKlingApi
         	} else trace_error("Property KlingApi::bot is null");
 
         	$this->modelTask->Update($params);
+            $this->bot->Answer($chat_id, ['text' => Lang("The task has been accepted")]);
         }
 
         return $response;
