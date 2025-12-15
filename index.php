@@ -43,7 +43,6 @@
 
         /* Эффект при наведении на блок */
         .container:hover {
-            transform: translateY(-8px);
             box-shadow: 
                 0 35px 70px rgba(0, 0, 0, 0.7),
                 0 0 0 1px rgba(102, 126, 234, 0.2) inset;
