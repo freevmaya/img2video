@@ -44,7 +44,7 @@ class KlingApi extends BaseKlingApi
         		'service'=>'kling',
                 'user_id'=>ADMIN_USERID,
                 'chat_id'=>ADMIN_USERID,
-                'request_data' => json_encode(array_merge($request_data, ['endpoint'=>$endpoint]))
+                'request_data' => json_encode(array_merge($request_data, ['endpoint'=>$endpoint]), JSON_FLAGS)
         	];
 
         	if ($this->bot) {
