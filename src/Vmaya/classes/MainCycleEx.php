@@ -108,4 +108,19 @@ class MainCycleEx {
     public function PayVideo($user_id, $data) {
         $this->transactionModel->PayVideo($user_id, $data);
     }
+
+    public function error($error) {
+        $this->Message(ADMIN_USERID, $error);
+    }
+
+    public function Message($chatId, $msg, $parse_mode = 'Markdown') {
+
+        $params = array_merge([
+            'chat_id' => $chatId,
+            'text' => $msg,
+            'parse_mode' => $parse_mode
+        ], is_string($msg) ? ['text' => $msg] : $msg);
+
+        return $this->api->sendMessage($params);
+    }
 }
