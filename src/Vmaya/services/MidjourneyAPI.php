@@ -29,7 +29,7 @@ class MidjourneyAPI implements APIInterface
             'webhook_url'   => $this->webhook_url,
             'webhook_type'  => "progress",
             'account_hash'  => $this->account_hash,
-            "is_disable_prefilter" => true
+            "is_disable_prefilter" => false
         ], $options);
 
         return $this->makeRequest('/midjourney/v2/imagine', $data);
