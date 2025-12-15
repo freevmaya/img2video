@@ -68,21 +68,33 @@ abstract class BaseBot {
         return $this->hasSession($name) ? $this->session[$name] : false;
     }
 
+    protected function unsetSessions($names) {
+
+        if ($this->currentUpdate) {
+            foreach ($names as $name)
+                if (isset($this->session[$name]))
+                    unset($this->session[$name]);
+            saveSession($this->currentUpdate->getMessage()->getChat()->getId(), $this->session);
+        }
+    }
+
     protected function popSession($name) {
 
         $result = null;
-        if (isset($this->session[$name])) {
-            $result = $this->session[$name];
-            unset($this->session[$name]);
-            if ($this->currentUpdate)
+        if ($this->currentUpdate) {           
+            if (isset($this->session[$name])) {
+                $result = $this->session[$name];
+                unset($this->session[$name]);
                 saveSession($this->currentUpdate->getMessage()->getChat()->getId(), $this->session);
+            }
         }
 
         return $result;
     }
 
     public function DeleteMessage($chatId, $message_id) {
-        $this->api->deleteMessage([ 'chat_id' => $chatId, 'message_id' => $message_id]); 
+        if (!empty($message_id))
+            $this->api->deleteMessage([ 'chat_id' => $chatId, 'message_id' => $message_id]); 
     }
 
     public function PrivateAnswerAndDelete($user_id, $chatId, $private_text, $temporary_text, $wait_sec = 6) {
@@ -106,7 +118,7 @@ abstract class BaseBot {
                     [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']]
                 ]
             ])
-        ], $this->getSession('lastBotMessageId'));
+        ]);
     }
 
     public function Answer($chatId, $msg, $messageId = false, $reply_to_message_id = false, $parse_mode = 'Markdown') {
@@ -135,9 +147,6 @@ abstract class BaseBot {
         } else {
             $result = $this->api->sendMessage($params);
         }
-
-        if (isset($result['message_id']))
-            $this->setSession('lastBotMessageId', $result['message_id']);
         return $result;
     }
 
@@ -378,6 +387,22 @@ abstract class BaseBot {
                 'error' => $e->getMessage()
             ];
         }
+    }
+
+    protected function genContent($text, $backToMenu = false, $buttons = null) {
+        $btList = empty($buttons) ? [] : $buttons;
+        $result = ['text' => $text];
+
+        if ($backToMenu && $this->hasSession('lastBotMessageId')) {
+            $back = ['text' => Lang("Back"), 'callback_data' => 'menu'];
+            if (count($btList) > 0)
+                $btList[count($btList) - 1][] = $back;
+            else $btList[] = [$back];            
+        }
+
+        if (count($btList) > 0)
+            $result['reply_markup'] = json_encode(['inline_keyboard' => $btList]);
+        return $result;
     }
 }
 ?>

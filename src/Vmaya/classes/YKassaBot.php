@@ -210,13 +210,10 @@ abstract class YKassaBot extends BaseBot {
     }
 
     protected function notEnough($chatId) {
-
         $keyboard[] = [
             ['text' => "💰 ".Lang("Purchase a subscription"), 'callback_data' => 'subscribe']
         ];
-        $this->Answer($chatId, ['text' => Lang("Insufficient balance"), 'reply_markup'=> json_encode([
-            'inline_keyboard' => $keyboard
-        ])], $this->getSession('lastBotMessageId'));
+        $this->Answer($chatId, $this->genContent(Lang("Insufficient balance"), true, $keyboard), $this->getSession('lastBotMessageId'));
     }
 
     protected function subscribeTypeList() {
@@ -239,9 +236,7 @@ abstract class YKassaBot extends BaseBot {
 
         $keyboard[] = $subscribeBlock;
 
-        $this->Answer($chatId, ['text' => Lang("Subscription options"), 'reply_markup'=> json_encode([
-            'inline_keyboard' => $keyboard
-        ])], $this->getSession('lastBotMessageId'));
+        $this->Answer($chatId, $this->genContent(Lang("Subscription options"), true, $keyboard), $this->getSession('lastBotMessageId'));
     }
 }
 
