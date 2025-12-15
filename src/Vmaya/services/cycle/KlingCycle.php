@@ -24,7 +24,7 @@ class KlingCycle extends BaseCycle {
 	protected function doProcessResponse($task, $response) {
 
         if (($response['status'] == 'processing') || ($response['status'] == 'submitted')) {
-            $this->Message($task['chat_id'], Lang('Your video in progress'));
+            $this->parent->Message($task['chat_id'], Lang('Your video in progress'));
             $this->finishResponse($response);
         } else if ($response['status'] == 'succeed') {
 
@@ -48,7 +48,7 @@ class KlingCycle extends BaseCycle {
                             $this->parent->finishTask($task, 'failure');
                             $this->finishResponse($response);
 
-                            $this->Message($task['chat_id'], ['text' => Lang("DownloadFailure"), 'reply_markup'=> json_encode([
+                            $this->parent->Message($task['chat_id'], ['text' => Lang("DownloadFailure"), 'reply_markup'=> json_encode([
                                     'inline_keyboard' => [
                                         [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']]
                                     ]
