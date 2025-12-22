@@ -294,7 +294,7 @@ class Image2VideoBot extends YKassaBot {
 
         $link = 'tg://user?id='.SUPPORT_USERID;
         $this->Answer($chatId, $this->genContent(sprintf(Lang("HelpDeskDescription"), $this->getUserId()), true, [
-            [['text' => Lang("Go to dialogue"), 'url' => $link]]
+            [[['text' => Lang("Go to dialogue"), 'url' => $link]]]
         ]), $this->getSession('lastBotMessageId'));
     }
 
