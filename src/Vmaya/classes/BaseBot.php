@@ -286,7 +286,9 @@ abstract class BaseBot {
     }
 
     private function _runUpdate($update) {
-        trace($update);
+        if (DEV)
+            trace($update);
+
         // 6. Обновляем ID последнего обработанного сообщения
         $this->lastUpdateId = $update->getUpdateId();
         $this->runUpdate($update);
@@ -403,7 +405,7 @@ abstract class BaseBot {
         if ($btList && is_array($btList) && (count($btList) > 0))
             $result['reply_markup'] = json_encode(['inline_keyboard' => $btList]);
         else trace_error($btList);
-        
+
         return $result;
     }
 }
