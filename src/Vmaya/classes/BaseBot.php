@@ -156,7 +156,7 @@ abstract class BaseBot {
     }*/
 
     protected function initUser($update) {
-        $fields = ['message', 'callback_query', 'pre_checkout_query', 'response'];
+        $fields = ['message', 'callback_query', 'pre_checkout_query', 'response', 'my_chat_member'];
         $user = null;
         $block = null;
         foreach ($fields as $field)
