@@ -202,6 +202,7 @@ abstract class BaseBot {
     protected function initLang($language_code) {
         GLOBAL $lang;
         $fileName = LANGUAGE_PATH.$language_code.'.php';
+        trace($fileName);
         if (file_exists($fileName))
             include_once($fileName);
     }
@@ -400,7 +401,7 @@ abstract class BaseBot {
             else $btList[] = [$back];            
         }
 
-        if (count($btList) > 0)
+        if ($btList && (count($btList) > 0))
             $result['reply_markup'] = json_encode(['inline_keyboard' => $btList]);
         return $result;
     }
