@@ -8,7 +8,7 @@ class SubscribeOptions extends BaseModel {
 	public function ByArea($area_id) {
 		GLOBAL $dbp;
 		if ($area_id)
-			return $dbp->asArray("SELECT s.*, a.currency FROM {$this->getTable()} s LEFT JOIN `areas` a ON s.area_id = a.id WHERE s.`area_id` LIKE '%{$area_id}%'");
+			return $dbp->asArray("SELECT s.*, a.currency FROM {$this->getTable()} s LEFT JOIN `areas` a ON s.area_id = a.id WHERE s.`area_id` LIKE '%{$area_id}%' ORDER BY s.price");
 
 		return [];
 	}
