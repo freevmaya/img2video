@@ -37,8 +37,9 @@ try {
     // 1. Удаляем вебхук, если он был установлен
     $telegram->deleteWebhook(['drop_pending_updates' => true]);
 
-
-    trace("Бот запущен. PID: " . getmypid());
+    $head = "======= Бот запущен. PID: " . getmypid().' =======';
+    echo $head."\n";
+    trace($head);
     
     // Основной цикл с обработкой обновлений
     while ($lock->isFile()) {
