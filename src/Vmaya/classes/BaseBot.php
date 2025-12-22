@@ -400,8 +400,10 @@ abstract class BaseBot {
             else $btList[] = [$back];            
         }
 
-        if ($btList && (count($btList) > 0))
+        if ($btList && is_array($btList) && (count($btList) > 0))
             $result['reply_markup'] = json_encode(['inline_keyboard' => $btList]);
+        else trace_error($btList);
+        
         return $result;
     }
 }
