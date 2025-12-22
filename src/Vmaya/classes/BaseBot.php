@@ -202,9 +202,8 @@ abstract class BaseBot {
     protected function initLang($language_code) {
         GLOBAL $lang;
         $fileName = LANGUAGE_PATH.$language_code.'.php';
-        trace($fileName);
         if (file_exists($fileName))
-            include_once($fileName);
+            include($fileName);
     }
 
     /*
