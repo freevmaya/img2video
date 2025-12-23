@@ -89,8 +89,13 @@
 	    public function bquery($query, $types, $params) {
 			$result = false;
 
+			if (empty($params)) {
+				$this->error('Cannot be empty query='.$query.', data: '.json_encode($params));
+				return false;
+			}
+
 			try {
-				//trace($query." ".$types);
+
 				$stmt = $this->mysqli->prepare($query);
 
 				$i=0;
@@ -104,6 +109,10 @@
 				$stmt->bind_param($types, ...$params);
 
 				$result = $stmt->execute();
+
+				//echo $query." ".$types;
+				//print_r($result);
+
 				$stmt->store_result();
 
 				$stmt->close();

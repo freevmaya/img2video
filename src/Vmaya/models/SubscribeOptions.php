@@ -21,11 +21,17 @@ class SubscribeOptions extends BaseModel {
 			"LEFT JOIN `areas` a ON a.id=u.area_id ".
 			"WHERE u.id={$userId} AND a.default_subscribe_id=so.id";
 
+		if (!($soption = $dbp->line($query))) // Если не нашли по пользователю ищем цену по умолчанию для зоны RU
+			$soption = $dbp->line("SELECT so.* FROM `tg_users` u ".
+				"LEFT JOIN `subscribe_options` so ON u.area_id=so.area_id ".
+				"LEFT JOIN `areas` a ON a.id=u.area_id ".
+				"WHERE a.languages='ru' AND a.default_subscribe_id=so.id");
+
 		//trace($query);
 		if ($soption = $dbp->line($query))
 			return $soption['price'] / $soption[$limitName];
 		else {
-			trace_error("User not found: ".$query);
+			trace_error("Не удалось получить цену");
 			return 100;
 		}
 	}

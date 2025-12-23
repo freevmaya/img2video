@@ -1,9 +1,11 @@
 <?
 abstract class BaseBot {
     private $session;
+    private $sessionChanged;
     private $lastUpdateId;
     private $origin_user_id;
     private $reply_to_message;
+    private $sessionModel;
 
     protected $user;
     protected $api;
@@ -22,7 +24,7 @@ abstract class BaseBot {
     }
 
     protected function initialize() {
-        
+        $this->sessionModel = new SessionsModel();
     }
 
     public static function getUserLink($userId, $userName) {
@@ -53,8 +55,26 @@ abstract class BaseBot {
 
     protected function setSession($name, $value) {
         $this->session[$name] = $value;
-        saveSession($this->currentUpdate->getMessage()->getChat()->getId(), $this->session);
+        $this->sessionChanged = true;
     }
+
+    protected function saveSession($chatId, $data) {
+        $this->sessionModel->Update([
+            'chat_id' => $chatId,
+            'data' => json_encode($data, JSON_FLAGS)
+        ], 'chat_id');
+    }
+
+    protected function readSession($chatId) {
+        $result = [];
+
+        if ($item = $this->sessionModel->getItem($chatId, 'chat_id'))
+            $result = json_decode($item['data'], true);
+        else $this->sessionModel->Insert(['chat_id'=>$chatId, 'data'=>'{}'], 'chat_id');
+
+        return $result;
+    }
+
 
     public function CurrentUpdate() {
         return $this->currentUpdate;
@@ -65,6 +85,10 @@ abstract class BaseBot {
     }
 
     protected function getSession($name) {
+        /*
+        if (!$this->hasSession($name))
+            trace("Session field $name not found!\n");
+            */
         return $this->hasSession($name) ? $this->session[$name] : false;
     }
 
@@ -72,9 +96,10 @@ abstract class BaseBot {
 
         if ($this->currentUpdate) {
             foreach ($names as $name)
-                if (isset($this->session[$name]))
+                if (isset($this->session[$name])) {
                     unset($this->session[$name]);
-            saveSession($this->currentUpdate->getMessage()->getChat()->getId(), $this->session);
+                    $this->sessionChanged = true;
+                }
         }
     }
 
@@ -85,7 +110,7 @@ abstract class BaseBot {
             if (isset($this->session[$name])) {
                 $result = $this->session[$name];
                 unset($this->session[$name]);
-                saveSession($this->currentUpdate->getMessage()->getChat()->getId(), $this->session);
+                $this->sessionChanged = true;
             }
         }
 
@@ -156,7 +181,7 @@ abstract class BaseBot {
     }*/
 
     protected function initUser($update) {
-        $fields = ['message', 'callback_query', 'pre_checkout_query', 'response', 'my_chat_member'];
+        $fields = ['message', 'callback_query', 'inline_query', 'chosen_inline_result', 'channel_post', 'pre_checkout_query', 'edited_message', 'response', 'my_chat_member'];
         $user = null;
         $block = null;
         foreach ($fields as $field)
@@ -166,12 +191,13 @@ abstract class BaseBot {
                 break;
             }
 
+        $this->session = [];
         if ($user) {
             try {
                 $chatId = isset($block['chat']) ? $block['chat']['id'] : @$block['message']['chat']['id'];
                 if (empty($chatId)) $chatId = $user['id'];
 
-                $this->session = readSession($chatId);
+                $this->session = $this->readSession($chatId);
                 $this->origin_user_id = $user['id'];
 
                 if ($this->origin_user_id == ADMIN_USERID)
@@ -289,9 +315,14 @@ abstract class BaseBot {
         if (DEV)
             trace($update);
 
+        $this->sessionChanged = false;
+
         // 6. Обновляем ID последнего обработанного сообщения
         $this->lastUpdateId = $update->getUpdateId();
         $this->runUpdate($update);
+
+        if ($this->sessionChanged)
+            $this->saveSession($this->currentUpdate->getMessage()->getChat()->getId(), $this->session);
     }
 
     protected function MLQuery($message, $start_promt="Отвечай на русском языке. Коротко.", $session_id=false)
@@ -404,7 +435,6 @@ abstract class BaseBot {
 
         if ($btList && is_array($btList) && (count($btList) > 0))
             $result['reply_markup'] = json_encode(['inline_keyboard' => $btList]);
-        else trace_error($btList);
 
         return $result;
     }

@@ -17,6 +17,16 @@ abstract class BaseModel {
 		return $id;
 	}
 
+	public function Insert($values) {
+		GLOBAL $dbp;
+		$types = $this->dbTypes(array_keys($values), null);
+
+		if ($dbp->bquery($this->insertQuery($values), $types, array_values($values)))
+			return $dbp->lastID();
+
+		return false;
+	}
+
 	public function Update($values, $idField = 'id') {
 		GLOBAL $dbp;
 		$types = $this->dbTypes(array_keys($values), $idField);
@@ -26,12 +36,11 @@ abstract class BaseModel {
 		$values = $this->allowUpdateValues($values);
 		unset($values[$idField]);
 
-		if ($id) {
-			if ($dbp->bquery($this->updateQuery($id, $values, $idField), $types, array_values($values)))
-				return $id;
-		}
-		else if ($dbp->bquery($this->insertQuery($values), $types, array_values($values)))
-				return $dbp->lastID();
+		if ($id && $dbp->bquery($this->updateQuery($id, $values, $idField), $types, array_values($values)))
+			return $id;
+
+		if ($dbp->bquery($this->insertQuery($values), $types, array_values($values)))
+			return $dbp->lastID();
 
 		return false;
 	}
