@@ -181,7 +181,24 @@ abstract class BaseBot {
     }*/
 
     protected function initUser($update) {
-        $fields = ['message', 'callback_query', 'inline_query', 'chosen_inline_result', 'channel_post', 'pre_checkout_query', 'edited_message', 'response', 'my_chat_member'];
+        $fields = [
+            'message',
+            'callback_query',
+            'inline_query',
+            'chosen_inline_result',
+            'channel_post',
+            'pre_checkout_query',
+            'edited_message',
+            'response',
+            'my_chat_member',
+            'edited_channel_post',
+            'shipping_query',
+            'poll',
+            'poll_answer',
+            'chat_member',
+            'chat_join_request'
+        ];
+        
         $user = null;
         $block = null;
         foreach ($fields as $field)
