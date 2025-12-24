@@ -316,10 +316,10 @@ class Image2VideoBot extends YKassaBot {
             $this->Answer($chatId, $this->genContent(sprintf(Lang("Your balance %s"), $this->Balance().' '.@$area['currency'])."\n\n".$limitsText, true), $this->getSession('lastBotMessageId'));
 
         } else {
-            $this->Answer($chatId, $this->genContent(Lang("No subscription"), [
+            $this->Answer($chatId, $this->genContent(Lang("No subscription"), true, [
                     [['text' => '⭐'.Lang('Subscription'), 'callback_data' => 'subscribe']]
                 ]
-            , true), $this->getSession('lastBotMessageId'));
+            ), $this->getSession('lastBotMessageId'));
         }
     }
 

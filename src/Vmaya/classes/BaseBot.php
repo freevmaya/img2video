@@ -440,19 +440,20 @@ abstract class BaseBot {
     }
 
     protected function genContent($text, $backToMenu = false, $buttons = null) {
+        
+        if (!is_array($buttons)) {
+            trace_error($buttons);
+            $buttons = null;
+        }
+
         $btList = empty($buttons) ? [] : $buttons;
         $result = ['text' => $text];
 
         if ($backToMenu && $this->hasSession('lastBotMessageId')) {
             $back = ['text' => Lang("Back"), 'callback_data' => 'menu'];
-            try {
-                if (count($btList) > 0)
-                    $btList[count($btList) - 1][] = $back;
-                else $btList[] = [$back];
-            } catch (Exception $e) {
-                trace_error($e);
-                $btList = null;
-            }            
+            if (count($btList) > 0)
+                $btList[count($btList) - 1][] = $back;
+            else $btList[] = [$back];            
         }
 
         if ($btList && is_array($btList) && (count($btList) > 0))
