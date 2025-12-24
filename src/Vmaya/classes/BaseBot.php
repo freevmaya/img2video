@@ -445,9 +445,14 @@ abstract class BaseBot {
 
         if ($backToMenu && $this->hasSession('lastBotMessageId')) {
             $back = ['text' => Lang("Back"), 'callback_data' => 'menu'];
-            if (count($btList) > 0)
-                $btList[count($btList) - 1][] = $back;
-            else $btList[] = [$back];            
+            try {
+                if (count($btList) > 0)
+                    $btList[count($btList) - 1][] = $back;
+                else $btList[] = [$back];
+            } catch ($e) {
+                trace_error($e);
+                $btList = null;
+            }            
         }
 
         if ($btList && is_array($btList) && (count($btList) > 0))
