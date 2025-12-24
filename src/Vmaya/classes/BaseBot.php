@@ -449,7 +449,7 @@ abstract class BaseBot {
                 if (count($btList) > 0)
                     $btList[count($btList) - 1][] = $back;
                 else $btList[] = [$back];
-            } catch ($e) {
+            } catch (Exception $e) {
                 trace_error($e);
                 $btList = null;
             }            
