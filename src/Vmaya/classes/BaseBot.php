@@ -441,7 +441,7 @@ abstract class BaseBot {
 
     protected function genContent($text, $backToMenu = false, $buttons = null) {
         
-        if (!is_array($buttons)) {
+        if ($buttons && !is_array($buttons)) {
             trace_error($buttons);
             $buttons = null;
         }
