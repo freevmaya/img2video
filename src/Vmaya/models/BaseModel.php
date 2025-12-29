@@ -1,6 +1,8 @@
 <?
 
 abstract class BaseModel {
+
+	protected $lastID;
 	abstract protected function getTable();
 	public function getFields() {return [];}
 	public function checkUnique($data) { return false; }
@@ -17,39 +19,40 @@ abstract class BaseModel {
 		return $id;
 	}
 
-	public function Insert($values) {
-		GLOBAL $dbp;
-		$types = $this->dbTypes(array_keys($values), null);
-
-		if ($dbp->bquery($this->insertQuery($values), $types, array_values($values)))
-			return $dbp->lastID();
-
-		return false;
-	}
-
 	public function Update($values, $idField = 'id') {
 		GLOBAL $dbp;
-		$types = $this->dbTypes(array_keys($values), $idField);
 
 		$id = isset($values[$idField]) ? $values[$idField] : null;
 
 		$values = $this->allowUpdateValues($values);
-		unset($values[$idField]);
 
-		if ($id && $dbp->bquery($this->updateQuery($id, $values, $idField), $types, array_values($values)))
-			return $id;
+		if ($item = $this->getItem($id, $idField))
+			unset($values[$idField]);
+		else $id = false;
 
-		if ($dbp->bquery($this->insertQuery($values), $types, array_values($values)))
-			return $dbp->lastID();
+		$types = $this->dbTypes(array_keys($values), null);
+
+		if ($id) {
+			$this->lastID = null;
+			if ($dbp->bquery($this->updateQuery($id, $values, $idField), $types, array_values($values)))
+				return $id;
+		}
+		else if ($dbp->bquery($this->insertQuery($values), $types, array_values($values)))
+				return $this->lastID = $dbp->lastID();
 
 		return false;
+	}
+
+	public function getLastId() {
+		return $this->lastID;
 	}
 
 	protected function allowUpdateValues($values) {
 		$fields = $this->getFields();
 		$result = [];
 		foreach ($values as $field=>$value)
-			if (isset($fields[$field]) && isset($fields[$field]['dbtype']))
+			if (isset($fields[$field]) && 
+				isset($fields[$field]['dbtype']))
 				$result[$field] = $value;
 
 		return $result;
@@ -59,10 +62,14 @@ abstract class BaseModel {
 
 		$updateList = [];
 		$id = $this->verifyId($idField, $id);
+		$fields = $this->getFields();
+		$fieldList = array_keys($values);
 
-		foreach($this->getFields() as $fieldName=>$field)
-			if (($fieldName != $idField) && isset($values[$fieldName]))
+		foreach($fieldList as $fieldName) {
+			if (isset($fields[$fieldName]) && 
+				($fieldName != $idField))
 				$updateList[] = "`{$fieldName}`=?";
+		}
 
 		return "UPDATE `{$this->getTable()}` SET ".implode(',', $updateList)." WHERE `{$idField}`={$id}";
 	}
@@ -70,8 +77,11 @@ abstract class BaseModel {
 	protected function insertQuery($values) {
 
 		$fieldList = array_keys($values);
+		$fields = $this->getFields();
 		$valuesList = [];
-		foreach($fieldList as $fieldName) $valuesList[] = '?';
+		foreach($fieldList as $fieldName) 
+			if (isset($fields[$fieldName]))
+				$valuesList[] = '?';
 
 		return "INSERT INTO {$this->getTable()} (".implode(',', $fieldList).") VALUES (".implode(',', $valuesList).")";
 	}

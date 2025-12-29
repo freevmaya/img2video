@@ -249,7 +249,6 @@ abstract class BaseBot {
             include($fileName);
     }
 
-    /*
     public function GetWebhookUpdates() {
 
         //$this->sendImmediateHttpResponse();
@@ -259,7 +258,7 @@ abstract class BaseBot {
             if ($this->lastUpdateId != $update->getUpdateId())
                 $this->_runUpdate($update);
         }
-    }*/
+    }
 
     private function sendImmediateHttpResponse() {
 

@@ -89,33 +89,31 @@
 	    public function bquery($query, $types, $params) {
 			$result = false;
 
-			if (empty($params)) {
-				$this->error('Cannot be empty query='.$query.', data: '.json_encode($params));
-				return false;
-			}
-
 			try {
-
+				//trace($query.' '.json_encode($params));
 				$stmt = $this->mysqli->prepare($query);
 
 				$i=0;
 		        foreach ($params as $key => $value) {
-		            if ($this->isDateTime($value))
-		                $params[$key] = $this->formatDateTime($value);
-		            if (($types[$i] == 's') && !is_string($value))
-		            	$params[$key] = json_encode($value);
+		        	if ($types[$i] == 's') {
+			            if ($this->isDateTime($value))
+			                $params[$key] = $this->formatDateTime($value);
+			            if (is_object($value) || is_array($value))
+			            	$params[$key] = json_encode($value);
+			        }
+
 		            $i++;
 		        }
-				$stmt->bind_param($types, ...$params);
 
-				$result = $stmt->execute();
+		        //trace($query.' '.$types.' '.json_encode($params));
+		        if (strlen($types) == count($params)) {
+					$stmt->bind_param($types, ...$params);
 
-				//echo $query." ".$types;
-				//print_r($result);
+					$result = $stmt->execute();
+					$stmt->store_result();
 
-				$stmt->store_result();
-
-				$stmt->close();
+					$stmt->close();
+				} else  $this->error('count($parameters) != strlen($types)');
 			} catch (Exception $e) {
 				if ($this->isConnectionError($e->getMessage())) {
 	                $this->reconnect();
