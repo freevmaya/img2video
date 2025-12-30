@@ -127,10 +127,6 @@ class MidjourneyAPI implements APIInterface
         return $this->makeRequest('/midjourney/v2/describe', $data);
     }
 
-    protected function error($error) {
-
-    }
-
     private function makeRequest($endpoint, $data)
     {
         $ch = curl_init($this->baseUrl . $endpoint);
@@ -153,14 +149,14 @@ class MidjourneyAPI implements APIInterface
                 'hash'=>md5(strtotime('now'))
             ];
         }
-        
-        trace($response);
 
         curl_close($ch);
 
-        if (isset($response['error']))
-            $this->error($endpoint.': '.$response['error']);
+        if (isset($response['error']) || (isset($response['status']) && ($response['status'] === false)))
+            trace_error($response);
         else {
+        
+            trace($response);
 
             $hash = isset($response['hash']) ? $response['hash'] : false;
 
