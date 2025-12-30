@@ -152,8 +152,9 @@ class MidjourneyAPI implements APIInterface
 
         curl_close($ch);
 
-        if (isset($response['error']) || (isset($response['status']) && ($response['status'] === false)))
-            trace_error($response);
+        if (isset($response['error']) || (isset($response['status']) && ($response['status'] === false))) {
+            trace_error(json_encode($response, JSON_FLAGS).'. Send data:'.json_encode($data, JSON_FLAGS));
+        }
         else {
         
             trace($response);
