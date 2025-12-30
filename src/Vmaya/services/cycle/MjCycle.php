@@ -5,32 +5,44 @@ use App\Services\API\cycle\BaseCycle;
 
 class MjCycle extends BaseCycle {
 
+    public static $paterns = [ 
+        '/\/([a-z\d-]+)_grid_([\d]+)/',
+        '/_([a-z\d-]+).png\?/',
+        '/within_a__([\w\d-]+)\.webp/'
+    ];
 
-    protected function convertUrl($url, $task) {
+    public static function parseUrl($url) {
+
+        foreach (MjCycle::$paterns as $pattern) {
+            if (preg_match($pattern, $url, $matches) && (count($matches) > 1)) 
+                return $matches;
+        }
+        return null;
+    }
+
+    public static function convertUrl($url, $task, $choice = 0) {
 
         $paterns = [ 
-            '/\/([a-z\d-]+)_grid_([\d]+)/'  => '%s/grid_0.png',
-            '/_([a-z\d-]+).png\?/'            => '%s/0_%s.png',
-            '/within_a__([\w\d-]+)\.webp/'  => 'video/%s/0.mp4'
+            MjCycle::$paterns[0]  => '%s/grid_0.png',
+            MjCycle::$paterns[1]  => '%s/0_%s.png',
+            MjCycle::$paterns[2]  => 'video/%s/0.mp4'
         ];
 
         foreach ($paterns as $pattern=>$replace) {
             if (preg_match($pattern, $url, $matches) && (count($matches) > 1)) {
 
-                $choice = 0;
-                if (!empty($request_data = $task['request_data']) && 
+                if ($task && (!empty($request_data = $task['request_data'])) && 
                     ($request_data = json_encode($request_data, true)) &&
                     isset($request_data['choice']))
                     $choice = $request_data['choice'];
 
                 $relativePath = sprintf($replace, $matches[1], $choice);
-                trace($matches);        
-                return 'https://cdn.midjourney.com/'.$relativePath;
+                return MJ_BASE_URL.$relativePath;
             }
         }
     }
 
-    protected function prepareFile($task, $response, $path, $result) {
+    public static function prepareFile($task, $response, $path, $result) {
         if (isset($result['url']) && $result['url']) {
 
             $url = $result['url'];
@@ -40,9 +52,9 @@ class MjCycle extends BaseCycle {
             $file_path = $path.$filename;
 
             if (!file_exists($file_path)) {
-                $url = $this->convertUrl($url, $task);
+                $url = MJCycle::convertUrl($url, $task);
                 trace($url);
-                if ($this->scraperDownload($url, $file_path))
+                if (scraperDownload($url, $file_path))
                     return $file_path;
             } else return $file_path;
         }
@@ -110,7 +122,7 @@ class MjCycle extends BaseCycle {
         $result = json_decode($response['result'], true);
         $hash = $task['hash'];
 
-        if ($file_path = $this->prepareFile($task, $response, RESULT_PATH, $result)) {
+        if ($file_path = MjCycle::prepareFile($task, $response, RESULT_PATH, $result)) {
 
             $info = pathinfo($result['filename']);
             $filename = $hash.'.'.$info['extension'];
@@ -136,7 +148,7 @@ class MjCycle extends BaseCycle {
         $result = json_decode($response['result'], true);
         $hash = $task['hash'];
 
-        if ($file_path = $this->prepareFile($task, $response, RESULT_PATH, $result)) {
+        if ($file_path = MjCycle::prepareFile($task, $response, RESULT_PATH, $result)) {
 
             $info = pathinfo($result['filename']);
             $filename = $hash.'.'.$info['extension'];
@@ -171,7 +183,7 @@ class MjCycle extends BaseCycle {
 
         $hash = $task['hash'];
 
-        if ($file_path = $this->prepareFile($task, $response, $path, $result)) {
+        if ($file_path = MjCycle::prepareFile($task, $response, $path, $result)) {
 
             $info = pathinfo($result['filename']);
             $filename = $hash.'.'.$info['extension'];
@@ -184,11 +196,11 @@ class MjCycle extends BaseCycle {
                 $result = $this->parent->sendPhoto($task['chat_id'], $file_path, $filename, Lang('Choose the option you like best'),
                     [
                         [
-                            ['text' => '1', 'callback_data' => "task.{$hash}.upscale.1"],
-                            ['text' => '2', 'callback_data' => "task.{$hash}.upscale.2"]
+                            ['text' => '1', 'callback_data' => "task.{$hash}.select.0"],
+                            ['text' => '2', 'callback_data' => "task.{$hash}.select.1"]
                         ],[
-                            ['text' => '3', 'callback_data' => "task.{$hash}.upscale.3"],
-                            ['text' => '4', 'callback_data' => "task.{$hash}.upscale.4"]
+                            ['text' => '3', 'callback_data' => "task.{$hash}.select.2"],
+                            ['text' => '4', 'callback_data' => "task.{$hash}.select.3"]
                         ]
                     ]
                 );

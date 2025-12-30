@@ -1,6 +1,13 @@
 <?php
 namespace App\Services\API;
 
+use App\Services\API\cycle\MjCycle;
+
+use \Telegram\Bot\FileUpload\InputFile;
+
+include_once(SERVICES_PATH.'cycle/BaseCycle.php');
+include_once(SERVICES_PATH.'cycle/MjCycle.php');
+
 class MidjourneyAPI implements APIInterface
 {
     private $apiKey;
@@ -50,6 +57,64 @@ class MidjourneyAPI implements APIInterface
     {
         // Midjourney может не поддерживать видео
         throw new \Exception("Video generation not supported by Midjourney API");
+    }
+
+    public function Select($hash, $choice) {
+        GLOBAL $dbp;
+
+        $response = $dbp->line("SELECT * FROM mj_tasks WHERE `hash`='$hash' AND `type`='imagine' AND `status`='progress' AND `result` IS NOT NULL ORDER BY id DESC");
+
+        if (($result = json_decode($response['result'], true)) &&
+            ($matches = MjCycle::parseUrl($result['url']))) {
+
+            $filename = $hash.'_'.$choice.'.png';
+            $url = MJ_BASE_URL.$matches[1].'/0_'.$choice.'.png';
+
+            $file_path = RESULT_PATH.$filename;
+
+            if (!file_exists($file_path)) {
+                if (!scraperDownload($url, $file_path)) {
+                    trace_error("Fail download file url: {$url}, hash: $hash");
+                    return;
+                }
+            }
+
+            $params = [
+                'chat_id' => $this->bot->CurrentUpdate()->getMessage()->getChat()->getId(),
+                'photo' => InputFile::create($file_path, $filename),
+                'caption' => Lang('Your photo is ready'),
+                'parse_mode' => 'HTML'
+            ];
+
+        trace($params);
+
+            $photoMessage = $this->bot->Api()->sendPhoto($params);
+
+        } else trace_error('Can\'t get url. Hash: '.$hash);
+        /*
+        $result = json_decode($response['result'], true);
+        $hash = $task['hash'];
+
+        if ($file_path = MjCycle::prepareFile($task, $response, RESULT_PATH, $result)) {
+
+            $info = pathinfo($result['filename']);
+            $filename = $hash.'.'.$info['extension'];
+
+            if ($result = $this->bot->sendAnimation($task['chat_id'], $file_path, $filename, '🎬 '.Lang("Your video is ready"), [
+                    'width' => $result['width'],
+                    'height' => $result['height']
+                ])) {
+
+                (new TransactionsModel())->PayUpscale($task['user_id'], [
+                    'response_id'=>$response['id'],
+                    'hash'=>$hash
+                ]);
+            }
+
+            return $result;
+        }
+        return false;
+        */
     }
 
     public function Upscale($hash, $choice)
@@ -115,7 +180,7 @@ class MidjourneyAPI implements APIInterface
 
             if ($hash && $this->modelTask) {
 
-                $chat_id = $this->bot->CurrentUpdate()->getMessage()->getChat()->getId();
+                $chat_id = @$this->bot->CurrentUpdate()->getMessage()->getChat()->getId();
                 $this->modelTask->Update([
                     'user_id'=>$this->bot->getUserId(),
                     'chat_id'=>$chat_id,

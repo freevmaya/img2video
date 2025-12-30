@@ -10,6 +10,8 @@
 	define("NUMBER_DOWNLOAD_ATTEMPTS", 8);
 	define("JSON_FLAGS", JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK);
 
+	define('MJ_BASE_URL', 'https://cdn.midjourney.com/');
+
 	include(INCLUDE_PATH.DS."_edbu2.php");
 	include(INCLUDE_PATH.DS."console.php");
 	include(INCLUDE_PATH.DS."fdbg.php");

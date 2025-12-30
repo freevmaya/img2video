@@ -37,20 +37,4 @@ abstract class BaseCycle {
             'id'=>$response['id'], 'processed'=>1
         ]);
     }
-
-    protected function scraperDownload($url, $file_path) {
-        $output = null;
-        $command = 'py '.BASEPATH."scraper_download.py \"{$url}\" \"{$file_path}\"";
-
-        exec($command, $output);
-        $result = 0;
-
-        if ($output && (count($output) > 0))
-            $result = intval($output[count($output) - 1]);
-            
-        if ($result != 1)
-            trace_error($command."; Result: ".$result);
-
-        return $result == 1;
-    }
 }

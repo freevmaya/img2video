@@ -23,6 +23,10 @@ abstract class BaseBot {
         $this->initialize();
     }
 
+    public function Api() {
+        return $this->api;
+    }
+
     protected function initialize() {
         $this->sessionModel = new SessionsModel();
     }
@@ -307,10 +311,10 @@ abstract class BaseBot {
         $this->currentUpdate = $update;
 
         $message = $update->getMessage();
-        $chat    = $message->getChat();
+        $chat    = $message ? $message->getChat() : null;
 
         if ($chat) {
-            $chatId = $message->getChat()->getId();
+            $chatId = $chat->getId();
             $messageId = $message['message_id'];
 
             $text = $message->getText();
@@ -342,7 +346,7 @@ abstract class BaseBot {
         $this->lastUpdateId = $update->getUpdateId();
         $this->runUpdate($update);
 
-        if ($this->sessionChanged)
+        if ($this->sessionChanged && $this->currentUpdate->getMessage())
             $this->saveSession($this->currentUpdate->getMessage()->getChat()->getId(), $this->session);
     }
 
