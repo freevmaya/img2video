@@ -136,6 +136,7 @@ abstract class YKassaBot extends BaseBot {
         if ($subscribe_type_id > 0) {
             if ($stype = (new SubscribeOptions())->getItem($subscribe_type_id)) {
 
+                $this->stat($chatId, 'payment-attempt', $subscribe_type_id);
                 try {
                     $currency = "RUB";
                     $amount = intval($stype['price']);

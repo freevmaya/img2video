@@ -19,6 +19,7 @@ class Image2VideoBot extends YKassaBot {
     protected $kling_api;
     protected $expect;
     protected $taskModel;
+    protected $firstStart;
 
     protected function initialize() {
         parent::initialize();
@@ -30,6 +31,7 @@ class Image2VideoBot extends YKassaBot {
             $this->mj_api = new MidjourneyAPI(MJ_APIKEY, MJ_HOOK_URL, MJ_ACCOUNTHASH, 
                                     $this, $this->taskModel, new MJModel());
             $this->kling_api = new KlingApi(KL_ACCESS_KEY, KL_SECRET_KEY, $this->taskModel, 'kling-v1-6', $this);
+            $this->firstStart = $this->taskModel->getItem($this->getUser()['id'], 'user_id') == null;
         }
         return $result;
     }
@@ -71,7 +73,7 @@ class Image2VideoBot extends YKassaBot {
                 $this->processTask($chatId, $data);
                 return true;
             case 'create_image':
-                if ($this->isAllowedImage())
+                if ($this->isAllowedImage() || $this->firstStart)
                     $this->text2image($chatId);
                 else $this->notEnough($chatId);
                 return true;
