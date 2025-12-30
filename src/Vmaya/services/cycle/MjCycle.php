@@ -194,17 +194,17 @@ class MjCycle extends BaseCycle {
         $prevResponse = $this->getPreviousResult($response['id'], $response['hash']);
 
         if ($prevResponse && ($prevResponse['result']))
-            $result = json_decode($prevResponse['result'], true);
-        else $result = json_decode($response['result'], true);
+            $task_result = json_decode($prevResponse['result'], true);
+        else $task_result = json_decode($response['result'], true);
 
         $isProgress = $response['status'] == 'progress';
         $path = $isProgress?PROCESS_PATH:RESULT_PATH;
 
         $hash = $task['hash'];
 
-        if ($file_path = MjCycle::prepareFile($task, $response, $path, $result)) {
+        if ($file_path = MjCycle::prepareFile($task, $response, $path, $task_result)) {
 
-            $info = pathinfo($result['filename']);
+            $info = pathinfo($task_result['filename']);
             $filename = $hash.'.'.$info['extension'];
 
             if ($isProgress) {
@@ -212,14 +212,16 @@ class MjCycle extends BaseCycle {
                 $result = $this->parent->sendPhoto($task['chat_id'], $file_path, $filename, Lang("Your image in progress"));
             } else {
 
+                $next_hash = isset($task_result['job_id']) ? $task_result['job_id'] : $hash;
+
                 $result = $this->parent->sendPhoto($task['chat_id'], $file_path, $filename, Lang('Choose the option you like best'),
                     [
                         [
-                            ['text' => '1', 'callback_data' => "task.{$hash}.select.0"],
-                            ['text' => '2', 'callback_data' => "task.{$hash}.select.1"]
+                            ['text' => '1', 'callback_data' => "task.{$next_hash}.select.0"],
+                            ['text' => '2', 'callback_data' => "task.{$next_hash}.select.1"]
                         ],[
-                            ['text' => '3', 'callback_data' => "task.{$hash}.select.2"],
-                            ['text' => '4', 'callback_data' => "task.{$hash}.select.3"]
+                            ['text' => '3', 'callback_data' => "task.{$next_hash}.select.2"],
+                            ['text' => '4', 'callback_data' => "task.{$next_hash}.select.3"]
                         ]
                     ]
                 );
