@@ -54,6 +54,8 @@ class Image2VideoBot extends YKassaBot {
 
         if ($this->getOriginUserId() == ADMIN_USERID) {
             $result[] = [['text' => 'Остановить', 'callback_data' => 'stopBot'], ['text' => 'Сменить ID', 'callback_data' => 'changeId']];
+
+            $result[] = [['text' => 'dev Описание', 'callback_data' => 'discribe']];
         }
 
         return $result;
@@ -71,6 +73,9 @@ class Image2VideoBot extends YKassaBot {
                 return true;
             case 'task':
                 $this->processTask($chatId, $data);
+                return true;
+            case 'discribe':
+                $this->discribe($chatId, $data);
                 return true;
             case 'create_image':
                 if ($this->isAllowedImage() || $this->firstStart)
@@ -168,12 +173,7 @@ class Image2VideoBot extends YKassaBot {
 
     protected function messageProcess($chatId, $messageId, $text) {
 
-        $message = $this->currentUpdate['message'];
-        if ($photo = @$message['photo']) {
-            if ($this->isAllowedVideo())
-                $this->image2video_photo($chatId, $text);
-            else $this->notEnough($chatId);
-        } else if ($expect = $this->expect) {
+        if ($expect = $this->expect) {
             if (method_exists($this, $expect))
                 $this->$expect($chatId, $text);
         }
@@ -199,37 +199,41 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function image2video_photo($chatId, $text) {
+        
+        if ($this->isAllowedVideo()) {
 
-        $message = $this->currentUpdate['message'];
+            $best_photo = $this->getMessagePhoto();
+            $message = $this->currentUpdate['message'];
 
-        if ($photo = @$message['photo']) {
-            $best_photo = $photo[count($photo) - 1];
+            if ($best_photo) {
 
-            $this->setSession('file_id', $best_photo['file_id']); 
-            $this->setSession('expect', 'image2video_photo_prompt');     
+                $this->setSession('file_id', $best_photo['file_id']); 
+                $this->setSession('expect', 'image2video_photo_prompt');     
 
-            $promptList = Lang('imageToVideoPrompts');
-            $menu = [];
+                $promptList = Lang('imageToVideoPrompts');
+                $menu = [];
 
-            $caption = $message['caption'] ?? $text;
+                $caption = $message['caption'] ?? $text;
 
-            if (!empty($caption)) {
-                $this->setSession('userText', $caption); 
-                $menu[] = [['text' => $caption, 'callback_data' => "task.userText.klingVideo"]];
-            }
+                if (!empty($caption)) {
+                    $this->setSession('userText', $caption); 
+                    $menu[] = [['text' => $caption, 'callback_data' => "task.userText.klingVideo"]];
+                }
 
-            foreach ($promptList as $i=>$prompt)
-                $menu[] = [['text' => Lang($prompt), 'callback_data' => "task.{$i}.klingVideo"]];
+                foreach ($promptList as $i=>$prompt)
+                    $menu[] = [['text' => Lang($prompt), 'callback_data' => "task.{$i}.klingVideo"]];
 
 
-            $result = $this->Answer($chatId, ['text' => Lang("Send a prompt for video"), 'reply_markup'=> json_encode([
-                'inline_keyboard' => $menu
-            ])]);
+                $result = $this->Answer($chatId, ['text' => Lang("Send a prompt for video"), 'reply_markup'=> json_encode([
+                    'inline_keyboard' => $menu
+                ])]);
 
-            if (isset($result['message_id']))
-                $this->setSession('promptMessageId', $result['message_id']);
+                if (isset($result['message_id']))
+                    $this->setSession('promptMessageId', $result['message_id']);
 
-        } else $this->image2video($chatId);
+            } else $this->image2video($chatId);
+
+        } else $this->notEnough($chatId);
     }
 
     protected function replyToMessage($reply, $chatId, $messageId, $text) {
@@ -350,6 +354,16 @@ class Image2VideoBot extends YKassaBot {
     protected function image2video($chatId) {
         $this->Answer($chatId, $this->genContent(Lang("Send you photo"), true), $this->getSession('lastBotMessageId'));
         $this->setSession("expect", 'image2video_photo');
+    }
+
+    protected function discribe($chatId, $data) {
+        $this->Answer($chatId, $this->genContent(Lang("Send you photo"), true), $this->getSession('lastBotMessageId'));
+        $this->setSession("expect", 'image_to_discribe');
+    }
+
+    protected function image_to_discribe($chatId, $text) {
+        $best_photo = $this->getMessagePhoto();
+        trace($best_photo);
     }
 }
 ?>

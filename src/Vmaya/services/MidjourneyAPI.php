@@ -139,6 +139,18 @@ class MidjourneyAPI implements APIInterface
         return $this->makeRequest('/midjourney/v2/animate', $data);
     }
 
+    public function Describe($imageUrl) // or low
+    {
+        $data = [
+            'url'           => $imageUrl,
+            'webhook_url'   => $this->webhook_url,
+            'webhook_type'  => 'result',
+            'account_hash'  => $this->account_hash
+        ];
+
+        return $this->makeRequest('/midjourney/v2/describe', $data);
+    }
+
     protected function error($error) {
 
     }

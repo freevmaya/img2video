@@ -41,6 +41,8 @@ class KlingApi extends BaseKlingApi
         if (isset($response['data']) && (@$response['code'] == 0)) {
         	$data = $response['data'];
 
+            $chat_id = $this->bot->CurrentUpdate()->getMessage()->getChat()->getId();
+
         	$params = [
         		'hash'=>$data['task_id'],
         		'service'=>'kling',
@@ -51,7 +53,7 @@ class KlingApi extends BaseKlingApi
 
         	if ($this->bot) {
         		$params['user_id'] = $this->bot->getUserId();
-        		$params['chat_id'] = $this->bot->CurrentUpdate()->getMessage()->getChat()->getId();
+        		$params['chat_id'] = $chat_id;
         	} else trace_error("Property KlingApi::bot is null");
 
         	$this->modelTask->Update($params);

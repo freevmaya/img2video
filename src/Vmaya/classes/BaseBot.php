@@ -469,5 +469,13 @@ abstract class BaseBot {
 
         return $result;
     }
+
+    protected function getMessagePhoto($onlyLastPhoto = true) {
+        $message = $this->currentUpdate['message'];
+
+        if ($photos = @$message['photo'])
+            return $onlyLastPhoto ? $photos[count($photos) - 1] : $photos;
+        return null;
+    }
 }
 ?>
