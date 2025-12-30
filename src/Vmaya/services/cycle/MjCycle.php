@@ -1,8 +1,6 @@
 <?
 namespace App\Services\API\cycle;
 
-use App\Services\API\cycle\BaseCycle;
-
 class MjCycle extends BaseCycle {
 
     public static $paterns = [ 
@@ -205,14 +203,13 @@ class MjCycle extends BaseCycle {
                     ]
                 );
 
-                /*
-                if ($result = $this->parent->sendPhoto($task['chat_id'], $file_path, $filename, Lang("Your photo is ready"))) {
+                if ($result) {
 
                     $this->parent->PayUpscale($task['user_id'], [
                         'response_id'=>$response['id'],
                         'hash'=>$hash
                     ]);
-                }*/
+                }
             }
             return $result;
         }

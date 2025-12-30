@@ -2,11 +2,7 @@
 namespace App\Services\API;
 
 use App\Services\API\cycle\MjCycle;
-
 use \Telegram\Bot\FileUpload\InputFile;
-
-include_once(SERVICES_PATH.'cycle/BaseCycle.php');
-include_once(SERVICES_PATH.'cycle/MjCycle.php');
 
 class MidjourneyAPI implements APIInterface
 {
@@ -59,7 +55,7 @@ class MidjourneyAPI implements APIInterface
         throw new \Exception("Video generation not supported by Midjourney API");
     }
 
-    public function Select($hash, $choice) {
+    public function Select($chatId, $hash, $choice) {
         GLOBAL $dbp;
 
         $response = $dbp->line("SELECT * FROM mj_tasks WHERE `hash`='$hash' AND `type`='imagine' AND `status`='progress' AND `result` IS NOT NULL ORDER BY id DESC");
@@ -75,22 +71,24 @@ class MidjourneyAPI implements APIInterface
             if (!file_exists($file_path)) {
                 if (!scraperDownload($url, $file_path)) {
                     trace_error("Fail download file url: {$url}, hash: $hash");
+                    $this->bot->Answer($chatId, Lang('Fail download image'));
                     return;
                 }
             }
 
             $params = [
-                'chat_id' => $this->bot->CurrentUpdate()->getMessage()->getChat()->getId(),
+                'chat_id' => $chatId,
                 'photo' => InputFile::create($file_path, $filename),
                 'caption' => Lang('Your photo is ready'),
                 'parse_mode' => 'HTML'
             ];
 
-        trace($params);
-
             $photoMessage = $this->bot->Api()->sendPhoto($params);
 
-        } else trace_error('Can\'t get url. Hash: '.$hash);
+        } else {
+            trace_error("Fail download file url: {$url}, hash: $hash");
+            $this->bot->Answer($chatId, Lang('Fail download image'));
+        }
         /*
         $result = json_decode($response['result'], true);
         $hash = $task['hash'];

@@ -6,10 +6,6 @@ declare(ticks = 1);
 require dirname(__DIR__).'/vendor/autoload.php';
 require dirname(__DIR__).'/src/Vmaya/engine.php';
 
-require SERVICES_PATH.'cycle/BaseCycle.php';
-require SERVICES_PATH.'cycle/MjCycle.php';
-require SERVICES_PATH.'cycle/KlingCycle.php';
-
 use \Telegram\Bot\Api;
 use App\Services\API\cycle;
 

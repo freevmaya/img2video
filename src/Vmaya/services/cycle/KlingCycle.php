@@ -1,8 +1,6 @@
 <?
 namespace App\Services\API\cycle;
 
-use App\Services\API\cycle\BaseCycle;
-
 class KlingCycle extends BaseCycle {
 
 	protected function finalyDownloadfile($task, $response, $file_path, $filename) {
