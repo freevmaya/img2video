@@ -183,7 +183,7 @@ function scraperDownload($url, $file_path) {
         $result = intval($output[count($output) - 1]);
         
     if ($result != 1)
-        trace_error($command."; Result: ".json_decode($output, JSON_FLAGS));
+        trace_error($command."; Result: ".json_encode($output, JSON_FLAGS));
 
     return $result == 1;
 }
