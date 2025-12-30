@@ -26,7 +26,9 @@ class KlingApi extends BaseKlingApi
 
     protected function makeRequest($endpoint, $request_data)
     {
-        if (DEV) {
+        if (PRODUCTION) 
+            $response = parent::makeRequest($endpoint, $request_data);
+        else {
             echo "DEV REQUEST!";
             $response = [
                 'code'=>0,
@@ -34,7 +36,7 @@ class KlingApi extends BaseKlingApi
                     'task_id' => '123456789'
                 ]
             ];
-        } else $response = parent::makeRequest($endpoint, $request_data);
+        }
 
         if (isset($response['data']) && (@$response['code'] == 0)) {
         	$data = $response['data'];

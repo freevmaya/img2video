@@ -27,6 +27,8 @@ register_shutdown_function(function() use ($lock) {
     $lock->release();
 });
 
+$dbp = null;
+
 // === ОСНОВНОЙ КОД БОТА ===
 try {
     $telegram = new Api(BOTTOKEN);
@@ -58,6 +60,7 @@ try {
     
 } catch (Exception $e) {
     trace_error("Fatal bot error: " . $e->getMessage());
-    $dbp->Close();
+    if ($dbp)
+        $dbp->Close();
     exit(1);
 }

@@ -17,7 +17,7 @@ abstract class YKassaBot extends BaseBot {
         $user_id = $this->getUser()['id'];
         $pref = explode('-', $data);
 
-        StatisticModel::trace($pref[0], $chatId);
+        $this->stat($chatId, $pref[0], $chatId);
 
         switch ($pref[0]) {
             case 'subscribe':

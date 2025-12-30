@@ -49,6 +49,10 @@ class MjCycle extends BaseCycle {
         return false;
     }
 
+    protected function getPreviousResult($id, $hash) {
+        return $this->modelReply->getPreviousResponse($id, $hash);
+    }
+
 	protected function doProcessResponse($task, $response) {
 		if (isset($response['result']) && !empty($response['result'])) {
 
@@ -56,13 +60,18 @@ class MjCycle extends BaseCycle {
 
             if (method_exists($this, $method)) {
                 if ($response['status'] == 'done') {
+                    if ($response['fail_time']) {
+                        if (time() - strtotime($response['fail_time']) < 10) // Задержка перед следующей попыткой скачивания
+                            return;
+                    }
+
                     $result = json_decode(@$response['result'], true);
+
                     if ($url = @$result['url']) {
 
                         if ($this->$method($task, $response)) {
                             $this->parent->finishTask($task);
                             $this->finishResponse($response);
-                            return true;
                         }
                         else {
                             
@@ -79,25 +88,22 @@ class MjCycle extends BaseCycle {
                                 ]);
                             } else {
                                 $this->modelReply->Update([
-                                    'id'=>$response['id'], 'fail_count'=>$response['fail_count'] + 1
+                                    'id'=>$response['id'], 
+                                    'fail_count' => $response['fail_count'] + 1,
+                                    'fail_time'  => date('Y-m-d H:i:s')
                                 ]);
-                                sleep(10);
                             }
-                            return false;
                         }
                     } else $this->finishResponse($response);
-                    return true;
                 } else {
                     $this->finishResponse($response);
-                    return true;
                 } 
             }
             else {
                 $this->finishResponse($response);
                 trace_error("The method is missing: {$method}");
-                return false;
             }
-        } else return true;
+        }
 	}
 
     protected function process_upscale($task, $response) {
@@ -153,7 +159,13 @@ class MjCycle extends BaseCycle {
 
     protected function process_imagine($task, $response) {
 
-        $result = json_decode($response['result'], true);
+
+        $prevResponse = $this->getPreviousResult($response['id'], $response['hash']);
+
+        if ($prevResponse && ($prevResponse['result']))
+            $result = json_decode($prevResponse['result'], true);
+        else $result = json_decode($response['result'], true);
+
         $isProgress = $response['status'] == 'progress';
         $path = $isProgress?PROCESS_PATH:RESULT_PATH;
 
@@ -169,7 +181,6 @@ class MjCycle extends BaseCycle {
                 $result = $this->parent->sendPhoto($task['chat_id'], $file_path, $filename, Lang("Your image in progress"));
             } else {
 
-                /* Временно отменяем выбор изображения
                 $result = $this->parent->sendPhoto($task['chat_id'], $file_path, $filename, Lang('Choose the option you like best'),
                     [
                         [
@@ -181,19 +192,15 @@ class MjCycle extends BaseCycle {
                         ]
                     ]
                 );
-                */
 
-                if ($result = $this->parent->sendPhoto($task['chat_id'], $file_path, $filename, Lang("Your photo is ready")/*, [
-                        [
-                            ['text' => Lang('Animate'), 'callback_data' => "task.{$hash}.animate"],
-                        ]
-                    ]*/)) {
+                /*
+                if ($result = $this->parent->sendPhoto($task['chat_id'], $file_path, $filename, Lang("Your photo is ready"))) {
 
                     $this->parent->PayUpscale($task['user_id'], [
                         'response_id'=>$response['id'],
                         'hash'=>$hash
                     ]);
-                }
+                }*/
             }
             return $result;
         }

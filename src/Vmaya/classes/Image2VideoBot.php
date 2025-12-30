@@ -59,7 +59,7 @@ class Image2VideoBot extends YKassaBot {
 
     private function _commandProcessor($command, $chatId, $data) {
         
-        StatisticModel::trace($command, $chatId);
+        $this->stat($chatId, $command, $chatId);
         switch ($command) {
             case 'start':
                 $this->start($chatId);

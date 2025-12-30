@@ -95,12 +95,14 @@ class MidjourneyAPI implements APIInterface
             ]
         ]);
 
-        if (DEV) {
+        if (PRODUCTION) $response = json_decode(curl_exec($ch), true);
+        else {
             echo "DEV MJ REQUEST!";
             $response = [
                 'hash'=>md5(strtotime('now'))
             ];
-        } else $response = json_decode(curl_exec($ch), true);
+        }
+        
         trace($response);
 
         curl_close($ch);

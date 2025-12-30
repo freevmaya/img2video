@@ -5,6 +5,15 @@ class MJModel extends BaseModel {
 		return 'mj_tasks';
 	}
 
+	public function getPreviousResponse($id, $hash) {
+		GLOBAL $dbp;
+
+		$list = $dbp->asArray("SELECT * FROM {$this->getTable()} WHERE id < $id AND `hash`='{$hash}' AND `result` IS NOT NULL");
+
+		$count = count($list);
+		return $count > 0 ? $list[$count - 1] : null;
+	}
+
 	public function getFields() {
 		return [
 			'id' => [

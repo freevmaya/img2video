@@ -65,6 +65,11 @@ abstract class BaseBot {
         ], 'chat_id');
     }
 
+    protected function stat($userId, $type, $data = null) {
+        if ($userId != ADMIN_USERID)
+            StatisticModel::trace($type, $data);
+    }
+
     protected function readSession($chatId) {
         $result = [];
 
