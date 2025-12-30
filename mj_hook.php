@@ -42,7 +42,7 @@
 		if (empty($input)) {
 		    http_response_code(400);
 		    file_put_contents(LOG_ERROR_FILE, 'ERROR: Empty request body'. "\n", FILE_APPEND);
-		    echo "EMPTY";
+		    echo json_encode(['error' => 'empty']);
 		    exit;
 		}
 
@@ -52,7 +52,7 @@
 		if (json_last_error() !== JSON_ERROR_NONE) {
 		    http_response_code(400);
 		    file_put_contents(LOG_ERROR_FILE, 'ERROR: Invalid JSON, '.json_last_error_msg(). "\n", FILE_APPEND);
-		    echo "EMPTY";
+		    echo json_encode(['error' => 'empty']);
 		    exit;
 		}
 
@@ -86,6 +86,10 @@
 	// Функция обработки данных
 	function processWebhookData($model, $data) {
 
+		if (($data['status'] == 'progress') && ((@$data['result'] == 'null') || empty(@$data['result']))) {
+			return;
+		}
+
 	    $model->Update($data);
 
 	    switch ($data['status']) {
@@ -98,6 +102,7 @@
 	    }
 	    
 	    // Определяем тип события
+	    /*
 	    $event_type = $data['type'] ?? 'unknown';	    
 
 	    if (count(explode('.', $event_type)) > 1) {
@@ -118,7 +123,7 @@
 		        	handleUnknown($event_type, $data);
 		            break;
 		    }
-		}
+		}*/
 	}
 
 	function handleResult($data) {
@@ -210,8 +215,7 @@
 	    );
 	}
 
-
-	// Получаем сырые данные
+/*
 	if (DEV) {
 		Main('{
 		    "Host": "vmaya.ru",
@@ -237,4 +241,5 @@
     "status_reason": null,
     "created_at": "2025-12-08T16:19:14Z"
 }');
-	} else Main(getallheaders(), file_get_contents('php://input'));
+	} else*/
+Main(getallheaders(), file_get_contents('php://input'));

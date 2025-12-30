@@ -104,7 +104,10 @@ class MjCycle extends BaseCycle {
                                 ]);
                             }
                         }
-                    } else $this->finishResponse($response);
+                    } else if ($this->$method($task, $response)) {
+                        $this->parent->finishTask($task);
+                        $this->finishResponse($response);
+                    }
                 } else {
                     $this->finishResponse($response);
                 } 
@@ -115,6 +118,23 @@ class MjCycle extends BaseCycle {
             }
         }
 	}
+
+    protected function process_describe($task, $response) {
+        if (isset($response['result']) && !empty($response['result'])) {
+            $result = json_decode($response['result'], true);
+            $this->parent->Message($task['chat_id'], 
+                ['text' => $result[0], 
+                 'reply_markup'=> json_encode([
+                                        'inline_keyboard' => 
+                                        [
+                                            [['text' => Lang('Upscale'), 'callback_data' => "task.{$task['hash']}.upscale.1"]]
+                                        ]
+                                    ])
+            ]);
+            return true;
+        }
+        return false;
+    }
 
     protected function process_upscale($task, $response) {
         $result = json_decode($response['result'], true);
@@ -151,7 +171,7 @@ class MjCycle extends BaseCycle {
             $info = pathinfo($result['filename']);
             $filename = $hash.'.'.$info['extension'];
 
-            if ($result = $this->sendAnimation($task['chat_id'], $file_path, $filename, '🎬 '.Lang("Your video is ready"), [
+            if ($result = $this->parent->sendMp4($task['chat_id'], $file_path, $filename, '🎬 '.Lang("Your video is ready"), [
                     'width' => $result['width'],
                     'height' => $result['height']
                 ])) {

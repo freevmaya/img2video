@@ -89,30 +89,6 @@ class MidjourneyAPI implements APIInterface
             trace_error("Fail download file url: {$url}, hash: $hash");
             $this->bot->Answer($chatId, Lang('Fail download image'));
         }
-        /*
-        $result = json_decode($response['result'], true);
-        $hash = $task['hash'];
-
-        if ($file_path = MjCycle::prepareFile($task, $response, RESULT_PATH, $result)) {
-
-            $info = pathinfo($result['filename']);
-            $filename = $hash.'.'.$info['extension'];
-
-            if ($result = $this->bot->sendAnimation($task['chat_id'], $file_path, $filename, '🎬 '.Lang("Your video is ready"), [
-                    'width' => $result['width'],
-                    'height' => $result['height']
-                ])) {
-
-                (new TransactionsModel())->PayUpscale($task['user_id'], [
-                    'response_id'=>$response['id'],
-                    'hash'=>$hash
-                ]);
-            }
-
-            return $result;
-        }
-        return false;
-        */
     }
 
     public function Upscale($hash, $choice)

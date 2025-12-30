@@ -8,6 +8,11 @@
     	protected $reconnectAttempts = 3;
     	protected $reconnectDelay = 0.2; // секунды
 
+		function __construct($host, $dbname, $user='', $passwd='') {
+			parent::__construct($host, $dbname, $user, $passwd);
+			$this->result_type = MYSQLI_ASSOC;
+		}
+
     	// Добавляем метод для проверки и восстановления соединения
 	    public function checkConnection() {
 	        if (!$this->mysqli || !$this->mysqli->ping()) {
@@ -35,11 +40,6 @@
 	        
 	        return false;
 	    }
-
-		function __construct($host, $dbname, $user='', $passwd='') {
-			parent::__construct($host, $dbname, $user, $passwd);
-			$this->result_type = MYSQLI_ASSOC;
-		}
 
 		public function connect($host, $dbname, $user='', $passwd='', $charset='utf8') {
 			$this->mysqli = new mysqli($host, $user, $passwd, $dbname);
@@ -84,6 +84,17 @@
 		public function safeVal($str) {
 			if (is_array($str) || is_object($str)) $str = json_encode($str);
 	        return $this->mysqli->real_escape_string($str);
+	    }
+
+	    public function bget($query, $types, $params) {
+	    	$ret = [];
+			if ($result = $this->bquery($query, $types, $params)) {
+				while ($row = $result->fetch_array($this->result_type)) 
+					$ret[] = $row;
+				
+				$result->free();
+			}
+			return $ret;
 	    }
 
 	    public function bquery($query, $types, $params) {
