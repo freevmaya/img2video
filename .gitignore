@@ -10,6 +10,8 @@ sessions/*
 config*.php
 downloads
 combined.txt
+update
+restart
 
 *.sublime-project
 *.sublime-workspace
