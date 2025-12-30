@@ -75,7 +75,7 @@ abstract class BaseBot {
 
         if ($item = $this->sessionModel->getItem($chatId, 'chat_id'))
             $result = json_decode($item['data'], true);
-        else $this->sessionModel->Insert(['chat_id'=>$chatId, 'data'=>'{}'], 'chat_id');
+        else $this->sessionModel->Update(['chat_id'=>$chatId, 'data'=>'{}']);
 
         return $result;
     }
