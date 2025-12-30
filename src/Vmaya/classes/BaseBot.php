@@ -81,6 +81,8 @@ abstract class BaseBot {
             $result = json_decode($item['data'], true);
         else $this->sessionModel->Update(['chat_id'=>$chatId, 'data'=>'{}']);
 
+        trace("Attempt read sesstion: {$chatId}. Result: ".json_encode($item, JSON_FLAGS));
+
         return $result;
     }
 
