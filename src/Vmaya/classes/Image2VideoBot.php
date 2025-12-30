@@ -199,7 +199,7 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function image2video_photo($chatId, $text) {
-        
+
         if ($this->isAllowedVideo()) {
 
             $best_photo = $this->getMessagePhoto();
@@ -364,6 +364,14 @@ class Image2VideoBot extends YKassaBot {
     protected function image_to_discribe($chatId, $text) {
         $best_photo = $this->getMessagePhoto();
         trace($best_photo);
+        if (($image_url = $this->GetFileUrl($best_photo['file_id']))) {
+
+            if (!empty($image_url)) {
+                $this->mj_api->Describe($image_url);
+                $this->Answer($chatId, Lang('Sent. This may take several minutes.'), $this->getSession('lastBotMessageId'));
+            }
+            else $this->Wrong($chatId, $this->getSession('lastBotMessageId'));
+        }
     }
 }
 ?>
