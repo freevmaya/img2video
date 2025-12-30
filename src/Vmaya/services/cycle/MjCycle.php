@@ -44,15 +44,16 @@ class MjCycle extends BaseCycle {
         if (isset($result['url']) && $result['url']) {
 
             $url = $result['url'];
-            $info = pathinfo(explode('?', $url)[0]);
+            $new_url = MJCycle::convertUrl($url, $task);
+
+            $info = pathinfo(explode('?', $new_url)[0]);
             $filename = $task['hash'].'-'.$response['id'].'.'.$info['extension'];
 
             $file_path = $path.$filename;
 
             if (!file_exists($file_path)) {
-                $url = MJCycle::convertUrl($url, $task);
-                trace($url);
-                if (scraperDownload($url, $file_path))
+                trace($new_url);
+                if (scraperDownload($new_url, $file_path))
                     return $file_path;
             } else return $file_path;
         }
