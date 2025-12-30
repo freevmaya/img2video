@@ -152,12 +152,14 @@ class MidjourneyAPI implements APIInterface
 
         curl_close($ch);
 
+        $logstr = "Endpoint: {$endpoint}\nResponse: ".json_encode($response, JSON_FLAGS);
+
         if (isset($response['error']) || (isset($response['status']) && ($response['status'] === false))) {
-            trace_error(json_encode($response, JSON_FLAGS).'. Send data:'.json_encode($data, JSON_FLAGS));
+            trace_error($logstr.".\nSend data:".json_encode($data, JSON_FLAGS));
         }
         else {
         
-            trace($response);
+            trace($logstr);
 
             $hash = isset($response['hash']) ? $response['hash'] : false;
 
