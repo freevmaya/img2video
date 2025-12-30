@@ -156,7 +156,7 @@ class Image2VideoBot extends YKassaBot {
                     $this->mj_api->Animate($parts[1]);
                     break;
                 case 'upscale':
-                    $this->mj_api->Upscale('7e93e4db-0577-4b4e-a7eb-e2c0a4326d82'/*$parts[1]*/, intval($parts[3]));
+                    $this->mj_api->Upscale($parts[1], intval($parts[3]));
                     break;
                 case 'select':
                     $this->mj_api->Select($chatId, $parts[1], intval($parts[3]));

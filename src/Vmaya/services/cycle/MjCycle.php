@@ -212,16 +212,14 @@ class MjCycle extends BaseCycle {
                 $result = $this->parent->sendPhoto($task['chat_id'], $file_path, $filename, Lang("Your image in progress"));
             } else {
 
-                $next_hash = isset($task_result['job_id']) ? $task_result['job_id'] : $hash;
-
                 $result = $this->parent->sendPhoto($task['chat_id'], $file_path, $filename, Lang('Choose the option you like best'),
                     [
                         [
-                            ['text' => '1', 'callback_data' => "task.{$next_hash}.upscale.0"],
-                            ['text' => '2', 'callback_data' => "task.{$next_hash}.upscale.1"]
+                            ['text' => '1', 'callback_data' => "task.{$hash}.select.0"],
+                            ['text' => '2', 'callback_data' => "task.{$hash}.select.1"]
                         ],[
-                            ['text' => '3', 'callback_data' => "task.{$next_hash}.upscale.2"],
-                            ['text' => '4', 'callback_data' => "task.{$next_hash}.upscale.3"]
+                            ['text' => '3', 'callback_data' => "task.{$hash}.select.2"],
+                            ['text' => '4', 'callback_data' => "task.{$hash}.select.3"]
                         ]
                     ]
                 );
