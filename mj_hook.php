@@ -99,6 +99,9 @@
 	    	case 'progress':
 	    		handleProgress($data);
 	    		break;
+	    	case 'error':
+	    		trace_error($data);
+	    		break;
 	    }
 	    
 	    // Определяем тип события
