@@ -20,10 +20,12 @@ class Image2VideoBot extends YKassaBot {
     protected $expect;
     protected $taskModel;
     protected $firstStart;
+    public $downloadClient;
 
     protected function initialize() {
         parent::initialize();
         $this->taskModel = new TaskModel();
+        $this->downloadClient = new DownloadClient();
     }
 
     protected function initUser($update) {
@@ -34,6 +36,11 @@ class Image2VideoBot extends YKassaBot {
             $this->firstStart = $this->taskModel->getItem($this->getUser()['id'], 'user_id') == null;
         }
         return $result;
+    }
+
+    public function GetUpdates() {
+        parent::GetUpdates();
+        $this->downloadClient->Run();
     }
 
     protected function runUpdate($update) {

@@ -4,6 +4,20 @@ namespace App\Services\API;
 use App\Services\API\cycle\MjCycle;
 use \Telegram\Bot\FileUpload\InputFile;
 
+
+function ParseUrl($url) {
+    $paterns = [ 
+        '/\/([a-z\d-]+)_grid_([\d]+)/',
+        '/_([a-z\d-]+).png\?/',
+        '/within_a__([\w\d-]+)\.webp/'
+    ];
+    foreach ($paterns as $pattern) {
+        if (preg_match($pattern, $url, $matches) && (count($matches) > 1)) 
+            return $matches;
+    }
+    return null;
+}
+
 class MidjourneyAPI implements APIInterface
 {
     private $apiKey;
@@ -61,29 +75,35 @@ class MidjourneyAPI implements APIInterface
         $response = $dbp->line("SELECT * FROM mj_tasks WHERE `hash`='$hash' AND `type`='imagine' AND `status`='progress' AND `result` IS NOT NULL ORDER BY id DESC");
 
         if (($result = json_decode($response['result'], true)) &&
-            ($matches = MjCycle::parseUrl($result['url']))) {
+            ($matches = ParseUrl($result['url']))) {
 
             $filename = $hash.'_'.$choice.'.png';
             $url = MJ_BASE_URL.$matches[1].'/0_'.$choice.'.png';
 
             $file_path = RESULT_PATH.$filename;
 
-            if (!file_exists($file_path)) {
-                if (!scraperDownload($url, $file_path)) {
-                    trace_error("Fail download file url: {$url}, hash: $hash");
-                    $this->bot->Answer($chatId, Lang('Fail download image'));
-                    return;
+            $this->bot->downloadClient->AddTask(function($record, $data) {
+
+                resizeImageIfTooLarge($record['path']);
+
+                if ($record['state'] == 'failure')
+                    $data['this']->bot->Answer($chatId, Lang('Fail download image'));
+                else {
+                    $params = [
+                        'chat_id' => $data['chat_id'],
+                        'photo' => InputFile::create($record['path'], $data['filename']),
+                        'caption' => Lang('Your photo is ready'),
+                        'parse_mode' => 'HTML'
+                    ];
+
+                    $photoMessage = $data['this']->bot->Api()->sendPhoto($params);
                 }
-            }
 
-            $params = [
+            }, $url, $file_path, [
+                'this' => $this,
                 'chat_id' => $chatId,
-                'photo' => InputFile::create($file_path, $filename),
-                'caption' => Lang('Your photo is ready'),
-                'parse_mode' => 'HTML'
-            ];
-
-            $photoMessage = $this->bot->Api()->sendPhoto($params);
+                'filename' => $filename
+            ]);
 
         } else {
             trace_error("Fail download file url: {$url}, hash: $hash");

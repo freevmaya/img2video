@@ -10,7 +10,7 @@ abstract class BaseModel {
 
 	protected function verifyId($idField, $id) {
 
-		if ($id && ($idField != 'id')) {
+		if ($id) {
 			$fields = $this->getFields();
 			if (isset($fields[$idField]) && ($fields[$idField]['dbtype'] == 's'))
 				$id = "'{$id}'";
@@ -96,12 +96,23 @@ abstract class BaseModel {
 		return $types;
 	}
 
-	public function getItems($options=null, $fieldNames = null) {
+	protected function dbType($field)
+	{
+		$fields = $this->getFields();
+		if (isset($fields[$field]))
+			return isset($fields[$field]['dbtype']) ? $fields[$field]['dbtype'] : 's';
+		return null;
+	}
+
+	public function getItems($options=null, $fieldNames = null, $operator = 'AND') {
 		GLOBAL $dbp;
+		if (is_string($options))
+			return $this->getItemsWhere('WHERE '.$options);
+		
 		if (!$fieldNames && $options)
 			$fieldNames = array_keys($options);
 
-		$where = $fieldNames ? ('WHERE '.implode(' AND ', BaseModel::GetConditions($options, $fieldNames))) : '';
+		$where = $fieldNames ? ('WHERE '.implode(" {$operator} ", BaseModel::GetConditions($options, $fieldNames))) : '';
 		return $this->getItemsWhere($where);
 	}
 
@@ -115,6 +126,11 @@ abstract class BaseModel {
 
 		$id = $this->verifyId($idField, $id);
 		return $id ? $dbp->line("SELECT * FROM {$this->getTable()} WHERE `{$idField}`={$id}") : null;
+	}
+
+	public function Delete($id, $idField = 'id') {		
+		GLOBAL $dbp;
+		return $dbp->bquery("DELETE FROM {$this->getTable()} WHERE `{$idField}`=?", $this->dbType($idField), [$id]);
 	}
 
 	public static  function AddWhere($whereList, $options, $paramName, $operand = '=') {

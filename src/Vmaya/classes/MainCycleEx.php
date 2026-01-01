@@ -13,6 +13,7 @@ class MainCycleEx {
     protected $api;
     protected $processors;
     protected $transactionModel;
+    public $downloadClient;
 
     public function __construct($api)
     {
@@ -24,6 +25,8 @@ class MainCycleEx {
         	'mj' => new MjCycle($this, $this->modelTask, new MJModel()),
         	'kling' => new KlingCycle($this, $this->modelTask, new KlingModel())
         ];
+
+        $this->downloadClient = new DownloadClient();
     }
 
     protected function initLang($language_code) {
@@ -40,6 +43,8 @@ class MainCycleEx {
                 $this->updateTask($task);
             }
         }
+
+        $this->downloadClient->Run();
     }
 
     protected function updateTask($task) {
@@ -64,16 +69,21 @@ class MainCycleEx {
             return;
         }
 
-        $result = $this->api->sendVideo([
-            'chat_id' => $task['chat_id'],
-            'video' => fopen($filePath, 'r'),
-            'caption' => $message,
-            'width' => 512,
-            'height' => 512,
-            'supports_streaming' => true
-        ]);
+        try {  
 
-        return $result;
+            return $this->api->sendVideo([
+                'chat_id' => $task['chat_id'],
+                'video' => fopen($filePath, 'r'),
+                'caption' => $message,
+                'width' => 512,
+                'height' => 512,
+                'supports_streaming' => true
+            ]);
+        } catch (Exception $e) {
+            trace_error($e->getMessage());
+        }
+
+        return false;
     }
 
     public function sendPhoto($chat_id, $file_path, $filename, $caption, $inline_keyboard = null) {
@@ -91,8 +101,12 @@ class MainCycleEx {
                     'inline_keyboard' => $inline_keyboard
                 ]);
 
-            $photoMessage = $this->api->sendPhoto($params);
-            return $photoMessage->getMessageId();
+            try {
+                $photoMessage = $this->api->sendPhoto($params);
+                return $photoMessage->getMessageId();
+            } catch (Exception $e) {
+                trace_error($e);
+            }
         } else {
             trace_error("File ({$file_path}) is not exists");
             return true;

@@ -20,6 +20,7 @@ class ProcessLock {
             
             // Проверяем, жив ли процесс
             if ($this->isProcessRunning($existingPid)) {
+                //echo "Процесс уже запущен";
                 return false; // Процесс уже запущен
             }
             
