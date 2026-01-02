@@ -68,9 +68,6 @@ class LeonardoAPI implements APIInterface
             ];
         }
 
-        echo $response;
-        /*
-
         curl_close($ch);
 
         $logstr = "Endpoint: {$endpoint}\nResponse: ".json_encode($response, JSON_FLAGS);
@@ -82,14 +79,17 @@ class LeonardoAPI implements APIInterface
         
             trace($logstr);
 
-            $hash = isset($response['hash']) ? $response['hash'] : false;
+            $job = $response['sdGenerationJob'];
 
-            if ($hash && $this->modelTask) {
+            $hash = isset($job['generationId']) ? $job['generationId'] : false;
+
+            if ($hash && $this->modelTask && $this->bot) {
 
                 $chat_id = @$this->bot->CurrentUpdate()->getMessage()->getChat()->getId();
                 $this->modelTask->Update([
                     'user_id'=>$this->bot->getUserId(),
                     'chat_id'=>$chat_id,
+                    'service'=>'leo'
                     'hash'=>$response['hash'] = $hash,
                     'request_data'=> json_encode(array_merge($data, ['endpoint'=>$endpoint]), JSON_FLAGS)
                 ]);
@@ -98,7 +98,6 @@ class LeonardoAPI implements APIInterface
 
             return $hash;
         }
-        */
 
         return false;
     }

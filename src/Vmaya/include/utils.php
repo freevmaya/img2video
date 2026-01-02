@@ -188,6 +188,72 @@ function scraperDownload($url, $file_path) {
     return $result == 1;
 }
 
+function getClientIP() {
+    $ip = '';
+    
+    // Проверяем заголовки в порядке приоритета
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        // Может содержать несколько IP через запятую
+        $ipList = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+        $ip = trim($ipList[0]);
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED'])) {
+        $ip = $_SERVER['HTTP_X_FORWARDED'];
+    } elseif (!empty($_SERVER['HTTP_X_CLUSTER_CLIENT_IP'])) {
+        $ip = $_SERVER['HTTP_X_CLUSTER_CLIENT_IP'];
+    } elseif (!empty($_SERVER['HTTP_FORWARDED_FOR'])) {
+        $ip = $_SERVER['HTTP_FORWARDED_FOR'];
+    } elseif (!empty($_SERVER['HTTP_FORWARDED'])) {
+        $ip = $_SERVER['HTTP_FORWARDED'];
+    } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    
+    // Валидация IP адреса
+    if (filter_var($ip, FILTER_VALIDATE_IP)) {
+        return $ip;
+    }
+    
+    return 'unknown';
+}
+
+function strEnum($number, $pattern, $lang = 'ru'): string
+{
+    // Парсим паттерн
+    if (!preg_match('/^([^\[]+)\[([^\]]+)\]$/', $pattern, $matches)) {
+        // Если паттерн не соответствует формату, возвращаем как есть
+        return $number . ' ' . $pattern;
+    }
+    
+    $base = $matches[1];
+    $forms = explode(',', $matches[2]);
+    
+    // Для русского языка
+    if ($lang === 'ru') {
+        $num = abs((int)$number);
+        
+        if ($num % 10 === 1 && $num % 100 !== 11) {
+            return $number . ' ' . $base . $forms[0];
+        } elseif ($num % 10 >= 2 && $num % 10 <= 4 && ($num % 100 < 10 || $num % 100 >= 20)) {
+            return $number . ' ' . $base . $forms[1];
+        } else {
+            return $number . ' ' . $base . $forms[2];
+        }
+    }
+    // Для английского
+    elseif ($lang === 'en') {
+        $num = abs((int)$number);
+        return $num === 1 
+            ? $number . ' ' . $base . $forms[0] 
+            : $number . ' ' . $base . ($forms[2] ?? $forms[0] . 's');
+    }
+    // Для других языков
+    else {
+        return $number . ' ' . $base;
+    }
+}
+
 
 /**
  * Улучшенная функция изменения размера изображения
