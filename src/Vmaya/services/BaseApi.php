@@ -15,6 +15,14 @@ abstract class BaseApi implements APIInterface
     	}
     }
 
+    public function getModelUrl($model_name) {
+        return isset($this->modelList[$model_name]['url']) ? $this->modelList[$model_name]['url'] : $this->defaultUrl();
+    }
+
+    public function defaultUrl() {
+        return "";
+    }
+
     public function getModels() {
         return array_filter($this->modelList, function($model) {
         	return $model['enabled'];

@@ -19,6 +19,10 @@ class BaseKlingApi extends BaseApi
         $this->model_name 	= $model_name;
     }
 
+    public function defaultUrl() {
+        return $this->baseUrl;
+    }
+
     public function generateToken() {
 	    
 	    $payload = [

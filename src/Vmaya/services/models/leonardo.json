@@ -1,49 +1,64 @@
 {
 	"list": {
 		"Lucid Origin": {
-			"enabled": true
+			"enabled": true,
+			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
 		},
 		"Lucid Realism": {
-			"enabled": true
+			"enabled": true,
+			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
 		},
 		"Leonardo Phoenix": {
-			"enabled": true
+			"enabled": true,
+			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
 		},
 		"Nano Banana Pro": {
-			"enabled": false
+			"enabled": false,
+			"url": "https://cloud.leonardo.ai/api/rest/v2/generations"
 		},
 		"Nano Banana": {
-			"enabled": false
+			"enabled": false,
+			"url": "https://cloud.leonardo.ai/api/rest/v2/generations"
 		},
 		"FLUX.2 Pro": {
-			"enabled": true
+			"enabled": true,
+			"url": "https://cloud.leonardo.ai/api/rest/v2/generations"
 		},
 		"GPT1.5": {
-			"enabled": true
+			"enabled": true,
+			"url": "https://cloud.leonardo.ai/api/rest/v2/generations"
 		},
 		"Leonardo FLUX.1 Kontext": {
-			"enabled": true
+			"enabled": true,
+			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
 		},
 		"Flux": {
-			"enabled": true
+			"enabled": true,
+			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
 		},
 		"Seedream": {
-			"enabled": true
+			"enabled": true,
+			"url": "https://cloud.leonardo.ai/api/rest/v2/generations"
 		},
 		"PhotoReal": {
-			"enabled": true
+			"enabled": true,
+			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
 		},
 		"Alchemy": {
-			"enabled": true
+			"enabled": true,
+			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
 		},
 		"Image Guidance": {
-			"enabled": true
+			"enabled": true,
+			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
 		},
 		"Canvas Inpainting": {
-			"enabled": true
+			"enabled": false,
+			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
 		},
 		"Realtime Canvas": {
-			"enabled": true
+			"enabled": true,
+			"url": "https://cloud.leonardo.ai/api/rest/v1/generations-lcm"
 		}
 	},
 	"default": {

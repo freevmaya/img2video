@@ -218,6 +218,13 @@ class Image2VideoBot extends YKassaBot {
                 case 'select':
                     $this->mj_api->Select($chatId, $parts[1], intval($parts[3]));
                     break;
+                case 'textToImage':
+                    if ($prompt = $this->popSession($parts[1])) {
+                        if ($this->isAllowedImage() || $this->firstStart)
+                            $this->leo_api->generateImage($prompt, ['model' => $this->getSession('leonardo_model')]);
+                        else $this->notEnough($chatId);
+                    }
+                    break;
                 case 'klingVideo':
                     if ($parts[1] == 'userText')
                         $prompt = $this->popSession('userText');
@@ -233,6 +240,19 @@ class Image2VideoBot extends YKassaBot {
         if ($expect = $this->expect) {
             if (method_exists($this, $expect))
                 $this->$expect($chatId, $text);
+        } else {
+            /*if ($photo = $this->getMessagePhoto()) {
+                $this->Answer($chatId, $this->genContent(Lang("What to do about this?"), false, [
+                    [['text'=>Lang('Create a video'), 'callback_data' => "task.klingVideo.{$photo}"]]
+                ]);
+            } else 
+            */
+            if (!empty($text)) {
+                $this->setSession('prompt', $text);
+                $this->Answer($chatId, $this->genContent(Lang("What to do about this?"), false, [
+                    [['text'=>Lang('Create an image'), 'callback_data' => "task.prompt.textToImage"]]
+                ]));
+            }
         }
     }
 
@@ -394,15 +414,8 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function textToImage($chatId, $prompt) {
-
-        //$this->mj_api->generateImage($prompt);
-
-        $leonardo_model = $this->getSession('leonardo_model');
-        if (!empty($leonardo_model)) {
-            if ($this->leo_api->generateImage($prompt, ['model' => $leonardo_model]) === false) 
-                $this->Answer($chatId, Lang("Something wrong"), $this->getSession('lastBotMessageId'));
-
-        } else $this->leo_api->generateImage($prompt);
+        if ($this->leo_api->generateImage($prompt, ['model' => $this->getSession('leonardo_model')]) === false) 
+            $this->Answer($chatId, Lang("Something wrong"), $this->getSession('lastBotMessageId'));
     }
 
     protected function textToVideo($chatId, $prompt) {

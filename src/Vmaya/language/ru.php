@@ -45,6 +45,7 @@ $lang = [
 	'Upscale'=>'Улучшить фото',
 	'Models'=>'Модели',
 	'Selected model %s'=>'Выбрана модель %s',
+	'What to do about this?'=>'Что с этим делать?',
 	'imageToVideoPrompts'=>[
 		'Человек смеётся',
 		'Человек улыбается',

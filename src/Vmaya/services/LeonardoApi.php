@@ -21,20 +21,28 @@ class LeonardoApi extends BaseApi
         $this->bot          = $bot;
     }
 
+    public function defaultUrl() {
+        return 'https://cloud.leonardo.ai/api/rest/v1';
+    }
+
     public function generateImage($prompt, $options=[])
     {
         $models = $this->getModels();
 
         $prompt = checkRusAndTranslate($prompt);
 
+        $model = false;
         if (isset($options['model'])) {
-            $model  = $options['model'];
+            $model = $options['model'];
             unset($options['model']);
         }
 
-        if ($model && isset($models[$model])) {
+        $url = $this->defaultUrl();
+
+        if (!empty($model) && isset($models[$model])) {
             if ($models[$model]['enabled'] && ($data = $this->setModelPrompt($model, $prompt))) {
                 $data = array_merge($data, $options);
+                $url = $this->getModelUrl($model);
             }
             else return false;
         } else {
@@ -51,7 +59,7 @@ class LeonardoApi extends BaseApi
             ], $options);
         }
 
-        return $this->makeRequest('/generations', $data);
+        return $this->makeRequest($url, $data);
     }
 
     public function generateImageFromImage($imagePath, $prompt, $options=[]) {
@@ -62,13 +70,13 @@ class LeonardoApi extends BaseApi
 
     }
 
-    private function makeRequest($endpoint, $data)
+    private function makeRequest($url, $data)
     {
 
         if (PRODUCTION) {
             try {
 
-                $ch = curl_init($this->baseUrl . $endpoint);
+                $ch = curl_init($url);
                 
                 curl_setopt_array($ch, [
                     CURLOPT_RETURNTRANSFER => true,
@@ -100,7 +108,7 @@ class LeonardoApi extends BaseApi
             ];
         }
 
-        $logstr = "Endpoint: {$endpoint}\nResponse: ".json_encode($response, JSON_FLAGS);
+        $logstr = "Endpoint: {$url}\nResponse: ".json_encode($response, JSON_FLAGS);
 
         if (isset($response['error']) || !empty($error) || 
             (isset($response['status']) && ($response['status'] === false))) {
@@ -125,7 +133,7 @@ class LeonardoApi extends BaseApi
                     'chat_id'=>$chat_id,
                     'service'=>'leo',
                     'hash'=>$response['hash'] = $hash,
-                    'request_data'=> json_encode(array_merge($data, ['endpoint'=>$endpoint]), JSON_FLAGS)
+                    'request_data'=> json_encode(array_merge($data, ['url'=>$url]), JSON_FLAGS)
                 ]);
                 $this->bot->Answer($chat_id, ['text' => Lang("The task has been accepted")]);
             }
