@@ -297,200 +297,205 @@ function resizeImageIfTooLarge($source_path, $dest_path = null, $options = []) {
         'new_size' => null,
         'resized' => false
     ];
+
+    try {
     
-    // Проверка файла
-    if (!file_exists($source_path)) {
-        $result['message'] = "Файл не найден: " . $source_path;
-        return $result;
-    }
-    
-    $image_info = @getimagesize($source_path);
-    if ($image_info === false) {
-        $result['message'] = "Не удалось прочитать изображение: " . $source_path;
-        return $result;
-    }
-    
-    list($orig_width, $orig_height, $image_type) = $image_info;
-    $result['original_size'] = ['width' => $orig_width, 'height' => $orig_height];
-    
-    // Исправляем ориентацию для JPEG с EXIF данными
-    if ($options['fix_orientation'] && $image_type == IMAGETYPE_JPEG && function_exists('exif_read_data')) {
-        $exif = @exif_read_data($source_path);
-        if (!empty($exif['Orientation'])) {
-            $source_image = imagecreatefromjpeg($source_path);
-            switch ($exif['Orientation']) {
-                case 3:
-                    $source_image = imagerotate($source_image, 180, 0);
-                    break;
-                case 6:
-                    $source_image = imagerotate($source_image, -90, 0);
-                    $temp = $orig_width;
-                    $orig_width = $orig_height;
-                    $orig_height = $temp;
-                    break;
-                case 8:
-                    $source_image = imagerotate($source_image, 90, 0);
-                    $temp = $orig_width;
-                    $orig_width = $orig_height;
-                    $orig_height = $temp;
-                    break;
-            }
-            // Сохраняем временный файл с исправленной ориентацией
-            $temp_path = tempnam(sys_get_temp_dir(), 'orient_');
-            imagejpeg($source_image, $temp_path, 100);
-            imagedestroy($source_image);
-            $source_path = $temp_path;
-        }
-    }
-    
-    // Проверяем, нужно ли изменять размер
-    if ($orig_width <= $options['max_width'] && $orig_height <= $options['max_height'] && !$options['crop_to_fit']) {
-        if ($source_path !== $dest_path) {
-            copy($source_path, $dest_path);
-        }
-        $result['success'] = true;
-        $result['message'] = "Размер в пределах допустимого";
-        $result['new_size'] = ['width' => $orig_width, 'height' => $orig_height];
-        return $result;
-    }
-    
-    // Вычисляем новые размеры
-    if ($options['crop_to_fit']) {
-        // Обрезаем для точного соответствия
-        $ratio = max($options['max_width'] / $orig_width, $options['max_height'] / $orig_height);
-        $new_width = round($orig_width * $ratio);
-        $new_height = round($orig_height * $ratio);
-        
-        $crop_x = floor(($new_width - $options['max_width']) / 2);
-        $crop_y = floor(($new_height - $options['max_height']) / 2);
-        $crop_width = $options['max_width'];
-        $crop_height = $options['max_height'];
-    } else {
-        // Сохраняем пропорции
-        $ratio = min($options['max_width'] / $orig_width, $options['max_height'] / $orig_height);
-        $new_width = round($orig_width * $ratio);
-        $new_height = round($orig_height * $ratio);
-        $crop_x = $crop_y = 0;
-        $crop_width = $new_width;
-        $crop_height = $new_height;
-    }
-    
-    // Загружаем изображение
-    switch ($image_type) {
-        case IMAGETYPE_JPEG:
-            $source_image = imagecreatefromjpeg($source_path);
-            break;
-        case IMAGETYPE_PNG:
-            $source_image = imagecreatefrompng($source_path);
-            break;
-        case IMAGETYPE_GIF:
-            $source_image = imagecreatefromgif($source_path);
-            break;
-        case IMAGETYPE_WEBP:
-            $source_image = function_exists('imagecreatefromwebp') ? imagecreatefromwebp($source_path) : false;
-            break;
-        default:
-            $result['message'] = "Неподдерживаемый тип изображения";
+        // Проверка файла
+        if (!file_exists($source_path)) {
+            $result['message'] = "Файл не найден: " . $source_path;
             return $result;
-    }
-    
-    if ($source_image === false) {
-        $result['message'] = "Не удалось создать изображение";
-        return $result;
-    }
-    
-    // Создаем новое изображение
-    if ($options['crop_to_fit']) {
-        $new_image = imagecreatetruecolor($options['max_width'], $options['max_height']);
-    } else {
-        $new_image = imagecreatetruecolor($new_width, $new_height);
-    }
-    
-    // Обрабатываем прозрачность
-    $is_transparent = $options['preserve_transparency'] && 
-                     ($image_type == IMAGETYPE_PNG || $image_type == IMAGETYPE_GIF || $image_type == IMAGETYPE_WEBP);
-    
-    if ($is_transparent) {
-        imagealphablending($new_image, false);
-        imagesavealpha($new_image, true);
-        $transparent = imagecolorallocatealpha($new_image, 255, 255, 255, 127);
-        imagefilledrectangle($new_image, 0, 0, 
-            $options['crop_to_fit'] ? $options['max_width'] : $new_width,
-            $options['crop_to_fit'] ? $options['max_height'] : $new_height,
-            $transparent
-        );
-    } else {
-        // Заливаем фоном
-        $bg_color = imagecolorallocate($new_image, 
-            $options['background_color'][0], 
-            $options['background_color'][1], 
-            $options['background_color'][2]
-        );
-        imagefilledrectangle($new_image, 0, 0, 
-            $options['crop_to_fit'] ? $options['max_width'] : $new_width,
-            $options['crop_to_fit'] ? $options['max_height'] : $new_height,
-            $bg_color
-        );
-    }
-    
-    // Изменяем размер (и обрезаем если нужно)
-    if ($options['crop_to_fit']) {
-        $temp_image = imagecreatetruecolor($new_width, $new_height);
+        }
+        
+        $image_info = @getimagesize($source_path);
+        if ($image_info === false) {
+            $result['message'] = "Не удалось прочитать изображение: " . $source_path;
+            return $result;
+        }
+        
+        list($orig_width, $orig_height, $image_type) = $image_info;
+        $result['original_size'] = ['width' => $orig_width, 'height' => $orig_height];
+        
+        // Исправляем ориентацию для JPEG с EXIF данными
+        if ($options['fix_orientation'] && $image_type == IMAGETYPE_JPEG && function_exists('exif_read_data')) {
+            $exif = @exif_read_data($source_path);
+            if (!empty($exif['Orientation'])) {
+                $source_image = imagecreatefromjpeg($source_path);
+                switch ($exif['Orientation']) {
+                    case 3:
+                        $source_image = imagerotate($source_image, 180, 0);
+                        break;
+                    case 6:
+                        $source_image = imagerotate($source_image, -90, 0);
+                        $temp = $orig_width;
+                        $orig_width = $orig_height;
+                        $orig_height = $temp;
+                        break;
+                    case 8:
+                        $source_image = imagerotate($source_image, 90, 0);
+                        $temp = $orig_width;
+                        $orig_width = $orig_height;
+                        $orig_height = $temp;
+                        break;
+                }
+                // Сохраняем временный файл с исправленной ориентацией
+                $temp_path = tempnam(sys_get_temp_dir(), 'orient_');
+                imagejpeg($source_image, $temp_path, 100);
+                imagedestroy($source_image);
+                $source_path = $temp_path;
+            }
+        }
+        
+        // Проверяем, нужно ли изменять размер
+        if ($orig_width <= $options['max_width'] && $orig_height <= $options['max_height'] && !$options['crop_to_fit']) {
+            if ($source_path !== $dest_path) {
+                copy($source_path, $dest_path);
+            }
+            $result['success'] = true;
+            $result['message'] = "Размер в пределах допустимого";
+            $result['new_size'] = ['width' => $orig_width, 'height' => $orig_height];
+            return $result;
+        }
+        
+        // Вычисляем новые размеры
+        if ($options['crop_to_fit']) {
+            // Обрезаем для точного соответствия
+            $ratio = max($options['max_width'] / $orig_width, $options['max_height'] / $orig_height);
+            $new_width = round($orig_width * $ratio);
+            $new_height = round($orig_height * $ratio);
+            
+            $crop_x = floor(($new_width - $options['max_width']) / 2);
+            $crop_y = floor(($new_height - $options['max_height']) / 2);
+            $crop_width = $options['max_width'];
+            $crop_height = $options['max_height'];
+        } else {
+            // Сохраняем пропорции
+            $ratio = min($options['max_width'] / $orig_width, $options['max_height'] / $orig_height);
+            $new_width = round($orig_width * $ratio);
+            $new_height = round($orig_height * $ratio);
+            $crop_x = $crop_y = 0;
+            $crop_width = $new_width;
+            $crop_height = $new_height;
+        }
+        
+        // Загружаем изображение
+        switch ($image_type) {
+            case IMAGETYPE_JPEG:
+                $source_image = imagecreatefromjpeg($source_path);
+                break;
+            case IMAGETYPE_PNG:
+                $source_image = imagecreatefrompng($source_path);
+                break;
+            case IMAGETYPE_GIF:
+                $source_image = imagecreatefromgif($source_path);
+                break;
+            case IMAGETYPE_WEBP:
+                $source_image = function_exists('imagecreatefromwebp') ? imagecreatefromwebp($source_path) : false;
+                break;
+            default:
+                $result['message'] = "Неподдерживаемый тип изображения";
+                return $result;
+        }
+        
+        if ($source_image === false) {
+            $result['message'] = "Не удалось создать изображение";
+            return $result;
+        }
+        
+        // Создаем новое изображение
+        if ($options['crop_to_fit']) {
+            $new_image = imagecreatetruecolor($options['max_width'], $options['max_height']);
+        } else {
+            $new_image = imagecreatetruecolor($new_width, $new_height);
+        }
+        
+        // Обрабатываем прозрачность
+        $is_transparent = $options['preserve_transparency'] && 
+                         ($image_type == IMAGETYPE_PNG || $image_type == IMAGETYPE_GIF || $image_type == IMAGETYPE_WEBP);
         
         if ($is_transparent) {
-            imagealphablending($temp_image, false);
-            imagesavealpha($temp_image, true);
-            $transparent = imagecolorallocatealpha($temp_image, 255, 255, 255, 127);
-            imagefilledrectangle($temp_image, 0, 0, $new_width, $new_height, $transparent);
+            imagealphablending($new_image, false);
+            imagesavealpha($new_image, true);
+            $transparent = imagecolorallocatealpha($new_image, 255, 255, 255, 127);
+            imagefilledrectangle($new_image, 0, 0, 
+                $options['crop_to_fit'] ? $options['max_width'] : $new_width,
+                $options['crop_to_fit'] ? $options['max_height'] : $new_height,
+                $transparent
+            );
+        } else {
+            // Заливаем фоном
+            $bg_color = imagecolorallocate($new_image, 
+                $options['background_color'][0], 
+                $options['background_color'][1], 
+                $options['background_color'][2]
+            );
+            imagefilledrectangle($new_image, 0, 0, 
+                $options['crop_to_fit'] ? $options['max_width'] : $new_width,
+                $options['crop_to_fit'] ? $options['max_height'] : $new_height,
+                $bg_color
+            );
         }
         
-        imagecopyresampled($temp_image, $source_image, 0, 0, 0, 0, $new_width, $new_height, $orig_width, $orig_height);
-        imagecopy($new_image, $temp_image, 0, 0, $crop_x, $crop_y, $crop_width, $crop_height);
-        imagedestroy($temp_image);
-    } else {
-        imagecopyresampled($new_image, $source_image, 0, 0, 0, 0, $new_width, $new_height, $orig_width, $orig_height);
-    }
-    
-    // Сохраняем результат
-    $save_result = false;
-    switch ($image_type) {
-        case IMAGETYPE_JPEG:
-            $save_result = imagejpeg($new_image, $dest_path, $options['quality']);
-            break;
-        case IMAGETYPE_PNG:
-            $png_quality = 9 - round($options['quality'] / 100 * 9);
-            $save_result = imagepng($new_image, $dest_path, $png_quality);
-            break;
-        case IMAGETYPE_GIF:
-            $save_result = imagegif($new_image, $dest_path);
-            break;
-        case IMAGETYPE_WEBP:
-            if (function_exists('imagewebp')) {
-                $save_result = imagewebp($new_image, $dest_path, $options['quality']);
+        // Изменяем размер (и обрезаем если нужно)
+        if ($options['crop_to_fit']) {
+            $temp_image = imagecreatetruecolor($new_width, $new_height);
+            
+            if ($is_transparent) {
+                imagealphablending($temp_image, false);
+                imagesavealpha($temp_image, true);
+                $transparent = imagecolorallocatealpha($temp_image, 255, 255, 255, 127);
+                imagefilledrectangle($temp_image, 0, 0, $new_width, $new_height, $transparent);
             }
-            break;
-    }
-    
-    // Освобождаем память
-    imagedestroy($source_image);
-    imagedestroy($new_image);
-    
-    if ($save_result) {
-        $result['success'] = true;
-        $result['message'] = "Изображение успешно обработано";
-        $result['new_size'] = [
-            'width' => $options['crop_to_fit'] ? $options['max_width'] : $new_width,
-            'height' => $options['crop_to_fit'] ? $options['max_height'] : $new_height
-        ];
-        $result['resized'] = true;
-        
-        // Удаляем метаданные если требуется
-        if ($options['strip_metadata']) {
-            // Простая реализация - пересохраняем без EXIF
-            // Для полного удаления метаданных нужны дополнительные библиотеки
+            
+            imagecopyresampled($temp_image, $source_image, 0, 0, 0, 0, $new_width, $new_height, $orig_width, $orig_height);
+            imagecopy($new_image, $temp_image, 0, 0, $crop_x, $crop_y, $crop_width, $crop_height);
+            imagedestroy($temp_image);
+        } else {
+            imagecopyresampled($new_image, $source_image, 0, 0, 0, 0, $new_width, $new_height, $orig_width, $orig_height);
         }
-    } else {
-        $result['message'] = "Ошибка при сохранении изображения";
+        
+        // Сохраняем результат
+        $save_result = false;
+        switch ($image_type) {
+            case IMAGETYPE_JPEG:
+                $save_result = imagejpeg($new_image, $dest_path, $options['quality']);
+                break;
+            case IMAGETYPE_PNG:
+                $png_quality = 9 - round($options['quality'] / 100 * 9);
+                $save_result = imagepng($new_image, $dest_path, $png_quality);
+                break;
+            case IMAGETYPE_GIF:
+                $save_result = imagegif($new_image, $dest_path);
+                break;
+            case IMAGETYPE_WEBP:
+                if (function_exists('imagewebp')) {
+                    $save_result = imagewebp($new_image, $dest_path, $options['quality']);
+                }
+                break;
+        }
+        
+        // Освобождаем память
+        imagedestroy($source_image);
+        imagedestroy($new_image);
+        
+        if ($save_result) {
+            $result['success'] = true;
+            $result['message'] = "Изображение успешно обработано";
+            $result['new_size'] = [
+                'width' => $options['crop_to_fit'] ? $options['max_width'] : $new_width,
+                'height' => $options['crop_to_fit'] ? $options['max_height'] : $new_height
+            ];
+            $result['resized'] = true;
+            
+            // Удаляем метаданные если требуется
+            if ($options['strip_metadata']) {
+                // Простая реализация - пересохраняем без EXIF
+                // Для полного удаления метаданных нужны дополнительные библиотеки
+            }
+        } else {
+            $result['message'] = "Ошибка при сохранении изображения";
+        }
+    } catch (Exception $e) {
+        trace_error($e->getMessage());
     }
     
     return $result;
