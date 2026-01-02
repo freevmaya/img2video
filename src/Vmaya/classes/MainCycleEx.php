@@ -114,7 +114,7 @@ class MainCycleEx {
                 $photoMessage = $this->api->sendPhoto($params);
                 return $photoMessage->getMessageId();
             } catch (Exception $e) {
-                trace_error($e);
+                trace_error($e.getMessage());
             }
         } else {
             trace_error("File ({$file_path}) is not exists");
