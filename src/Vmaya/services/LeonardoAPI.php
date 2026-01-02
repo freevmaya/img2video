@@ -26,6 +26,7 @@ class LeonardoApi extends BaseApi
         if (isset($options['model']) && isset($this->models[$options['model']])) {
             if ($data = $this->setModelPrompt($options['model'], $prompt)) {
                 unset($options['model']);
+                trace($options);
                 $data = array_merge($data, $options);
             }
             else return false;

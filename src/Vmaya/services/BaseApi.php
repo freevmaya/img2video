@@ -10,7 +10,7 @@ abstract class BaseApi implements APIInterface
     {
     	if (!empty($modes_file)) {
     		$data = json_decode(file_get_contents(__DIR__."/models/{$modes_file}.json"), true);
-    		$this->modelList = $data['list'];
+    		$this->modelList 	= $data['list'];
 	        $this->defaultModel = $data['default']; 
     	}
     }
