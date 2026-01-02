@@ -132,7 +132,7 @@ class Image2VideoBot extends YKassaBot {
 
     protected function callbackProcess($callback, $chatId, $messageId, $data) {
 
-        $parts = explode('.', $data);
+        $parts = explode('.', $data, 3);
         if ($this->_commandProcessor($parts[0], $chatId, $parts))
             return true;
         else return parent::callbackProcess($callback, $chatId, $messageId, $data);
