@@ -4,10 +4,12 @@ use \Telegram\Bot\FileUpload\InputFile;
 use \Telegram\Bot\Exceptions\TelegramResponseException;
 use App\Services\API\cycle\MjCycle;
 use App\Services\API\cycle\KlingCycle;
+use App\Services\API\cycle\LeoCycle;
 
 class MainCycleEx {
 
     private $lastMessageId;
+    private $currentLanguage;
     protected $user;
     protected $modelTask;
     protected $api;
@@ -23,7 +25,8 @@ class MainCycleEx {
 
         $this->processors 	= [
         	'mj' => new MjCycle($this, $this->modelTask, new MJModel()),
-        	'kling' => new KlingCycle($this, $this->modelTask, new KlingModel())
+        	'kling' => new KlingCycle($this, $this->modelTask, new KlingModel()),
+            'leo' => new LeoCycle($this, $this->modelTask, new LeoTasksModel())
         ];
 
         $this->downloadClient = new DownloadClient();
@@ -31,9 +34,13 @@ class MainCycleEx {
 
     protected function initLang($language_code) {
         GLOBAL $lang;
-        $fileName = LANGUAGE_PATH.$language_code.'.php';
-        if (file_exists($fileName))
-            include($fileName);
+        if ($this->currentLanguage != $language_code) {
+            $fileName = LANGUAGE_PATH.$language_code.'.php';
+            if (file_exists($fileName)) {
+                include($fileName);
+                $this->currentLanguage = $language_code;
+            }
+        }
     }
 
     public function Update() {
@@ -61,6 +68,8 @@ class MainCycleEx {
         $this->modelTask->Update([
             'id'=>$task['id'], 'state'=>$state
         ]);
+
+        trace("finish task {$task['id']}: {$state}");
     }
 
     public function sendMp4($task, $filePath, $filename, $message, $params=[]) {

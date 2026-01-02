@@ -4,29 +4,21 @@ namespace App\Services\API\cycle;
 class LeoCycle extends BaseCycle {
 
 	protected function doProcessResponse($task, $response) {
-		if (isset($response['result_url']) && !empty($response['result_url'])) {
 
-            $type = explode('.', $response['type']);
+        $type = explode('.', $response['type']);
 
-            $method = 'process_'.$type[0];
+        $method = 'process_'.$type[0];
 
-            if (method_exists($this, $method)) {
-                if ($type[0] == 'complete') {
-
-                    $result = json_decode(@$response['result'], true);
-
-                    if ($url = $response['result_url']) {
-                        $this->$method($task, $response);
-                    } else if ($this->$method($task, $response))
-                        $this->parent->finishTask($task);
-                }
-
-                $this->finishResponse($response); 
+        if (method_exists($this, $method)) {
+            if ($response['status'] == 'COMPLETE') {
+                $this->$method($task, $response);
             }
-            else {
-                $this->finishResponse($response);
-                trace_error("The method is missing: {$method}");
-            }
+
+            $this->finishResponse($response); 
+        }
+        else {
+            $this->finishResponse($response);
+            trace_error("The method is missing: {$method}");
         }
 	}
 
@@ -41,27 +33,25 @@ class LeoCycle extends BaseCycle {
             'task'      => $task,
             'response'  => $response,
             'file_url'  => $file_url,
+            'file_name' => $file_name,
             'file_path' => RESULT_PATH.$file_name
         ];
 
         $this->parent->downloadClient->AddTask(function($record, $data) {
-
             $method     = 'select';
             $task       = $data['task'];
             $response   = $data['response'];
             $hash       = $task['hash'];
-            $status      = $record['status'];
+            $dl_state   = $record['state'];
             $_this      = $data['this'];
             $parent     = $_this->parent;
-
-            $parent->finishTask($task, $status == 'COMPLETE' ? 'finished' : 'failure');
 
             trace("Attempt send photo {$data['file_path']}");
 
             resizeImageIfTooLarge($data['file_path']);
 
-            if ($status == 'COMPLETE') {
-                $result = $parent->sendPhoto($task['chat_id'], $data['file_path'], $data['file_name']);
+            if ($dl_state == 'finished') {
+                $result = $parent->sendPhoto($task['chat_id'], $data['file_path'], $data['file_name'], Lang('Your photo is ready'));
 
                 if ($result) {
 
@@ -69,9 +59,15 @@ class LeoCycle extends BaseCycle {
                         'response_id'=>$response['id'],
                         'hash'=>$hash
                     ]);
+
+                    $parent->finishTask($task, 'finished');
+                } else {
+                    $parent->Message($task['chat_id'], Lang('Something wrong'));
+                    $parent->finishTask($task, 'failure');
                 }
             } else {
                 $parent->Message($task['chat_id'], Lang('Fail download image'));
+                $parent->finishTask($task, 'failure');
             }
         }, $method_data['file_url'], $method_data['file_path'], $method_data);
     }

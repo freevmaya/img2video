@@ -22,8 +22,9 @@ abstract class BaseCycle {
         $responses = $this->getResponses($task);
 
         if (count($responses) == 0) {
-            if (HoursDiffDate($task['date']) > 1)
+            if (HoursDiffDate($task['date']) > 24) { // Если разница в 24 часа, то закрываем задание
                 $this->parent->finishTask($task, 'failure');
+            }
         } else {
             foreach ($responses as $item)
                 $this->doProcessResponse($task, $item);

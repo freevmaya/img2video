@@ -20,6 +20,7 @@
 	include(INCLUDE_PATH.DS.'db/mySQLProvider.php');
 
 	include(SERVICES_PATH.'APIInterface.php');
+	include(SERVICES_PATH.'BaseApi.php');
 	include(SERVICES_PATH.'MidjourneyApi.php');
 	include(SERVICES_PATH.'LeonardoApi.php');
 	include(SERVICES_PATH.'BaseKlingApi.php');

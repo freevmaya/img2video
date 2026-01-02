@@ -4,7 +4,7 @@ namespace App\Services\API;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-class BaseKlingApi implements APIInterface
+class BaseKlingApi extends BaseApi
 {
     private $accessKey;
     private $secretKey;
@@ -13,6 +13,7 @@ class BaseKlingApi implements APIInterface
 
     public function __construct($accessKey, $secretKey, $model_name='kling-v1')
     {
+        parent::__construct('kling');
         $this->accessKey    = $accessKey;
         $this->secretKey 	= $secretKey;
         $this->model_name 	= $model_name;

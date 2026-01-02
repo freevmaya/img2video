@@ -6,6 +6,7 @@ abstract class BaseBot {
     private $origin_user_id;
     private $reply_to_message;
     private $sessionModel;
+    private $currentLanguage;
 
     protected $user;
     protected $api;
@@ -256,9 +257,13 @@ abstract class BaseBot {
 
     protected function initLang($language_code) {
         GLOBAL $lang;
-        $fileName = LANGUAGE_PATH.$language_code.'.php';
-        if (file_exists($fileName))
-            include($fileName);
+        if ($this->currentLanguage != $language_code) {
+            $fileName = LANGUAGE_PATH.$language_code.'.php';
+            if (file_exists($fileName)) {
+                $this->currentLanguage = $language_code;
+                include($fileName);
+            }
+        }
     }
 
     public function GetWebhookUpdates() {

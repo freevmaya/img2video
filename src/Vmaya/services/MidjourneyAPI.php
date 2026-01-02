@@ -18,7 +18,7 @@ function ParseUrl($url) {
     return null;
 }
 
-class MidjourneyApi implements APIInterface
+class MidjourneyApi extends BaseApi
 {
     private $apiKey;
     private $baseUrl = 'https://api.userapi.ai';
@@ -31,6 +31,7 @@ class MidjourneyApi implements APIInterface
     public function __construct($apiKey, $webhook_url, $account_hash, 
                                 $bot, $modelTask, $modelReply)
     {
+        parent::__construct();
         $this->apiKey       = $apiKey;
         $this->webhook_url  = $webhook_url;
         $this->account_hash = $account_hash;

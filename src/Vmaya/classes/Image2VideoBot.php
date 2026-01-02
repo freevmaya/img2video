@@ -28,15 +28,16 @@ class Image2VideoBot extends YKassaBot {
         parent::initialize();
         $this->taskModel = new TaskModel();
         $this->downloadClient = new DownloadClient();
+
+
+        $this->mj_api = new MidjourneyApi(MJ_APIKEY, MJ_HOOK_URL, MJ_ACCOUNTHASH, 
+                                $this, $this->taskModel, new MJModel());
+        $this->kling_api = new KlingApi(KL_ACCESS_KEY, KL_SECRET_KEY, $this->taskModel, 'kling-v1-6', $this);
+        $this->leo_api = new LeonardoApi(LEO_APIKEY, $this, $this->taskModel, new LeoTasksModel());
     }
 
     protected function initUser($update) {
         if (($result = parent::initUser($update)) && $this->getUserId()) {
-            $this->mj_api = new MidjourneyApi(MJ_APIKEY, MJ_HOOK_URL, MJ_ACCOUNTHASH, 
-                                    $this, $this->taskModel, new MJModel());
-            $this->kling_api = new KlingApi(KL_ACCESS_KEY, KL_SECRET_KEY, $this->taskModel, 'kling-v1-6', $this);
-            $this->leo_api = new LeonardoApi(LEO_APIKEY, $this, $this->taskModel, new LeoTasksModel());
-
             $this->firstStart = $this->taskModel->getItem($this->getUser()['id'], 'user_id') == null;
         }
         return $result;
@@ -54,18 +55,20 @@ class Image2VideoBot extends YKassaBot {
 
     protected function startMenuList() {
         $result = [
+            [['text' => '🖼️ '.Lang('Create an image'), 'callback_data'  => 'create_image']],
             [['text' => '🎥 '.Lang('Bring a photo to life'), 'callback_data' => 'create_video']],
             [['text' => '💰 '.Lang('Balance'), 'callback_data' => 'MySubscribe']],
             //[['text' => '📊 '.Lang('My generations'), 'callback_data' => 'my_generations']],
             [['text' => '⭐ '.Lang('Subscription'), 'callback_data' => 'subscribe']],
             [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']],
+            [['text' => '🤖 '.Lang('Models'), 'callback_data' => 'models']],
             [['text' => '❕'.Lang('Agreement'), 'callback_data' => 'agreement']]
         ];
 
         if ($this->getOriginUserId() == ADMIN_USERID) {
             $result[] = [['text' => 'Остановить', 'callback_data' => 'stopBot'], ['text' => 'Сменить ID', 'callback_data' => 'changeId']];
 
-            $result[] = [['text' => 'Lonardo Image', 'callback_data' => 'create_image']];
+            //$result[] = [['text' => 'Lonardo Image', 'callback_data' => 'create_image']];
             $result[] = [['text' => '🖼️ '.Lang('Create an image'), 'callback_data' => 'create_image']];
         }
 
@@ -110,6 +113,12 @@ class Image2VideoBot extends YKassaBot {
             case 'agreement':
                 $this->agreement($chatId);
                 return true;
+            case 'models':
+                $this->models($chatId);
+                return true;
+            case 'model':
+                $this->setModel($chatId, $data);
+                return true;
         }
         return false;
     }
@@ -150,6 +159,39 @@ class Image2VideoBot extends YKassaBot {
             $text = file_get_contents($fileName);
             $this->Answer($chatId, $this->genContent($text, true), $this->getSession('lastBotMessageId'));
         }
+    }
+
+    protected function models($chatId) {
+        $leo_models = $this->leo_api->getModels();
+        $kling_models = $this->kling_api->getModels();
+
+        $leo_model = $this->getSession('leonardo_model');
+        $kling_model = $this->getSession('kling_model');
+
+        $list = [
+            [['text'=>'---Leonardo---', 'callback_data' => 'ignore']]
+        ];
+        foreach ($leo_models as $name=>$model) {
+            if ($leo_model == $name)
+                $name = '*'.$name;
+
+            $list[] = [['text' => $name, 'callback_data' => "model.leonardo.{$name}"]];
+        }
+
+        $list[] = [['text'=>'---Kling---', 'callback_data' => 'ignore']];
+
+        foreach ($kling_models as $name=>$model) {
+            if ($kling_model == $name)
+                $name = '*'.$name;
+            $list[] = [['text' => $name, 'callback_data' => "model.kling.{$name}"]];
+        }
+
+        $this->Answer($chatId, $this->genContent(Lang('Models'), true, $list), $this->getSession('lastBotMessageId'));
+    }
+
+    protected function setModel($chatId, $data) {
+        $this->setSession($data[1].'_model', $data[2]);
+        $this->Answer($chatId, $this->genContent(sprintf(Lang('Selected model %s'), $data[2]), true), $this->getSession('lastBotMessageId'));
     }
 
     protected function replaceUserId($chatId, $text) {
@@ -335,8 +377,6 @@ class Image2VideoBot extends YKassaBot {
             $imgPrice = round($stype['price'] / $stype['image_limit']);
             $videoPrice = round($stype['price'] / $stype['video_limit']);
 
-            trace($stype);
-
             $limitsText = sprintf(Lang('Enough for %s images or %s videos'), round($balance / $imgPrice), round($balance / $videoPrice));
             
             $this->Answer($chatId, $this->genContent(sprintf(Lang("Your balance %s"), $balance.' '.@$area['currency'])."\n\n".$limitsText, true), $this->getSession('lastBotMessageId'));
@@ -350,9 +390,15 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function textToImage($chatId, $prompt) {
-        $this->Answer($chatId, $this->genContent("Prompt: ".$prompt), $this->getSession('lastBotMessageId'));
+
         //$this->mj_api->generateImage($prompt);
-        $this->leo_api->generateImage($prompt);
+
+        $leonardo_model = $this->getSession('leonardo_model');
+        if (!empty($leonardo_model)) {
+            if ($this->leo_api->generateImage($prompt, ['model' => $leonardo_model]) === false) 
+                $this->Answer($chatId, Lang("Something wrong"), $this->getSession('lastBotMessageId'));
+
+        } else $this->leo_api->generateImage($prompt);
     }
 
     protected function textToVideo($chatId, $prompt) {
@@ -360,7 +406,11 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function text2image($chatId) {
-        $result = $this->Answer($chatId, $this->genContent(Lang("Send a prompt"), true), $this->getSession('lastBotMessageId'));
+        if ($leonardo_model = $this->getSession('leonardo_model'))
+            $text = sprintf(Lang("Send a prompt. Current model %s"), $leonardo_model);
+        else $text = Lang("Send a prompt");
+
+        $result = $this->Answer($chatId, $this->genContent($text, true), $this->getSession('lastBotMessageId'));
         $this->setSession("expect", 'textToImage');
 
         if (isset($result['message_id']))
