@@ -195,7 +195,7 @@ class Image2VideoBot extends YKassaBot {
 
     protected function setModel($chatId, $data) {
         $this->setSession($data[1].'_model', $data[2]);
-        $this->Answer($chatId, $this->genContent(sprintf(Lang('Selected model %s'), $data[2]), true));
+        $this->Answer($chatId, $this->genContent(sprintf(Lang('Selected model %s'), $data[2]), true), $this->getSession('lastBotMessageId'));
     }
 
     protected function replaceUserId($chatId, $text) {

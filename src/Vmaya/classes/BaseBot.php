@@ -185,6 +185,9 @@ abstract class BaseBot {
         } else {
             $result = $this->api->sendMessage($params);
         }
+
+        if (isset($result['message_id']))
+            $this->setSession('lastBotMessageId', $result['message_id']);
         return $result;
     }
 
