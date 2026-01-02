@@ -23,10 +23,15 @@ class LeonardoApi extends BaseApi
 
     public function generateImage($prompt, $options=[])
     {
-        if (isset($options['model']) && isset($this->models[$options['model']])) {
-            if ($data = $this->setModelPrompt($options['model'], $prompt)) {
-                unset($options['model']);
-                trace($options);
+        $models = $this->getModels();
+
+        if (isset($options['model'])) {
+            $model  = $options['model'];
+            unset($options['model']);
+        }
+
+        if ($model && isset($models[$model])) {
+            if ($models[$model]['enabled'] && ($data = $this->setModelPrompt($model, $prompt))) {
                 $data = array_merge($data, $options);
             }
             else return false;
