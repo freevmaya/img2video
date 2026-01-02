@@ -465,12 +465,13 @@ abstract class BaseBot {
         $btList = empty($buttons) ? [] : $buttons;
         $result = ['text' => $text];
 
+        /*
         if ($backToMenu && $this->hasSession('lastBotMessageId')) {
             $back = ['text' => Lang("Back"), 'callback_data' => 'menu'];
             if (count($btList) > 0)
                 $btList[count($btList) - 1][] = $back;
             else $btList[] = [$back];            
-        }
+        }*/
 
         if ($btList && is_array($btList) && (count($btList) > 0))
             $result['reply_markup'] = json_encode(['inline_keyboard' => $btList]);

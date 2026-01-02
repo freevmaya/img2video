@@ -218,7 +218,7 @@ abstract class YKassaBot extends BaseBot {
         $keyboard[] = [
             ['text' => "💰 ".Lang("Purchase a subscription"), 'callback_data' => 'subscribe']
         ];
-        $this->Answer($chatId, $this->genContent(Lang("Insufficient balance"), true, $keyboard), $this->getSession('lastBotMessageId'));
+        $this->Answer($chatId, $this->genContent(Lang("Insufficient balance"), true, $keyboard));
     }
 
     protected function subscribeTypeList() {
@@ -241,7 +241,7 @@ abstract class YKassaBot extends BaseBot {
 
         $keyboard[] = $subscribeBlock;
 
-        $this->Answer($chatId, $this->genContent(Lang("Subscription options"), true, $keyboard), $this->getSession('lastBotMessageId'));
+        $this->Answer($chatId, $this->genContent(Lang("Subscription options"), true, $keyboard));
     }
 }
 

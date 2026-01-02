@@ -125,7 +125,7 @@ class Image2VideoBot extends YKassaBot {
 
     protected function commandProcess($command, $chatId, $messageId, $text) {
 
-        $this->unsetSessions(['lastBotMessageId', 'expect']);
+        $this->unsetSessions(['expect']);
         if (!$this->_commandProcessor(substr($command, 1), $chatId, $text))
             parent::commandProcess($command, $chatId, $messageId, $text);
     }
@@ -149,7 +149,7 @@ class Image2VideoBot extends YKassaBot {
 
     protected function changeId($chatId) {
 
-        $this->Answer($chatId, Lang("Enter new user ID"), $this->getSession('lastBotMessageId'));
+        $this->Answer($chatId, Lang("Enter new user ID"));
         $this->setSession("expect", 'replaceUserId');
     }
 
@@ -157,7 +157,7 @@ class Image2VideoBot extends YKassaBot {
         $fileName = LANGUAGE_PATH.$this->user['language_code'].DS.'agreement.txt';
         if (file_exists($fileName)) {            
             $text = file_get_contents($fileName);
-            $this->Answer($chatId, $this->genContent($text, true), $this->getSession('lastBotMessageId'));
+            $this->Answer($chatId, $this->genContent($text, true));
         }
     }
 
@@ -174,7 +174,7 @@ class Image2VideoBot extends YKassaBot {
             $list[] = [['text'=>'---Leonardo---', 'callback_data' => 'ignore']];
             foreach ($leo_models as $name=>$model) {
                 if ($leo_model == $name)
-                    $name = '*'.$name;
+                    $name = '🟢 '.$name;
 
                 $list[] = [['text' => $name, 'callback_data' => "model.leonardo.{$name}"]];
             }
@@ -185,17 +185,17 @@ class Image2VideoBot extends YKassaBot {
 
             foreach ($kling_models as $name=>$model) {
                 if ($kling_model == $name)
-                    $name = '*'.$name;
+                    $name = '🟢 '.$name;
                 $list[] = [['text' => $name, 'callback_data' => "model.kling.{$name}"]];
             }
         }
 
-        $this->Answer($chatId, $this->genContent(Lang('Models'), true, $list), $this->getSession('lastBotMessageId'));
+        $this->Answer($chatId, $this->genContent(Lang('Models'), true, $list));
     }
 
     protected function setModel($chatId, $data) {
         $this->setSession($data[1].'_model', $data[2]);
-        $this->Answer($chatId, $this->genContent(sprintf(Lang('Selected model %s'), $data[2]), true), $this->getSession('lastBotMessageId'));
+        $this->Answer($chatId, $this->genContent(sprintf(Lang('Selected model %s'), $data[2]), true));
     }
 
     protected function replaceUserId($chatId, $text) {
@@ -265,10 +265,10 @@ class Image2VideoBot extends YKassaBot {
 
             if (!empty($image_url) && !empty($prompt)) {
                 $this->kling_api->generateVideoFromImage($image_url, $prompt);
-                $this->Answer($chatId, Lang('Sent. This may take several minutes.'), $this->getSession('lastBotMessageId'));
+                $this->Answer($chatId, Lang('Sent. This may take several minutes.'));
             }
-            else $this->Wrong($chatId, $this->getSession('lastBotMessageId'));
-        } else $this->Wrong($chatId, $this->getSession('lastBotMessageId'));
+            else $this->Wrong($chatId);
+        } else $this->Wrong($chatId);
     }
 
     protected function image2video_photo_prompt($chatId, $prompt) {
@@ -322,10 +322,7 @@ class Image2VideoBot extends YKassaBot {
         $result = $this->Answer($chatId, [
             'text' => Lang('Choose action').':',
             'reply_markup' => json_encode(['inline_keyboard' => $this->startMenuList()])
-        ], $this->getSession('lastBotMessageId'));
-
-        if (isset($result['message_id']))
-            $this->setSession('lastBotMessageId', $result['message_id']);
+        ]);
     }
 
     protected function start($chatId) {
@@ -374,7 +371,7 @@ class Image2VideoBot extends YKassaBot {
                 $msg .= ' and git pull '.($git_result['success'] ? 'success!' : 'failure');
             }
 
-            $this->Answer($chatId, $this->genContent(Lang($msg), true), $this->getSession('lastBotMessageId'));
+            $this->Answer($chatId, $this->genContent(Lang($msg), true));
         }
     }
 
@@ -383,7 +380,7 @@ class Image2VideoBot extends YKassaBot {
         $link = 'tg://user?id='.SUPPORT_USERID;
         $this->Answer($chatId, $this->genContent(sprintf(Lang("HelpDeskDescription"), $this->getUserId()), true, [
             [['text' => Lang("Go to dialogue"), 'url' => $link]]
-        ]), $this->getSession('lastBotMessageId'));
+        ]));
     }
 
     protected function mySubscribe($chatId) {
@@ -403,23 +400,23 @@ class Image2VideoBot extends YKassaBot {
 
             $limitsText = sprintf(Lang('Enough for %s images or %s videos'), round($balance / $imgPrice), round($balance / $videoPrice));
             
-            $this->Answer($chatId, $this->genContent(sprintf(Lang("Your balance %s"), $balance.' '.@$area['currency'])."\n\n".$limitsText, true), $this->getSession('lastBotMessageId'));
+            $this->Answer($chatId, $this->genContent(sprintf(Lang("Your balance %s"), $balance.' '.@$area['currency'])."\n\n".$limitsText, true));
 
         } else {
             $this->Answer($chatId, $this->genContent(Lang("No subscription"), true, [
                     [['text' => '⭐'.Lang('Subscription'), 'callback_data' => 'subscribe']]
                 ]
-            ), $this->getSession('lastBotMessageId'));
+            ));
         }
     }
 
     protected function textToImage($chatId, $prompt) {
         if ($this->leo_api->generateImage($prompt, ['model' => $this->getSession('leonardo_model')]) === false) 
-            $this->Answer($chatId, Lang("Something wrong"), $this->getSession('lastBotMessageId'));
+            $this->Answer($chatId, Lang("Something wrong"));
     }
 
     protected function textToVideo($chatId, $prompt) {
-        $this->Answer($chatId, $this->genContent("Prompt: ".$prompt), $this->getSession('lastBotMessageId'));
+        $this->Answer($chatId, $this->genContent("Prompt: ".$prompt));
     }
 
     protected function text2image($chatId) {
@@ -427,7 +424,7 @@ class Image2VideoBot extends YKassaBot {
             $text = sprintf(Lang("Send a prompt. Current model %s"), $leonardo_model);
         else $text = Lang("Send a prompt");
 
-        $result = $this->Answer($chatId, $this->genContent($text, true), $this->getSession('lastBotMessageId'));
+        $result = $this->Answer($chatId, $this->genContent($text, true));
         $this->setSession("expect", 'textToImage');
 
         if (isset($result['message_id']))
@@ -435,12 +432,12 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function image2video($chatId) {
-        $this->Answer($chatId, $this->genContent(Lang("Send you photo"), true), $this->getSession('lastBotMessageId'));
+        $this->Answer($chatId, $this->genContent(Lang("Send you photo"), true));
         $this->setSession("expect", 'image2video_photo');
     }
 
     protected function discribe($chatId, $data) {
-        $this->Answer($chatId, $this->genContent(Lang("Send you photo"), true), $this->getSession('lastBotMessageId'));
+        $this->Answer($chatId, $this->genContent(Lang("Send you photo"), true));
         $this->setSession("expect", 'image_to_discribe');
     }
 
@@ -451,9 +448,9 @@ class Image2VideoBot extends YKassaBot {
 
             if (!empty($image_url)) {
                 $this->mj_api->Describe($image_url);
-                $this->Answer($chatId, Lang('Sent. This may take several minutes.'), $this->getSession('lastBotMessageId'));
+                $this->Answer($chatId, Lang('Sent. This may take several minutes.'));
             }
-            else $this->Wrong($chatId, $this->getSession('lastBotMessageId'));
+            else $this->Wrong($chatId);
         }
     }
 }
