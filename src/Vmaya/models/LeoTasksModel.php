@@ -24,6 +24,10 @@ class LeoTasksModel extends BaseModel {
 				'label' => 'type',
 				'dbtype' => 's'
 			],
+			'status' => [
+				'label' => 'status',
+				'dbtype' => 's'
+			],
 			'object' => [
 				'label' => 'object',
 				'dbtype' => 's'

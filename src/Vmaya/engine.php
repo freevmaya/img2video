@@ -20,11 +20,13 @@
 	include(INCLUDE_PATH.DS.'db/mySQLProvider.php');
 
 	include(SERVICES_PATH.'APIInterface.php');
-	include(SERVICES_PATH.'MidjourneyAPI.php');
+	include(SERVICES_PATH.'MidjourneyApi.php');
+	include(SERVICES_PATH.'LeonardoApi.php');
 	include(SERVICES_PATH.'BaseKlingApi.php');
 	include(SERVICES_PATH.'KlingApi.php');
 	include(SERVICES_PATH.'cycle/BaseCycle.php');
 	include(SERVICES_PATH.'cycle/KlingCycle.php');
+	include(SERVICES_PATH.'cycle/LeoCycle.php');
 	include(SERVICES_PATH.'cycle/MjCycle.php');
 
 	define("AUTOLOAD_PATHS", [INCLUDE_PATH, CLASSES_PATH, MODELS_PATH]);

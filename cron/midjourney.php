@@ -3,11 +3,11 @@
 	require dirname(__DIR__).'/src/Vmaya/engine.php';
 
 	include(SERVICES_PATH.'APIInterface.php');
-	include(SERVICES_PATH.'MidjourneyAPI.php');
+	include(SERVICES_PATH.'MidjourneyApi.php');
 
-	use \App\Services\API\MidjourneyAPI;
+	use \App\Services\API\MidjourneyApi;
 
-	$mj = new MidjourneyAPI(MJ_APIKEY, MJ_HOOK_URL, MJ_ACCOUNTHASH);
+	$mj = new MidjourneyApi(MJ_APIKEY, MJ_HOOK_URL, MJ_ACCOUNTHASH);
 
 	$result = $mj->generateImage("Cyberpunk samurai meditating in a neon-lit, rain-soaked Tokyo alley");
 

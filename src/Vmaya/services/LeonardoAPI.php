@@ -4,7 +4,7 @@ namespace App\Services\API;
 use App\Services\API\cycle\MjCycle;
 use \Telegram\Bot\FileUpload\InputFile;
 
-class LeonardoAPI implements APIInterface
+class LeonardoApi implements APIInterface
 {
     private $apiKey;
     private $baseUrl = 'https://cloud.leonardo.ai/api/rest/v1';
@@ -60,7 +60,7 @@ class LeonardoAPI implements APIInterface
             ]
         ]);
 
-        if (PRODUCTION) $response = curl_exec($ch);
+        if (PRODUCTION) $response = json_decode(curl_exec($ch), true);
         else {
             echo "DEV Leonardo AI REQUEST!";
             $response = [
@@ -89,7 +89,7 @@ class LeonardoAPI implements APIInterface
                 $this->modelTask->Update([
                     'user_id'=>$this->bot->getUserId(),
                     'chat_id'=>$chat_id,
-                    'service'=>'leo'
+                    'service'=>'leo',
                     'hash'=>$response['hash'] = $hash,
                     'request_data'=> json_encode(array_merge($data, ['endpoint'=>$endpoint]), JSON_FLAGS)
                 ]);

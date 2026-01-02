@@ -209,7 +209,9 @@ abstract class YKassaBot extends BaseBot {
     }
 
     protected function isAllowedVideo() {
-        return $this->Balance() >= (new TransactionsModel)->GetPrice($this->getUserId(), 'video_limit');
+        $price = (new TransactionsModel)->GetPrice($this->getUserId(), 'video_limit');
+        trace($this->Balance().' '.$price);
+        return $this->Balance() >= $price;
     }
 
     protected function notEnough($chatId) {

@@ -10,13 +10,15 @@ create_video - оживить фото
 
 */
 
-use \App\Services\API\MidjourneyAPI;
+use \App\Services\API\MidjourneyApi;
 use \App\Services\API\KlingApi;
+use \App\Services\API\LeonardoApi;
 
 class Image2VideoBot extends YKassaBot {
 
     protected $mj_api;
     protected $kling_api;
+    protected $leo_api;
     protected $expect;
     protected $taskModel;
     protected $firstStart;
@@ -30,9 +32,11 @@ class Image2VideoBot extends YKassaBot {
 
     protected function initUser($update) {
         if (($result = parent::initUser($update)) && $this->getUserId()) {
-            $this->mj_api = new MidjourneyAPI(MJ_APIKEY, MJ_HOOK_URL, MJ_ACCOUNTHASH, 
+            $this->mj_api = new MidjourneyApi(MJ_APIKEY, MJ_HOOK_URL, MJ_ACCOUNTHASH, 
                                     $this, $this->taskModel, new MJModel());
             $this->kling_api = new KlingApi(KL_ACCESS_KEY, KL_SECRET_KEY, $this->taskModel, 'kling-v1-6', $this);
+            $this->leo_api = new LeonardoApi(LEO_APIKEY, $this, $this->taskModel, new LeoTasksModel());
+
             $this->firstStart = $this->taskModel->getItem($this->getUser()['id'], 'user_id') == null;
         }
         return $result;
@@ -61,7 +65,7 @@ class Image2VideoBot extends YKassaBot {
         if ($this->getOriginUserId() == ADMIN_USERID) {
             $result[] = [['text' => 'Остановить', 'callback_data' => 'stopBot'], ['text' => 'Сменить ID', 'callback_data' => 'changeId']];
 
-            $result[] = [['text' => 'dev Описание', 'callback_data' => 'discribe']];
+            $result[] = [['text' => 'Lonardo Image', 'callback_data' => 'create_image']];
             $result[] = [['text' => '🖼️ '.Lang('Create an image'), 'callback_data' => 'create_image']];
         }
 
@@ -320,7 +324,9 @@ class Image2VideoBot extends YKassaBot {
 
         $tmodel = new TransactionsModel();
 
-        if ($subscribe = $tmodel->LastSubscribe($this->getUserId())) {
+        $balance = $this->Balance();
+
+        if (($subscribe = $tmodel->LastSubscribe($this->getUserId())) && ($balance > 0)) {
             $area = (new AreasModel())->getItem($this->getUser()['area_id']);
 
             $data = json_decode($subscribe['data'], true);
@@ -329,9 +335,11 @@ class Image2VideoBot extends YKassaBot {
             $imgPrice = round($stype['price'] / $stype['image_limit']);
             $videoPrice = round($stype['price'] / $stype['video_limit']);
 
-            $limitsText = sprintf(Lang('Enough for %s images or %s videos'), round($this->Balance() / $imgPrice), round($this->Balance() / $videoPrice));
+            trace($stype);
+
+            $limitsText = sprintf(Lang('Enough for %s images or %s videos'), round($balance / $imgPrice), round($balance / $videoPrice));
             
-            $this->Answer($chatId, $this->genContent(sprintf(Lang("Your balance %s"), $this->Balance().' '.@$area['currency'])."\n\n".$limitsText, true), $this->getSession('lastBotMessageId'));
+            $this->Answer($chatId, $this->genContent(sprintf(Lang("Your balance %s"), $balance.' '.@$area['currency'])."\n\n".$limitsText, true), $this->getSession('lastBotMessageId'));
 
         } else {
             $this->Answer($chatId, $this->genContent(Lang("No subscription"), true, [
@@ -343,7 +351,8 @@ class Image2VideoBot extends YKassaBot {
 
     protected function textToImage($chatId, $prompt) {
         $this->Answer($chatId, $this->genContent("Prompt: ".$prompt), $this->getSession('lastBotMessageId'));
-        $this->mj_api->generateImage($prompt);
+        //$this->mj_api->generateImage($prompt);
+        $this->leo_api->generateImage($prompt);
     }
 
     protected function textToVideo($chatId, $prompt) {
@@ -370,7 +379,7 @@ class Image2VideoBot extends YKassaBot {
 
     protected function image_to_discribe($chatId, $text) {
         $best_photo = $this->getMessagePhoto();
-        trace($best_photo);
+
         if (($image_url = $this->GetFileUrl($best_photo['file_id']))) {
 
             if (!empty($image_url)) {

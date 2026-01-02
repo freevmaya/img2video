@@ -105,6 +105,7 @@ function processLeoWebhookData($data) {
     $model->Update([
         'hash' => $data['data']['object']['id'],
         'type' => $data['type'],
+        'status' => $data['data']['object']['status'],
         'object' => $data['object'],
         'result_url' => $result_url,
         'data' => json_encode($data['data'], JSON_FLAGS)

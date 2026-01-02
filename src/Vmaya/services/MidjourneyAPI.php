@@ -18,7 +18,7 @@ function ParseUrl($url) {
     return null;
 }
 
-class MidjourneyAPI implements APIInterface
+class MidjourneyApi implements APIInterface
 {
     private $apiKey;
     private $baseUrl = 'https://api.userapi.ai';
