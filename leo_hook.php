@@ -31,6 +31,7 @@ function Main($headers, $input) {
     // Включаем логирование
     if (ISLOG)
         file_put_contents(LOG_FILE, 
+            "\n\n-------------------------------------------------------".
             date('Y-m-d H:i:s') . " - Leo Webhook вызван\n", 
             FILE_APPEND
         );
