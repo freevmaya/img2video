@@ -3,27 +3,32 @@ namespace App\Services\API;
 
 abstract class BaseApi implements APIInterface
 {
-    protected $models;
+    private $modelList;
+    private $defaultModel;
 
     public function __construct($modes_file = null)
     {
     	if (!empty($modes_file)) {
-	        $this->models = json_decode(file_get_contents(__DIR__."/models/{$modes_file}.json"), true);
+    		$data = json_decode(file_get_contents(__DIR__."/models/{$modes_file}.json"), true);
+    		$this->modelList = $data['list'];
+	        $this->defaultModel = $data['default']; 
     	}
     }
 
     public function getModels() {
-        return $this->models;
+        return array_filter($this->modelList, function($model) {
+        	return $model['enabled'];
+        });
     }
 
     public function getModelOptions($model_name) {
-    	return isset($this->models[$model_name]) ? $this->models[$model_name] : [];
+    	return isset($this->defaultModel[$model_name]) ? $this->defaultModel[$model_name] : [];
     }
 
     public function setModelPrompt($model_name, $prompt) {
-    	if (!empty($prompt) && isset($this->models[$model_name])) {
-    		if (BaseApi::SetPrompt($this->models[$model_name], $prompt))
-    			return $this->models[$model_name];
+    	if (!empty($prompt) && isset($this->defaultModel[$model_name])) {
+    		if (BaseApi::SetPrompt($this->defaultModel[$model_name], $prompt))
+    			return $this->defaultModel[$model_name];
     	}
     	return false;
     }

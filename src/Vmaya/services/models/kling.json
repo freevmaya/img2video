@@ -1,3 +1,10 @@
 {
-	"kling-v1": "kling-v1"
+	"list": {
+		"kling-v1": {
+			"enabled": true
+		}
+	},
+	"default": {
+		"kling-v1": "kling-v1"
+	}
 }

@@ -168,22 +168,26 @@ class Image2VideoBot extends YKassaBot {
         $leo_model = $this->getSession('leonardo_model');
         $kling_model = $this->getSession('kling_model');
 
-        $list = [
-            [['text'=>'---Leonardo---', 'callback_data' => 'ignore']]
-        ];
-        foreach ($leo_models as $name=>$model) {
-            if ($leo_model == $name)
-                $name = '*'.$name;
+        $list = [];
 
-            $list[] = [['text' => $name, 'callback_data' => "model.leonardo.{$name}"]];
+        if (count($leo_models) > 0) {
+            $list[] = [['text'=>'---Leonardo---', 'callback_data' => 'ignore']];
+            foreach ($leo_models as $name=>$model) {
+                if ($leo_model == $name)
+                    $name = '*'.$name;
+
+                $list[] = [['text' => $name, 'callback_data' => "model.leonardo.{$name}"]];
+            }
         }
 
-        $list[] = [['text'=>'---Kling---', 'callback_data' => 'ignore']];
+        if (count($kling_models) > 0) {
+            $list[] = [['text'=>'---Kling---', 'callback_data' => 'ignore']];
 
-        foreach ($kling_models as $name=>$model) {
-            if ($kling_model == $name)
-                $name = '*'.$name;
-            $list[] = [['text' => $name, 'callback_data' => "model.kling.{$name}"]];
+            foreach ($kling_models as $name=>$model) {
+                if ($kling_model == $name)
+                    $name = '*'.$name;
+                $list[] = [['text' => $name, 'callback_data' => "model.kling.{$name}"]];
+            }
         }
 
         $this->Answer($chatId, $this->genContent(Lang('Models'), true, $list), $this->getSession('lastBotMessageId'));

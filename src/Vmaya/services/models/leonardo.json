@@ -1,212 +1,261 @@
 {
-	"Lucid Origin": {
-		"alchemy": false,
-		"height": 1080,
-		"modelId": "7b592283-e8a7-4c5a-9ba6-d18c31f258b9",
-		"contrast": 3.5,
-		"num_images": 1,
-		"styleUUID": "111dc692-d470-4eec-b791-3475abac4c46",
-		"prompt": "",
-		"width": 1920,
-		"ultra": false
-	},
-	"Lucid Realism": {
-		"alchemy": false,
-		"height": 1024,
-		"modelId": "05ce0082-2d80-4a2d-8653-4d1c85e2418e",
-		"contrast": 3.5,
-		"num_images": 1,
-		"styleUUID": "111dc692-d470-4eec-b791-3475abac4c46",
-		"prompt": "",
-		"width": 1024,
-		"ultra": false
-	},
-	"Leonardo Phoenix": {
-		"modelId": "de7d3faf-762f-48e0-b3b7-9d0ac3a3fcf3",
-		"contrast": 3.5,
-		"prompt": "",
-		"num_images": 1,
-		"width": 1472,
-		"height": 832,
-		"alchemy": true,
-		"styleUUID": "111dc692-d470-4eec-b791-3475abac4c46",
-		"enhancePrompt": false
-	},
-	"Nano Banana Pro": {
-		"model": "gemini-image-2",
-		"parameters": {
-			"width": 1024,
-			"height": 1024,
-			"prompt": "",
-			"quantity": 1,
-			"style_ids": [
-			    "111dc692-d470-4eec-b791-3475abac4c46"
-			],
-			"prompt_enhance": "OFF"
+	"list": {
+		"Lucid Origin": {
+			"enabled": true
 		},
-		"public": false
-	},
-	"Nano Banana": {
-		"model": "gemini-2.5-flash-image",
-	    "parameters": {
-	        "width": 1024,
-	        "height": 1024,
-	        "prompt": "",
-	        "quantity": 1,
-	        "style_ids": [
-	            "111dc692-d470-4eec-b791-3475abac4c46"
-	        ],
-	        "prompt_enhance": "OFF"
-	    },
-	    "public": false
-	},
-	"FLUX.2 Pro": {
-		"public": false,
-		"model": "flux-pro-2.0",
-		"parameters": {
-		"prompt": "A cat wearing a hat",
-		"quantity": 1,
-		"width": 1440,
-		"height": 1440,
-		"seed": 4294967295,
-		"guidances": {
-		  "image_reference": [
-					{ "image": { "id": "00000000-0000-0000-0000-000000000001", "type": "GENERATED" } },
-					{ "image": { "id": "00000000-0000-0000-0000-000000000002", "type": "UPLOADED" } },
-					{ "image": { "id": "00000000-0000-0000-0000-000000000003", "type": "GENERATED" } },
-					{ "image": { "id": "00000000-0000-0000-0000-000000000004", "type": "UPLOADED" } }
-				]
-		 	}
+		"Lucid Realism": {
+			"enabled": true
+		},
+		"Leonardo Phoenix": {
+			"enabled": true
+		},
+		"Nano Banana Pro": {
+			"enabled": true
+		},
+		"Nano Banana": {
+			"enabled": true
+		},
+		"FLUX.2 Pro": {
+			"enabled": true
+		},
+		"GPT1.5": {
+			"enabled": true
+		},
+		"Leonardo FLUX.1 Kontext": {
+			"enabled": true
+		},
+		"Flux": {
+			"enabled": true
+		},
+		"Seedream": {
+			"enabled": true
+		},
+		"PhotoReal": {
+			"enabled": true
+		},
+		"Alchemy": {
+			"enabled": true
+		},
+		"Image Guidance": {
+			"enabled": true
+		},
+		"Canvas Inpainting": {
+			"enabled": true
+		},
+		"Realtime Canvas": {
+			"enabled": true
 		}
 	},
-	"GPT1.5": {
-		"public": false,
-		"model": "gpt-image-1.5",
-		"parameters": {
-			"mode": "QUALITY",
-			"prompt": "Koala with purple hat",
-			"quantity": 2,
-			"width": 1024,
+	"default": {
+		"Lucid Origin": {
+			"alchemy": false,
+			"height": 1080,
+			"modelId": "7b592283-e8a7-4c5a-9ba6-d18c31f258b9",
+			"contrast": 3.5,
+			"num_images": 1,
+			"styleUUID": "111dc692-d470-4eec-b791-3475abac4c46",
+			"prompt": "",
+			"width": 1920,
+			"ultra": false
+		},
+		"Lucid Realism": {
+			"alchemy": false,
 			"height": 1024,
+			"modelId": "05ce0082-2d80-4a2d-8653-4d1c85e2418e",
+			"contrast": 3.5,
+			"num_images": 1,
+			"styleUUID": "111dc692-d470-4eec-b791-3475abac4c46",
+			"prompt": "",
+			"width": 1024,
+			"ultra": false
+		},
+		"Leonardo Phoenix": {
+			"modelId": "de7d3faf-762f-48e0-b3b7-9d0ac3a3fcf3",
+			"contrast": 3.5,
+			"prompt": "",
+			"num_images": 1,
+			"width": 1472,
+			"height": 832,
+			"alchemy": true,
+			"styleUUID": "111dc692-d470-4eec-b791-3475abac4c46",
+			"enhancePrompt": false
+		},
+		"Nano Banana Pro": {
+			"model": "gemini-image-2",
+			"parameters": {
+				"width": 1024,
+				"height": 1024,
+				"prompt": "",
+				"quantity": 1,
+				"style_ids": [
+				    "111dc692-d470-4eec-b791-3475abac4c46"
+				],
+				"prompt_enhance": "OFF"
+			},
+			"public": false
+		},
+		"Nano Banana": {
+			"model": "gemini-2.5-flash-image",
+		    "parameters": {
+		        "width": 1024,
+		        "height": 1024,
+		        "prompt": "",
+		        "quantity": 1,
+		        "style_ids": [
+		            "111dc692-d470-4eec-b791-3475abac4c46"
+		        ],
+		        "prompt_enhance": "OFF"
+		    },
+		    "public": false
+		},
+		"FLUX.2 Pro": {
+			"public": false,
+			"model": "flux-pro-2.0",
+			"parameters": {
+			"prompt": "A cat wearing a hat",
+			"quantity": 1,
+			"width": 1440,
+			"height": 1440,
 			"seed": 4294967295,
 			"guidances": {
-				"image_reference": [
-					{
-						"image": {
-							"id": "00000000-0000-0000-0000-000000000001",
-							"type": "UPLOADED"
-						},
-						"strength": 0.5,
-						"prompt_enhance": "OFF"
-					}
-				]
+			  "image_reference": [
+						{ "image": { "id": "00000000-0000-0000-0000-000000000001", "type": "GENERATED" } },
+						{ "image": { "id": "00000000-0000-0000-0000-000000000002", "type": "UPLOADED" } },
+						{ "image": { "id": "00000000-0000-0000-0000-000000000003", "type": "GENERATED" } },
+						{ "image": { "id": "00000000-0000-0000-0000-000000000004", "type": "UPLOADED" } }
+					]
+			 	}
 			}
-		}
-	},
-	"Leonardo FLUX.1 Kontext": {
-		"prompt": "",
-	    "modelId": "28aeddf8-bd19-4803-80fc-79602d1a9989",
-	    "styleUUID": "111dc692-d470-4eec-b791-3475abac4c46",
-	    "num_images": 1,
-	    "width": 832,
-	    "height": 1248
-	},
-	"Flux": {
-		"modelId": "b2614463-296c-462a-9586-aafdb8f00e36",
-		"contrast": 3.5,
-		"prompt": "",
-		"num_images": 1,
-		"width": 1024,
-		"height": 1024,
-		"styleUUID": "111dc692-d470-4eec-b791-3475abac4c46",
-		"enhancePrompt": false
-	},
-	"Seedream": {
-	    "model": "seedream-4.0",
-	    "parameters": {
-	        "width": 1920,
-	        "height": 1080,
-	        "prompt": "Koala with purple wizard hat on a skateboard",
-	        "quantity": 2,
-	        "guidances": {
-	            "image_reference": [
-	                {
-	                    "image": {
-	                        "id": "YOUR_UPLOADED_IMAGE_ID",
-	                        "type": "UPLOADED"
-	                    },
-	                    "strength": "MID"
-	                }
-	            ]
-	        },
-	        "style_ids": [
-	            "111dc692-d470-4eec-b791-3475abac4c46"
-	        ]
-	    },
-	    "public": false
-	},
-	"PhotoReal": {
-		"height": 512,
-		"prompt": "",
-		"negative_prompt": "trees",
-		"modelId": "aa77f04e-3eec-4034-9c07-d0f619684628",
-		"width": 512,
-		"alchemy": true,
-		"presetStyle": "DYNAMIC",
-		"photoReal": true,
-		"photoRealVersion":"v2"
-	},
-	"Alchemy": {
-		"height": 512,
-		"prompt": "",
-		"modelId": "aa77f04e-3eec-4034-9c07-d0f619684628",
-		"width": 512,
-		"alchemy": true,
-		"presetStyle": "CINEMATIC"
-	},
-	"Image Guidance": {
-		"height": 512,
-		"modelId": "aa77f04e-3eec-4034-9c07-d0f619684628",
-		"prompt": "",
-		"presetStyle":"CINEMATIC",
-		"width": 1024,
-		"photoReal": true,
-		"photoRealVersion":"v2",
-		"alchemy":true,
-		"controlnets": [
-		    {
-		        "initImageId": "<YOUR_GENERATED_IMAGE_ID>",
-		        "initImageType": "GENERATED",
-		        "preprocessorId": 67,
-		        "strengthType": "High",
-		        "influence": 0.39
+		},
+		"GPT1.5": {
+			"public": false,
+			"model": "gpt-image-1.5",
+			"parameters": {
+				"mode": "QUALITY",
+				"prompt": "Koala with purple hat",
+				"quantity": 2,
+				"width": 1024,
+				"height": 1024,
+				"seed": 4294967295,
+				"guidances": {
+					"image_reference": [
+						{
+							"image": {
+								"id": "00000000-0000-0000-0000-000000000001",
+								"type": "UPLOADED"
+							},
+							"strength": 0.5,
+							"prompt_enhance": "OFF"
+						}
+					]
+				}
+			}
+		},
+		"Leonardo FLUX.1 Kontext": {
+			"prompt": "",
+		    "modelId": "28aeddf8-bd19-4803-80fc-79602d1a9989",
+		    "styleUUID": "111dc692-d470-4eec-b791-3475abac4c46",
+		    "num_images": 1,
+		    "width": 832,
+		    "height": 1248
+		},
+		"Flux": {
+			"modelId": "b2614463-296c-462a-9586-aafdb8f00e36",
+			"contrast": 3.5,
+			"prompt": "",
+			"num_images": 1,
+			"width": 1024,
+			"height": 1024,
+			"styleUUID": "111dc692-d470-4eec-b791-3475abac4c46",
+			"enhancePrompt": false
+		},
+		"Seedream": {
+		    "model": "seedream-4.0",
+		    "parameters": {
+		        "width": 1920,
+		        "height": 1080,
+		        "prompt": "Koala with purple wizard hat on a skateboard",
+		        "quantity": 2,
+		        "guidances": {
+		            "image_reference": [
+		                {
+		                    "image": {
+		                        "id": "YOUR_UPLOADED_IMAGE_ID",
+		                        "type": "UPLOADED"
+		                    },
+		                    "strength": "MID"
+		                }
+		            ]
+		        },
+		        "style_ids": [
+		            "111dc692-d470-4eec-b791-3475abac4c46"
+		        ]
 		    },
-		    {
-		        "initImageId": "<YOUR_INIT_IMAGE_ID>",
-		        "initImageType": "UPLOADED",
-		        "preprocessorId": 67,
-		        "strengthType": "High",
-		        "influence": 0.64
-		    }
-		]
-	},
-	"Canvas Inpainting": {
-	    "prompt": "",
-	    "canvasRequest": true,
-	    "num_images": 1,
-	    "init_strength": 0.15,
-	    "canvasRequestType": "INPAINT",
-	    "guidance_scale": 7,
-	    "modelId": "1e60896f-3c26-4296-8ecc-53e2afecc132",
-	    "canvasInitId": "<init_image_id>",
-	    "canvasMaskId": "<masks_image_id>"
-	},
-	"Realtime Canvas": {
-		"width": 512,
-		"height": 512,
-		"imageDataUrl": "",
-		"prompt": "",
-		"style": "DYNAMIC",
-		"strength": 0.7
+		    "public": false
+		},
+		"PhotoReal": {
+			"height": 512,
+			"prompt": "",
+			"negative_prompt": "trees",
+			"modelId": "aa77f04e-3eec-4034-9c07-d0f619684628",
+			"width": 512,
+			"alchemy": true,
+			"presetStyle": "DYNAMIC",
+			"photoReal": true,
+			"photoRealVersion":"v2"
+		},
+		"Alchemy": {
+			"height": 512,
+			"prompt": "",
+			"modelId": "aa77f04e-3eec-4034-9c07-d0f619684628",
+			"width": 512,
+			"alchemy": true,
+			"presetStyle": "CINEMATIC"
+		},
+		"Image Guidance": {
+			"height": 512,
+			"modelId": "aa77f04e-3eec-4034-9c07-d0f619684628",
+			"prompt": "",
+			"presetStyle":"CINEMATIC",
+			"width": 1024,
+			"photoReal": true,
+			"photoRealVersion":"v2",
+			"alchemy":true,
+			"controlnets": [
+			    {
+			        "initImageId": "<YOUR_GENERATED_IMAGE_ID>",
+			        "initImageType": "GENERATED",
+			        "preprocessorId": 67,
+			        "strengthType": "High",
+			        "influence": 0.39
+			    },
+			    {
+			        "initImageId": "<YOUR_INIT_IMAGE_ID>",
+			        "initImageType": "UPLOADED",
+			        "preprocessorId": 67,
+			        "strengthType": "High",
+			        "influence": 0.64
+			    }
+			]
+		},
+		"Canvas Inpainting": {
+		    "prompt": "",
+		    "canvasRequest": true,
+		    "num_images": 1,
+		    "init_strength": 0.15,
+		    "canvasRequestType": "INPAINT",
+		    "guidance_scale": 7,
+		    "modelId": "1e60896f-3c26-4296-8ecc-53e2afecc132",
+		    "canvasInitId": "<init_image_id>",
+		    "canvasMaskId": "<masks_image_id>"
+		},
+		"Realtime Canvas": {
+			"width": 512,
+			"height": 512,
+			"imageDataUrl": "",
+			"prompt": "",
+			"style": "DYNAMIC",
+			"strength": 0.7
+		}
 	}
 }
