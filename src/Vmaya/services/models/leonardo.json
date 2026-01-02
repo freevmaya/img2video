@@ -10,10 +10,10 @@
 			"enabled": true
 		},
 		"Nano Banana Pro": {
-			"enabled": true
+			"enabled": false
 		},
 		"Nano Banana": {
-			"enabled": true
+			"enabled": false
 		},
 		"FLUX.2 Pro": {
 			"enabled": true

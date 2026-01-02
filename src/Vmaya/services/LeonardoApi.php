@@ -25,6 +25,8 @@ class LeonardoApi extends BaseApi
     {
         $models = $this->getModels();
 
+        $prompt = checkRusAndTranslate($prompt);
+
         if (isset($options['model'])) {
             $model  = $options['model'];
             unset($options['model']);
@@ -92,7 +94,9 @@ class LeonardoApi extends BaseApi
         else {
             echo "DEV Leonardo AI REQUEST!";
             $response = [
-                'hash'=>md5(strtotime('now'))
+                'sdGenerationJob' => [
+                    'generationId' => md5(strtotime('now'))
+                ]
             ];
         }
 

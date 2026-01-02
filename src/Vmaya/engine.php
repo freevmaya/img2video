@@ -29,6 +29,7 @@
 	include(SERVICES_PATH.'cycle/KlingCycle.php');
 	include(SERVICES_PATH.'cycle/LeoCycle.php');
 	include(SERVICES_PATH.'cycle/MjCycle.php');
+	include(SERVICES_PATH.'utils.php');
 
 	define("AUTOLOAD_PATHS", [INCLUDE_PATH, CLASSES_PATH, MODELS_PATH]);
 	spl_autoload_register(function ($class_name) {
