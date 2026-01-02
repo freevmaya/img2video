@@ -21,11 +21,11 @@
 			"url": "https://cloud.leonardo.ai/api/rest/v2/generations"
 		},
 		"FLUX.2 Pro": {
-			"enabled": true,
+			"enabled": false,
 			"url": "https://cloud.leonardo.ai/api/rest/v2/generations"
 		},
 		"GPT1.5": {
-			"enabled": true,
+			"enabled": false,
 			"url": "https://cloud.leonardo.ai/api/rest/v2/generations"
 		},
 		"Leonardo FLUX.1 Kontext": {
@@ -37,7 +37,7 @@
 			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
 		},
 		"Seedream": {
-			"enabled": true,
+			"enabled": false,
 			"url": "https://cloud.leonardo.ai/api/rest/v2/generations"
 		},
 		"PhotoReal": {
