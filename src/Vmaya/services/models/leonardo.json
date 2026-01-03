@@ -44,24 +44,28 @@
 			"dev": "Требуются какие то еще картинки, надо разобраться"
 		},
 		"PhotoReal": {
-			"enabled": true,
-			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
+			"enabled": false,
+			"url": "https://cloud.leonardo.ai/api/rest/v1/generations",
+			"dev": "Требуются какие то еще картинки, надо разобраться"
 		},
 		"Alchemy": {
 			"enabled": true,
 			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
 		},
 		"Image Guidance": {
-			"enabled": true,
-			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
+			"enabled": false,
+			"url": "https://cloud.leonardo.ai/api/rest/v1/generations",
+			"dev": "Требуются какие то еще картинки, надо разобраться"
 		},
 		"Canvas Inpainting": {
 			"enabled": false,
-			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
+			"url": "https://cloud.leonardo.ai/api/rest/v1/generations",
+			"dev": "Требуются какие то еще картинки, надо разобраться"
 		},
 		"Realtime Canvas": {
-			"enabled": true,
-			"url": "https://cloud.leonardo.ai/api/rest/v1/generations-lcm"
+			"enabled": false,
+			"url": "https://cloud.leonardo.ai/api/rest/v1/generations-lcm",
+			"dev": "Требуются какие то еще картинки, надо разобраться"
 		}
 	},
 	"default": {
