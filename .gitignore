@@ -1,6 +1,7 @@
 *.log
 *.pid
 *.zip
+*.cfg
 *.log.*
 logs/*
 config/*
