@@ -39,6 +39,9 @@ class TGUserModel extends BaseModel {
 
 				if ($dbp->bquery($query, 'iissss', $values))
 					$user['area_id'] = $area['id'];
+
+				$user['is_new'] = true;
+				
 			} else $user = $a_user;
 		}
 

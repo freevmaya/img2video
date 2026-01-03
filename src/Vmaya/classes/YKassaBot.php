@@ -26,13 +26,13 @@ abstract class YKassaBot extends BaseBot {
                 else $this->subscribe($chatId);
                 return true;
             case 'MySubscribe':
-                $this->mySubscribe($chatId);
+                $this->MySubscribe($chatId);
                 return true;
             default: return false;
         }
     }
 
-    protected function mySubscribe($chatId) {
+    protected function MySubscribe($chatId) {
     }
 
     protected function runUpdate($update) {

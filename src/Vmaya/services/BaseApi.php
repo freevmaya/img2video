@@ -25,6 +25,10 @@ abstract class BaseApi implements APIInterface
         return "";
     }
 
+    public function getModelInfo($model_name) {
+        return isset($this->modelList[$model_name]) ? $this->modelList[$model_name] : null;
+    }
+
     public function getModels() {
         return array_filter($this->modelList, function($model) {
         	return $model['enabled'];

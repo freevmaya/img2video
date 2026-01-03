@@ -124,8 +124,9 @@ abstract class BaseModel {
 	public function getItem($id, $idField = 'id') {		
 		GLOBAL $dbp;
 
-		$id = $this->verifyId($idField, $id);
-		return $id ? $dbp->line("SELECT * FROM {$this->getTable()} WHERE `{$idField}`={$id}") : null;
+		if ($id) $id = $this->verifyId($idField, $id);
+		
+		return $id ? $dbp->line("SELECT * FROM {$this->getTable()} WHERE `{$idField}`={$id}") : $dbp->line("SELECT * FROM {$this->getTable()} LIMIT 1");
 	}
 
 	public function Delete($id, $idField = 'id') {		

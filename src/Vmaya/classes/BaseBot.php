@@ -229,7 +229,8 @@ abstract class BaseBot {
         $message = $this->currentUpdate->getMessage();
     }*/
 
-    protected function initUser($update) {
+    public function findUserBlock($update) {
+
         $fields = [
             'message',
             'callback_query',
@@ -247,15 +248,21 @@ abstract class BaseBot {
             'chat_member',
             'chat_join_request'
         ];
-        
-        $user = null;
+
         $block = null;
         foreach ($fields as $field)
             if (isset($update[$field])) {
-                $block = $update[$field];
-                $user = $update[$field]['from'];
-                break;
+                return $update[$field];
             }
+
+        return false;
+    }
+
+    protected function initUser($update) {
+        
+        $user = null;
+        if ($block = $this->findUserBlock($update))
+            $user = $block['from'];
 
         $this->session = [];
         if ($user) {
@@ -272,6 +279,9 @@ abstract class BaseBot {
                 $this->user = (new TGUserModel())->checkAndAdd($user);
 
                 $this->initLang($this->user['language_code']);
+
+                if (isset($this->user['is_new'])) 
+                    $this->doNewUser();
                 return true;
             } catch (Exception $e) {
                 $this->trace_error($e->getMessage(), $update);
@@ -280,6 +290,10 @@ abstract class BaseBot {
         } else $this->trace_error("User block not found!", $update);
 
         return false;
+    }
+
+    protected function doNewUser() {
+        
     }
 
     protected function initAdmin($user, $update) {

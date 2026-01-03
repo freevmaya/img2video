@@ -19,7 +19,7 @@ class TransactionsModel extends BaseModel {
 	public function Balance($userId) {
 		GLOBAL $dbp;
 
-		return $dbp->one("SELECT SUM(`value`) FROM {$this->getTable()} WHERE `user_id`={$userId} AND `type` IN ('expense', 'subscribe')");
+		return $dbp->one("SELECT SUM(`value`) FROM {$this->getTable()} WHERE `user_id`={$userId} AND `type` IN ('expense', 'subscribe', 'present')");
 	}
 
 	public function Expense($userId) {
@@ -31,7 +31,7 @@ class TransactionsModel extends BaseModel {
 	public function LastSubscribe($userId) {
 		GLOBAL $dbp;
 
-		return $dbp->line("SELECT * FROM {$this->getTable()} WHERE `user_id`={$userId} AND `type` = 'subscribe' ORDER BY `id` DESC");
+		return $dbp->line("SELECT * FROM {$this->getTable()} WHERE `user_id`={$userId} AND `type` IN ('subscribe', 'present') ORDER BY `id` DESC");
 	}
 
 	public function GetPrice($userId, $limitName='image_limit') {
