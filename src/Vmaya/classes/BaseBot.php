@@ -130,8 +130,13 @@ abstract class BaseBot {
         return $result;
     }
 
-    public function DeleteMessage($chatId, $message_id) {
-        if (!empty($message_id))
+    public function DeleteMessage($chatId=null, $message_id=null) {
+        if (empty($message_id))
+            $message_id = $this->getSession('lastBotMessageId');
+        if (empty($chatId))
+            $chatId = $this->getCurrentChatId();
+
+        if (!empty($message_id) && !empty($chatId))
             $this->api->deleteMessage([ 'chat_id' => $chatId, 'message_id' => $message_id]); 
     }
 

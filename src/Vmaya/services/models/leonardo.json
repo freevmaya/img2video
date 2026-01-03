@@ -21,7 +21,7 @@
 			"url": "https://cloud.leonardo.ai/api/rest/v2/generations"
 		},
 		"FLUX.2 Pro": {
-			"enabled": true,
+			"enabled": false,
 			"url": "https://cloud.leonardo.ai/api/rest/v2/generations"
 		},
 		"GPT1.5": {

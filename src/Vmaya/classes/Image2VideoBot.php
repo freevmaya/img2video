@@ -220,6 +220,7 @@ class Image2VideoBot extends YKassaBot {
                     break;
                 case 'textToImage':
                     if ($prompt = $this->popSession($parts[1])) {
+                        $this->DeleteMessage();
                         if ($this->isAllowedImage() || $this->firstStart)
                             $this->leo_api->generateImage($prompt, ['model' => $this->getSession('leonardo_model')]);
                         else $this->notEnough($chatId);
