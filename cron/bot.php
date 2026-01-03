@@ -53,7 +53,7 @@ try {
     $telegram->setHttpClientHandler($httpClient);
 
     $dbp = new mySQLProvider(_dbhost, _dbname_default, _dbuser, _dbpassword);
-    $bot = new Image2VideoBot($telegram, $dbp, __FILE__.'.data');
+    $bot = new Image2VideoBot($telegram, $dbp, __FILE__.'.cfg');
 
     // 1. Удаляем вебхук, если он был установлен
     $telegram->deleteWebhook(['drop_pending_updates' => true]);
