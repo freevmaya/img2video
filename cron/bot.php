@@ -63,7 +63,7 @@ try {
     trace($head);
     
     // Основной цикл с обработкой обновлений
-    while ($lock->isFile()) {
+    while (true) {
 
         $bot->GetUpdates(10);
         
