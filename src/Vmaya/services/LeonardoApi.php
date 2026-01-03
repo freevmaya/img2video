@@ -119,9 +119,16 @@ class LeonardoApi extends BaseApi
         }
         else {
 
-            $job = $response['sdGenerationJob'];
+//{"generate":{"apiCreditCost":140,"generationId":"1f0e854a-f871-6d90-bd02-8c15f93ff666"}}.
 
-            $hash = isset($job['generationId']) ? trim($job['generationId']) : false;
+            $hash = false;
+            if (isset($response['sdGenerationJob'])) {
+                $job = isset($response['sdGenerationJob']);
+                $hash = isset($job['generationId']) ? trim($job['generationId']) : false;
+            } else  if (isset($response['generate'])) {
+                $generate = isset($response['generate']);
+                $hash = isset($generate['generationId']) ? trim($generate['generationId']) : false;
+            }
 
             if ($hash && $this->modelTask && $this->bot) {
         
