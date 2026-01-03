@@ -63,14 +63,13 @@ try {
     trace($head);
     
     // Основной цикл с обработкой обновлений
-    while (true) {
+    while ($lock->isFile()) {
 
         $bot->GetUpdates(10);
         
         // Проверяем, не нужно ли завершить работу
         if (function_exists('pcntl_signal_dispatch')) {
             pcntl_signal_dispatch();
-            break;
         }
         
         //echo "Cycle\n";
