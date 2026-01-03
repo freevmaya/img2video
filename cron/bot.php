@@ -7,6 +7,8 @@ require dirname(__DIR__).'/src/Vmaya/engine.php';
 
 use \Telegram\Bot\Api;
 use \Telegram\Bot\FileUpload\InputFile;
+use GuzzleHttp\Client;
+use Telegram\Bot\HttpClients\GuzzleHttpClient; // Правильный namespace
 
 // === ИНИЦИАЛИЗАЦИЯ БЛОКИРОВКИ ===
 $lock = new ProcessLock(__DIR__ . '/bot.pid');
@@ -31,7 +33,24 @@ $dbp = null;
 
 // === ОСНОВНОЙ КОД БОТА ===
 try {
+
+    $guzzleClient = new Client([
+        'timeout' => 10,
+        'connect_timeout' => 10,
+        'read_timeout' => 10,
+        'curl' => [
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_LOW_SPEED_LIMIT => 1024,
+            CURLOPT_LOW_SPEED_TIME => 300,
+        ],
+    ]);
+
+    $httpClient = new GuzzleHttpClient($guzzleClient);
+
+
     $telegram = new Api(BOTTOKEN);
+    $telegram->setHttpClientHandler($httpClient);
 
     $dbp = new mySQLProvider(_dbhost, _dbname_default, _dbuser, _dbpassword);
     $bot = new Image2VideoBot($telegram, $dbp);
