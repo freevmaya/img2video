@@ -22,11 +22,13 @@
 		},
 		"FLUX.2 Pro": {
 			"enabled": false,
-			"url": "https://cloud.leonardo.ai/api/rest/v2/generations"
+			"url": "https://cloud.leonardo.ai/api/rest/v2/generations",
+			"dev": "Требуются какие то еще картинки, надо разобраться"
 		},
 		"GPT1.5": {
-			"enabled": true,
-			"url": "https://cloud.leonardo.ai/api/rest/v2/generations"
+			"enabled": false,
+			"url": "https://cloud.leonardo.ai/api/rest/v2/generations",
+			"dev": "Требуются какие то еще картинки, надо разобраться"
 		},
 		"Leonardo FLUX.1 Kontext": {
 			"enabled": true,
