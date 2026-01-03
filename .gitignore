@@ -8,6 +8,7 @@ config/*
 sessions/*
 /sessions
 /test
+test*.*
 config*.php
 downloads
 combined.txt
