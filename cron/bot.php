@@ -31,7 +31,7 @@ $dbp = null;
 
 // === ОСНОВНОЙ КОД БОТА ===
 try {
-    $telegram = new Api(BOTTOKEN, true);
+    $telegram = new Api(BOTTOKEN);
 
     $dbp = new mySQLProvider(_dbhost, _dbname_default, _dbuser, _dbpassword);
     $bot = new Image2VideoBot($telegram, $dbp);
