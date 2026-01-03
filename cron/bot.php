@@ -50,7 +50,7 @@ try {
 
 
     $telegram = new Api(BOTTOKEN);
-    $telegram->setHttpClientHandler($httpClient);
+    //$telegram->setHttpClientHandler($httpClient);
 
     $dbp = new mySQLProvider(_dbhost, _dbname_default, _dbuser, _dbpassword);
     $bot = new Image2VideoBot($telegram, $dbp);
