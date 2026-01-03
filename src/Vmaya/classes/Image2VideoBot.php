@@ -218,6 +218,9 @@ class Image2VideoBot extends YKassaBot {
                 case 'select':
                     $this->mj_api->Select($chatId, $parts[1], intval($parts[3]));
                     break;
+                case 'select':
+                    $this->mj_api->Select($chatId, $parts[1], intval($parts[3]));
+                    break;
                 case 'textToImage':
                     if ($prompt = $this->popSession($parts[1])) {
                         $this->DeleteMessage();
@@ -226,11 +229,9 @@ class Image2VideoBot extends YKassaBot {
                         else $this->notEnough($chatId);
                     }
                     break;
-                case 'klingVideo':
-                    if ($parts[1] == 'userText')
-                        $prompt = $this->popSession('userText');
-                    else $prompt = Lang('imageToVideoPrompts')[intval($parts[1])];
-                    $this->klingGenerateVideo($chatId, $prompt);
+                case 'generateVideo':
+                    $this->DeleteMessage();
+                    $this->image2video_photo($chatId, $this->popSession('userText'), $this->popSession('file_id'));
                     break;
             }
         }
@@ -242,13 +243,15 @@ class Image2VideoBot extends YKassaBot {
             if (method_exists($this, $expect))
                 $this->$expect($chatId, $text);
         } else {
-            /*if ($photo = $this->getMessagePhoto()) {
+            if ($photo = $this->getMessagePhoto()) {
+
+                $this->setSession('userText', $this->currentUpdate['message']['caption']);
+                $this->setSession('file_id', $photo['file_id']);
                 $this->Answer($chatId, $this->genContent(Lang("What to do about this?"), false, [
-                    [['text'=>Lang('Create a video'), 'callback_data' => "task.klingVideo.{$photo}"]]
-                ]);
-            } else 
-            */
-            if (!empty($text)) {
+                    [['text'=>Lang('Create a video'), 'callback_data' => "task.file_id.generateVideo"]]
+                ]));
+
+            } else if (!empty($text)) {
                 $this->setSession('prompt', $text);
                 $this->Answer($chatId, $this->genContent(Lang("What to do about this?"), false, [
                     [['text'=>Lang('Create an image'), 'callback_data' => "task.prompt.textToImage"]]
@@ -275,26 +278,27 @@ class Image2VideoBot extends YKassaBot {
         $this->klingGenerateVideo($chatId, $prompt);
     }
 
-    protected function image2video_photo($chatId, $text) {
+    protected function image2video_photo($chatId, $text, $photo_id = null) {
 
         if ($this->isAllowedVideo()) {
 
-            $best_photo = $this->getMessagePhoto();
-            $message = $this->currentUpdate['message'];
+            if (empty($photo_id)) {
+                $best_photo = $this->getMessagePhoto();
+                $photo_id = $best_photo ? $best_photo['file_id'] : false;
+                $text = $this->currentUpdate['message']['caption'] ?? $text;
+            }
 
-            if ($best_photo) {
+            if ($photo_id) {
 
-                $this->setSession('file_id', $best_photo['file_id']); 
+                $this->setSession('file_id', $photo_id); 
                 $this->setSession('expect', 'image2video_photo_prompt');     
 
                 $promptList = Lang('imageToVideoPrompts');
                 $menu = [];
 
-                $caption = $message['caption'] ?? $text;
-
-                if (!empty($caption)) {
-                    $this->setSession('userText', $caption); 
-                    $menu[] = [['text' => $caption, 'callback_data' => "task.userText.klingVideo"]];
+                if (!empty($text)) {
+                    $this->setSession('userText', $text); 
+                    $menu[] = [['text' => $text, 'callback_data' => "task.userText.klingVideo"]];
                 }
 
                 foreach ($promptList as $i=>$prompt)

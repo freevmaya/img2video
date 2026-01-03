@@ -186,7 +186,7 @@ abstract class BaseBot {
     }
 
     public function getCurrentChatId() {
-        return $this->CurrentUpdate()->getMessage()->getChat()->getId();
+        return @$this->CurrentUpdate()->getMessage()->getChat()->getId();
     }
 
     public function Answer($chatId, $msg, $messageId = false, $reply_to_message_id = false, $parse_mode = 'Markdown') {
