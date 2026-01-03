@@ -31,7 +31,7 @@ $dbp = null;
 
 // === ОСНОВНОЙ КОД БОТА ===
 try {
-    $telegram = new Api(BOTTOKEN);
+    $telegram = new Api(BOTTOKEN, true);
 
     $dbp = new mySQLProvider(_dbhost, _dbname_default, _dbuser, _dbpassword);
     $bot = new Image2VideoBot($telegram, $dbp);
@@ -51,12 +51,15 @@ try {
         // Проверяем, не нужно ли завершить работу
         if (function_exists('pcntl_signal_dispatch')) {
             pcntl_signal_dispatch();
+            break;
         }
         
-        usleep(50);
+        usleep(100000);
     }
 
     $dbp->Close();
+    echo "Finish\n";
+    exit(0);
     
 } catch (Exception $e) {
     trace_error("Fatal bot error: " . $e->getMessage());
