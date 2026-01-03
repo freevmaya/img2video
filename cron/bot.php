@@ -54,6 +54,7 @@ try {
             break;
         }
         
+        //echo "Cycle\n";
         usleep(100000);
     }
 
