@@ -209,18 +209,6 @@ class Image2VideoBot extends YKassaBot {
         if (count($parts) > 2) {
             $action = $parts[2];
             switch ($action) {
-                case 'animate':
-                    $this->mj_api->Animate($parts[1]);
-                    break;
-                case 'upscale':
-                    $this->mj_api->Upscale($parts[1], intval($parts[3]));
-                    break;
-                case 'select':
-                    $this->mj_api->Select($chatId, $parts[1], intval($parts[3]));
-                    break;
-                case 'select':
-                    $this->mj_api->Select($chatId, $parts[1], intval($parts[3]));
-                    break;
                 case 'textToImage':
                     if ($prompt = $this->popSession($parts[1])) {
                         $this->DeleteMessage();

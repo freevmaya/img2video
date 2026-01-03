@@ -189,7 +189,7 @@ abstract class BaseBot {
         return @$this->CurrentUpdate()->getMessage()->getChat()->getId();
     }
 
-    public function Answer($chatId, $msg, $messageId = false, $reply_to_message_id = false, $parse_mode = 'Markdown') {
+    public function Answer($chatId, $msg, $messageEditId = false, $reply_to_message_id = false, $parse_mode = 'Markdown') {
 
         if (empty($chatId))
             $chatId = $this->getCurrentChatId();
@@ -212,8 +212,8 @@ abstract class BaseBot {
             else $params['message_thread_id'] = $message['message_thread_id'];
         }
 
-        if ($messageId) {
-            $params['message_id'] = $messageId;
+        if ($messageEditId) {
+            $params['message_id'] = $messageEditId;
             $result = $this->api->editMessageText($params);
         } else {
             $result = $this->api->sendMessage($params);
