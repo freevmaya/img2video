@@ -13,7 +13,7 @@
 			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
 		},
 		"Nano Banana Pro": {
-			"enabled": false,
+			"enabled": true,
 			"url": "https://cloud.leonardo.ai/api/rest/v2/generations"
 		},
 		"Nano Banana": {

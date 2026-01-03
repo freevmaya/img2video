@@ -118,14 +118,14 @@ class LeonardoApi extends BaseApi
                 trace_error($error);
         }
         else {
-        
-            trace($logstr);
 
             $job = $response['sdGenerationJob'];
 
             $hash = isset($job['generationId']) ? trim($job['generationId']) : false;
 
             if ($hash && $this->modelTask && $this->bot) {
+        
+                trace($logstr);
 
                 $chat_id = @$this->bot->CurrentUpdate()->getMessage()->getChat()->getId();
                 $this->modelTask->Update([
@@ -136,7 +136,7 @@ class LeonardoApi extends BaseApi
                     'request_data'=> json_encode(array_merge($data, ['url'=>$url]), JSON_FLAGS)
                 ]);
                 $this->bot->Answer($chat_id, ['text' => Lang("The task has been accepted")]);
-            }
+            } else trace_error($logstr.".\nSend data:".json_encode($data, JSON_FLAGS));
 
             return $hash;
         }
