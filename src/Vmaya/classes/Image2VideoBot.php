@@ -265,7 +265,6 @@ class Image2VideoBot extends YKassaBot {
 
             if (!empty($image_url) && !empty($prompt)) {
                 $this->kling_api->generateVideoFromImage($image_url, $prompt);
-                $this->Answer($chatId, Lang('Sent. This may take several minutes.'));
             }
             else $this->Wrong($chatId);
         } else $this->Wrong($chatId);
@@ -411,8 +410,7 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function textToImage($chatId, $prompt) {
-        if ($this->leo_api->generateImage($prompt, ['model' => $this->getSession('leonardo_model')]) === false) 
-            $this->Answer($chatId, Lang("Something wrong"));
+        $this->leo_api->generateImage($prompt, ['model' => $this->getSession('leonardo_model')]);
     }
 
     protected function textToVideo($chatId, $prompt) {

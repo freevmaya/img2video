@@ -10,15 +10,13 @@ class LeonardoApi extends BaseApi
     private $baseUrl = 'https://cloud.leonardo.ai/api/rest/v1';
     protected $modelTask;
     protected $modelReply;
-    protected $bot;
 
     public function __construct($apiKey, $bot = null, $modelTask = null, $modelReply = null)
     {
-        parent::__construct('leonardo');
+        parent::__construct('leonardo', $bot);
         $this->apiKey       = $apiKey;
         $this->modelTask    = $modelTask;
         $this->modelReply   = $modelReply;
-        $this->bot          = $bot;
     }
 
     public function defaultUrl() {
@@ -123,30 +121,34 @@ class LeonardoApi extends BaseApi
 
             $hash = false;
             if (isset($response['sdGenerationJob'])) {
-                $job = isset($response['sdGenerationJob']);
+                $job = $response['sdGenerationJob'];
                 $hash = isset($job['generationId']) ? trim($job['generationId']) : false;
             } else  if (isset($response['generate'])) {
-                $generate = isset($response['generate']);
+                $generate = $response['generate'];
                 $hash = isset($generate['generationId']) ? trim($generate['generationId']) : false;
             }
+
+            trace($hash);
 
             if ($hash && $this->modelTask && $this->bot) {
         
                 trace($logstr);
 
-                $chat_id = @$this->bot->CurrentUpdate()->getMessage()->getChat()->getId();
                 $this->modelTask->Update([
                     'user_id'=>$this->bot->getUserId(),
-                    'chat_id'=>$chat_id,
+                    'chat_id'=>$this->bot->getCurrentChatId(),
                     'service'=>'leo',
                     'hash'=>$response['hash'] = $hash,
-                    'request_data'=> json_encode(array_merge($data, ['url'=>$url]), JSON_FLAGS)
+                    'request_data'=> json_encode(array_merge($data, ['url'=>$url]), JSON_FLAGS),
+                    'response_data'=> json_encode($response, JSON_FLAGS)
                 ]);
-                $this->bot->Answer($chat_id, ['text' => Lang("The task has been accepted")]);
-            } else trace_error($logstr.".\nSend data:".json_encode($data, JSON_FLAGS));
 
-            return $hash;
+                $this->Answer(Lang("The task has been accepted"));
+                return $hash;
+
+            } else trace_error($logstr.".\nSend data:".json_encode($data, JSON_FLAGS));
         }
+        $this->Wrong(Lang("Something wrong"));
 
         return false;
     }

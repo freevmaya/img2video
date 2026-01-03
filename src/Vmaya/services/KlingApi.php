@@ -7,14 +7,12 @@ use App\Services\API\BaseKlingApi;
 
 class KlingApi extends BaseKlingApi
 {
-    protected $bot;
     protected $modelTask;
 
     public function __construct($accessKey, $secretKey, $modelTask, $model_name='kling-v1', 
                                 $bot=null)
     {
-    	parent::__construct($accessKey, $secretKey, $model_name);
-        $this->bot = $bot;
+    	parent::__construct($accessKey, $secretKey, $model_name, $bot);
         $this->modelTask = $modelTask;
     }
 
@@ -41,8 +39,6 @@ class KlingApi extends BaseKlingApi
         if (isset($response['data']) && (@$response['code'] == 0)) {
         	$data = $response['data'];
 
-            $chat_id = $this->bot->CurrentUpdate()->getMessage()->getChat()->getId();
-
         	$params = [
         		'hash'=>$data['task_id'],
         		'service'=>'kling',
@@ -53,13 +49,16 @@ class KlingApi extends BaseKlingApi
 
         	if ($this->bot) {
         		$params['user_id'] = $this->bot->getUserId();
-        		$params['chat_id'] = $chat_id;
+        		$params['chat_id'] = $this->bot->getCurrentChatId();
         	} else trace_error("Property KlingApi::bot is null");
 
         	$this->modelTask->Update($params);
-            $this->bot->Answer($chat_id, ['text' => Lang("The task has been accepted")]);
+            $this->Answer(Lang("The task has been accepted"));
+            return $data['task_id'];
         }
 
-        return $response;
+        $this->Wrond();
+
+        return false;
     }
 }

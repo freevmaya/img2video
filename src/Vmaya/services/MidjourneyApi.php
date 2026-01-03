@@ -185,15 +185,14 @@ class MidjourneyApi extends BaseApi
             $hash = isset($response['hash']) ? $response['hash'] : false;
 
             if ($hash && $this->modelTask) {
-
-                $chat_id = @$this->bot->CurrentUpdate()->getMessage()->getChat()->getId();
+                
                 $this->modelTask->Update([
                     'user_id'=>$this->bot->getUserId(),
-                    'chat_id'=>$chat_id,
+                    'chat_id'=>$this->bot->getCurrentChatId(),
                     'hash'=>$response['hash'] = $hash,
                     'request_data'=> json_encode(array_merge($data, ['endpoint'=>$endpoint]), JSON_FLAGS)
                 ]);
-                $this->bot->Answer($chat_id, ['text' => Lang("The task has been accepted")]);
+                $this->Answer(Lang("The task has been accepted"));
             }
 
             return $hash;

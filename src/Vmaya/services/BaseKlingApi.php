@@ -11,9 +11,9 @@ class BaseKlingApi extends BaseApi
     private $model_name;
     private $baseUrl = 'https://api-singapore.klingai.com/';
 
-    public function __construct($accessKey, $secretKey, $model_name='kling-v1')
+    public function __construct($accessKey, $secretKey, $model_name='kling-v1', $bot=null)
     {
-        parent::__construct('kling');
+        parent::__construct('kling', $bot);
         $this->accessKey    = $accessKey;
         $this->secretKey 	= $secretKey;
         $this->model_name 	= $model_name;
@@ -48,7 +48,7 @@ class BaseKlingApi extends BaseApi
 
     public function generateVideoFromImage($imagePath, $prompt, $options=[]) {
 
-    	$this->makeRequest('v1/videos/image2video', array_merge([
+    	return $this->makeRequest('v1/videos/image2video', array_merge([
     		'model_name' => $this->model_name,
     		"mode" => "pro",
     		"duration" => "5",

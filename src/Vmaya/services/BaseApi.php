@@ -5,14 +5,16 @@ abstract class BaseApi implements APIInterface
 {
     private $modelList;
     private $defaultModel;
+    protected $bot;
 
-    public function __construct($modes_file = null)
+    public function __construct($modes_file = null, $bot = null)
     {
     	if (!empty($modes_file)) {
     		$data = json_decode(file_get_contents(__DIR__."/models/{$modes_file}.json"), true);
     		$this->modelList 	= $data['list'];
 	        $this->defaultModel = $data['default']; 
     	}
+        $this->bot = $bot;
     }
 
     public function getModelUrl($model_name) {
@@ -52,5 +54,15 @@ abstract class BaseApi implements APIInterface
     				return true;
     		}
     	return false;
+    }
+
+    public function Answer($content) {
+        if ($this->bot)
+            $this->bot->Answer(null, $content);
+    }
+
+    public function Wrong() {
+        if ($this->bot)
+            $this->bot->Wrong();
     }
 }
