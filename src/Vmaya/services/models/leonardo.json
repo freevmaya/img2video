@@ -39,8 +39,9 @@
 			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
 		},
 		"Seedream": {
-			"enabled": true,
-			"url": "https://cloud.leonardo.ai/api/rest/v2/generations"
+			"enabled": false,
+			"url": "https://cloud.leonardo.ai/api/rest/v2/generations",
+			"dev": "Требуются какие то еще картинки, надо разобраться"
 		},
 		"PhotoReal": {
 			"enabled": true,

@@ -111,10 +111,11 @@ class MainCycleEx {
                 ]);
 
             try {
+                usleep(500);
                 $photoMessage = $this->api->sendPhoto($params);
                 return $photoMessage->getMessageId();
             } catch (Exception $e) {
-                
+
                 trace_error($e->getMessage());
                 sleep(2);
 
