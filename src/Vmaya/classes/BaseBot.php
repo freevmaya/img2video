@@ -281,17 +281,6 @@ abstract class BaseBot {
         }
     }
 
-    public function GetWebhookUpdates() {
-
-        //$this->sendImmediateHttpResponse();
-        $update = $this->api->getWebhookUpdate();
-
-        if ($this->initUser($update)) {
-            if ($this->lastUpdateId != $update->getUpdateId())
-                $this->_runUpdate($update);
-        }
-    }
-
     private function sendImmediateHttpResponse() {
 
         // КРИТИЧЕСКИ ВАЖНО: отвечаем в течение 1 секунды
@@ -328,6 +317,18 @@ abstract class BaseBot {
             sleep(5); // Пауза перед повторной попыткой
         }
     }
+
+    /*
+    public function GetWebhookUpdates() {
+
+        //$this->sendImmediateHttpResponse();
+        $update = $this->api->getWebhookUpdate();
+
+        if ($this->initUser($update)) {
+            if ($this->lastUpdateId != $update->getUpdateId())
+                $this->_runUpdate($update);
+        }
+    }*/
 
     protected function runUpdate($update) {
 

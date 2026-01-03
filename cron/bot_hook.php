@@ -27,7 +27,7 @@
 		$dbp = new mySQLProvider('localhost', _dbname_default, _dbuser, _dbpassword);
 
 		$bot = new Image2VideoBot($telegram, $dbp);
-		$bot->GetWebhookUpdates();
+		$bot->GetUpdates();
 
 		$dbp->Close();
 	}
