@@ -2,15 +2,16 @@
 abstract class BaseBot {
     private $session;
     private $sessionChanged;
-    private $lastUpdateId;
     private $origin_user_id;
     private $reply_to_message;
     private $sessionModel;
     private $currentLanguage;
+    private $file_settings;
 
     protected $user;
     protected $api;
     protected $dbp;
+    protected $settings;
     protected $currentUpdate = null;
 
     public function getUser() { return $this->user; }
@@ -18,10 +19,32 @@ abstract class BaseBot {
     public function getOriginUserId() { return $this->origin_user_id; }
     public function getReplyToMessage() { return $this->reply_to_message; }
 
-	function __construct($api, $dbp) {
+	function __construct($api, $dbp, $file_settings = null) {
         $this->api = $api;
-        $this->lastUpdateId = 0;
+
+        $this->openSettings($file_settings);
+
+        print_r($this->settings);
+
         $this->initialize();
+    }
+
+    protected function openSettings($file_settings)
+    {
+        if (!empty($file_settings)) {
+            $this->file_settings = $file_settings;
+            if (file_exists($file_settings)) {
+                $this->settings = json_decode(file_get_contents($this->file_settings), true);
+            } else {
+                $this->settings = ['lastUpdateId' => 0];
+            }
+        }
+    }
+
+    protected function saveSettings() {
+        if (!empty($this->file_settings) && !empty($this->settings)) {
+            file_put_contents($this->file_settings, json_encode($this->settings, JSON_FLAGS));
+        }
     }
 
     public function Api() {
@@ -297,13 +320,13 @@ abstract class BaseBot {
         }
     }
 
-    public function GetUpdates() {
+    public function GetUpdates($timeout = 10) {
 
         try {
             // 4. Получаем обновления с учетом последнего обработанного ID
             $updates = $this->api->getUpdates([
-                'offset' => $this->lastUpdateId + 1,
-                'timeout' => 10, // Длительность ожидания новых сообщений (сек)
+                'offset' => $this->settings['lastUpdateId'] + 1,
+                'timeout' => $timeout, // Длительность ожидания новых сообщений (сек)
             ]);
 
             // 5. Обрабатываем каждое обновление
@@ -325,7 +348,7 @@ abstract class BaseBot {
         $update = $this->api->getWebhookUpdate();
 
         if ($this->initUser($update)) {
-            if ($this->lastUpdateId != $update->getUpdateId())
+            if ($this->settings['lastUpdateId'] != $update->getUpdateId())
                 $this->_runUpdate($update);
         }
     }*/
@@ -367,7 +390,8 @@ abstract class BaseBot {
         $this->sessionChanged = false;
 
         // 6. Обновляем ID последнего обработанного сообщения
-        $this->lastUpdateId = $update->getUpdateId();
+        $this->settings['lastUpdateId'] = $update->getUpdateId();
+        $this->saveSettings();
         $this->runUpdate($update);
 
         if ($this->sessionChanged && $this->currentUpdate->getMessage())

@@ -35,12 +35,12 @@ $dbp = null;
 try {
 
     $guzzleClient = new Client([
-        'timeout' => 10,
-        'connect_timeout' => 10,
-        'read_timeout' => 10,
+        'timeout' => 20,
+        'connect_timeout' => 20,
+        'read_timeout' => 20,
         'curl' => [
-            CURLOPT_TIMEOUT => 10,
-            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT => 20,
+            CURLOPT_CONNECTTIMEOUT => 20,
             CURLOPT_LOW_SPEED_LIMIT => 1024,
             CURLOPT_LOW_SPEED_TIME => 300,
         ],
@@ -50,10 +50,10 @@ try {
 
 
     $telegram = new Api(BOTTOKEN);
-    //$telegram->setHttpClientHandler($httpClient);
+    $telegram->setHttpClientHandler($httpClient);
 
     $dbp = new mySQLProvider(_dbhost, _dbname_default, _dbuser, _dbpassword);
-    $bot = new Image2VideoBot($telegram, $dbp);
+    $bot = new Image2VideoBot($telegram, $dbp, __FILE__.'.data');
 
     // 1. Удаляем вебхук, если он был установлен
     $telegram->deleteWebhook(['drop_pending_updates' => true]);
@@ -65,7 +65,7 @@ try {
     // Основной цикл с обработкой обновлений
     while ($lock->isFile()) {
 
-        $bot->GetUpdates();
+        $bot->GetUpdates(10);
         
         // Проверяем, не нужно ли завершить работу
         if (function_exists('pcntl_signal_dispatch')) {
@@ -76,7 +76,6 @@ try {
         //echo "Cycle\n";
         usleep(100000);
     }
-
     $dbp->Close();
     echo "Finish\n";
     exit(0);
