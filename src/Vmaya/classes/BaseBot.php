@@ -24,8 +24,6 @@ abstract class BaseBot {
 
         $this->openSettings($file_settings);
 
-        print_r($this->settings);
-
         $this->initialize();
     }
 
