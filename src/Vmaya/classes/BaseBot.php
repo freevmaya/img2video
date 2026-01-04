@@ -335,25 +335,21 @@ abstract class BaseBot {
     public function GetUpdates($timeout = 10) {
 
         try {
-            // 4. Получаем обновления с учетом последнего обработанного ID
+            //Получаем обновления с учетом последнего обработанного ID
             try {
                 $updates = $this->api->getUpdates([
                     'offset' => $this->settings['lastUpdateId'] + 1,
                     'timeout' => $timeout, // Длительность ожидания новых сообщений (сек)
                 ]);
+
+                //Обрабатываем каждое обновление
+                foreach ($updates as $update) {
+                    if ($this->initUser($update)) 
+                        $this->_runUpdate($update);
+                } 
             } catch (Exception $e) {
                 trace_error($e->getMessage());
             }
-
-            // 5. Обрабатываем каждое обновление
-            foreach ($updates as $update) {
-                try {
-                    if ($this->initUser($update)) 
-                        $this->_runUpdate($update);
-                } catch (Exception $e) {
-                    trace_error($e->getMessage());
-                }
-            } 
         } catch (Exception $e) {
             // 9. Обработка ошибок
             echo 'Ошибка: ' . $e->getMessage() . PHP_EOL;
