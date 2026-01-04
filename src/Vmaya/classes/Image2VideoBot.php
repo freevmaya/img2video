@@ -189,12 +189,10 @@ class Image2VideoBot extends YKassaBot {
             if (count($models) > 0) {
                 $list[] = [['text'=>"--------{$key}-------", 'callback_data' => 'ignore']];
                 foreach ($models as $name=>$model) {
-                    if ($current_model == $name)
-                        $name = '🟢 '.$name;
 
                     $info = $generator->getModelInfo($name);
 
-                    $line = [['text' => $name, 'callback_data' => "model.{$key}.{$name}"]];
+                    $line = [['text' => $current_model == $name ? '🟢 '.$name : $name, 'callback_data' => "model.{$key}.{$name}"]];
                     if ($info && isset($info['info']))
                         $line[] = ['text'=>'ⓘ', 'callback_data' => "info.{$key}.{$name}"];
 

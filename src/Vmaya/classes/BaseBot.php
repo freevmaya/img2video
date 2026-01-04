@@ -293,7 +293,7 @@ abstract class BaseBot {
     }
 
     protected function doNewUser() {
-        
+
     }
 
     protected function initAdmin($user, $update) {
@@ -336,15 +336,23 @@ abstract class BaseBot {
 
         try {
             // 4. Получаем обновления с учетом последнего обработанного ID
-            $updates = $this->api->getUpdates([
-                'offset' => $this->settings['lastUpdateId'] + 1,
-                'timeout' => $timeout, // Длительность ожидания новых сообщений (сек)
-            ]);
+            try {
+                $updates = $this->api->getUpdates([
+                    'offset' => $this->settings['lastUpdateId'] + 1,
+                    'timeout' => $timeout, // Длительность ожидания новых сообщений (сек)
+                ]);
+            } catch (Exception $e) {
+                trace_error($e->getMessage());
+            }
 
             // 5. Обрабатываем каждое обновление
             foreach ($updates as $update) {
-                if ($this->initUser($update)) 
-                    $this->_runUpdate($update);
+                try {
+                    if ($this->initUser($update)) 
+                        $this->_runUpdate($update);
+                } catch (Exception $e) {
+                    trace_error($e->getMessage());
+                }
             } 
         } catch (Exception $e) {
             // 9. Обработка ошибок

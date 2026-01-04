@@ -41,7 +41,7 @@
 	        return false;
 	    }
 
-		public function connect($host, $dbname, $user='', $passwd='', $charset='utf8') {
+		public function connect($host, $dbname, $user='', $passwd='', $charset='utf8mb4') {
 			$this->mysqli = new mysqli($host, $user, $passwd, $dbname);
 		    if ($this->mysqli->connect_errno) 
 		    	$this->error($this->mysqli->connect_errno.', '.$this->mysqli->error);
