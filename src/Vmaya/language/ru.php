@@ -50,6 +50,8 @@ $lang = [
 	'What to do about this?'=>'Что с этим делать?',
 	'More'=>'Еше',
 	'Menu'=>'Меню',
+	'Image'=>'Изображение',
+	'Video'=>'Видео',
 	'imageToVideoPrompts'=>[
 		'Человек смеётся',
 		'Человек улыбается',

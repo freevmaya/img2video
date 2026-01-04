@@ -114,8 +114,8 @@ class Image2VideoBot extends YKassaBot {
                 'reply_markup' => json_encode([
                     'keyboard' => [ 
                         [
-                            ['text' => $this->pmenuMap['/create_image'].' '.Lang('Create an image')],
-                            ['text' => $this->pmenuMap['/create_video'].' '.Lang('Bring a photo to life')]
+                            ['text' => $this->pmenuMap['/create_image'].' '.Lang('Image')],
+                            ['text' => $this->pmenuMap['/create_video'].' '.Lang('Video')]
                         ],
                         [
                             ['text' => $this->pmenuMap['/menu'].' '.Lang('More')]
