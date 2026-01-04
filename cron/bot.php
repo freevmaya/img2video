@@ -65,7 +65,7 @@ try {
     // Основной цикл с обработкой обновлений
     while ($lock->isFile()) {
 
-        $bot->GetUpdates(10);
+        $bot->GetUpdates(5);
         
         // Проверяем, не нужно ли завершить работу
         if (function_exists('pcntl_signal_dispatch')) {
