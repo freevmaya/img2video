@@ -369,6 +369,10 @@ abstract class BaseBot {
         }
     }*/
 
+    protected function beforeProcess($chatId, $text) {
+        return true;
+    }
+
     protected function runUpdate($update) {
 
         $this->currentUpdate = $update;
@@ -381,19 +385,23 @@ abstract class BaseBot {
             $messageId = $message['message_id'];
 
             $text = $message->getText();
+            if ($this->beforeProcess($chatId, $text)) {
 
-            $this->reply_to_message = isset($message['reply_to_message']) ? $message['reply_to_message'] : null;
+                $this->reply_to_message = isset($message['reply_to_message']) ? $message['reply_to_message'] : null;
 
-            if ($text && ($text[0] == '/')) {
-                $ctext = explode('@', $text);
-                if (!isset($ctext[1]) || ($ctext[1] == BOTALIASE))
-                    $this->commandProcess($ctext[0], $chatId, $messageId, $text);
-            }
-            else if (isset($update['callback_query'])) 
-                $this->_callbackProcess();
-            else if ($this->reply_to_message)
-                $this->replyToMessage($this->reply_to_message, $chatId, $messageId, $text);
-            else $this->messageProcess($chatId, $messageId, $text);
+                if ($text && ($text[0] == '/')) {
+                    $ctext = explode('@', $text);
+                    if (!isset($ctext[1]) || ($ctext[1] == BOTALIASE))
+                        $this->commandProcess($ctext[0], $chatId, $messageId, $text);
+                }
+                else if (isset($update['callback_query'])) 
+                    $this->_callbackProcess();
+                else if ($this->reply_to_message)
+                    $this->replyToMessage($this->reply_to_message, $chatId, $messageId, $text);
+                else $this->messageProcess($chatId, $messageId, $text);
+            } else 
+                $this->session = [];
+                
         } else {
             $this->session = [];
         }

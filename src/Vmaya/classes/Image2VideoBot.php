@@ -61,6 +61,13 @@ class Image2VideoBot extends YKassaBot {
         $this->downloadClient->Run();
     }
 
+    protected function beforeProcess($chatId, $text) {
+
+        if (!$this->getSession('pmenu_state'))
+            $this->showPMenu($chatId, Lang("BotDescription"));
+        return parent::beforeProcess($chatId, $text);
+    }
+
     protected function runUpdate($update) {
         $this->expect = $this->popSession("expect");
         parent::runUpdate($update);
@@ -98,38 +105,54 @@ class Image2VideoBot extends YKassaBot {
         return $result;
     }
 
-    private function showPMenu($chatId, $text = 'Меню установлено') {
+    protected function showPMenu($chatId, $text = 'Меню установлено') {
 
-        return $this->api->sendMessage([
-            'chat_id' => $chatId,
-            'text' => $text,
-            'reply_markup' => json_encode([
-                'keyboard' => [ 
-                    [
-                        ['text' => $this->pmenuMap['create_image'].' '.Lang('Create an image')],
-                        ['text' => $this->pmenuMap['create_video'].' '.Lang('Bring a photo to life')]
+        if ($this->getSession('pmenu_state') != 'show') {
+            $result = $this->api->sendMessage([
+                'chat_id' => $chatId,
+                'text' => $text,
+                'reply_markup' => json_encode([
+                    'keyboard' => [ 
+                        [
+                            ['text' => $this->pmenuMap['/create_image'].' '.Lang('Create an image')],
+                            ['text' => $this->pmenuMap['/create_video'].' '.Lang('Bring a photo to life')]
+                        ],
+                        [
+                            ['text' => $this->pmenuMap['/menu'].' '.Lang('More')]
+                        ]
                     ],
-                    [
-                        ['text' => $this->pmenuMap['menu'].' '.Lang('More')]
-                    ]
-                ],
-                'resize_keyboard' => true,
-                'one_time_keyboard' => false,
-                'selective' => false
-            ], JSON_FLAGS)
-        ]);
+                    'resize_keyboard' => true,
+                    'one_time_keyboard' => false,
+                    'selective' => false
+                ], JSON_FLAGS)
+            ]);
+
+            if (isset($result['message_id'])) {
+                $this->setSession('pmenu_state', 'show');
+                return $result;
+            }
+        }
+        return false;
     }
 
-    private function hidePMenu($chatId, $text = 'Меню удалено') {
+    protected function hidePMenu($chatId, $text = 'Меню удалено') {
+        if ($this->getSession('pmenu_state') == 'show') {
+            $result = $this->api->sendMessage([
+                'chat_id' => $chatId,
+                'text' => $text,
+                'reply_markup' => json_encode([
+                    'remove_keyboard' => true,
+                    'selective' => false
+                ], JSON_FLAGS)
+            ]);
 
-        return $this->api->sendMessage([
-            'chat_id' => $chatId,
-            'text' => $text,
-            'reply_markup' => json_encode([
-                'remove_keyboard' => true,
-                'selective' => false
-            ], JSON_FLAGS)
-        ]);
+            if (isset($result['message_id'])) {
+                $this->setSession('pmenu_state', 'hide');
+                return $result;
+            }
+        }
+
+        return false;
     }
 
     private function _commandProcessor($command, $chatId, $data = null) {
@@ -393,7 +416,7 @@ class Image2VideoBot extends YKassaBot {
     protected function showMainMenu($chatId) {
 
         $result = $this->Answer($chatId, [
-            'text' => Lang('Choose action').':',
+            'text' => Lang('Menu'),
             'reply_markup' => json_encode([
                 'inline_keyboard' => $this->startMenuList()])
         ]);
@@ -401,12 +424,11 @@ class Image2VideoBot extends YKassaBot {
 
     protected function start($chatId) {
 
-        $this->showPMenu($chatId, Lang("BotDescription"));
-        /*
+        $this->showPMenu($chatId, '----');
         $this->Answer($chatId, [
             'text' => Lang("BotDescription"), 
             'reply_markup'=> json_encode(['inline_keyboard' => $this->startMenuList()])
-        ]);*/
+        ]);
     }
 
     function gitPull($branch = 'main', $path = null) {
