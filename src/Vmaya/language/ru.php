@@ -48,6 +48,7 @@ $lang = [
 	'Information about the "%s" model'=> 'Информация о модели "%s"',
 	'We have topped up your account with %s'=>'Мы пополнили ваш счет на сумму %s',
 	'What to do about this?'=>'Что с этим делать?',
+	'More'=>'Еше',
 	'imageToVideoPrompts'=>[
 		'Человек смеётся',
 		'Человек улыбается',

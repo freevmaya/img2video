@@ -13,6 +13,7 @@ create_video - оживить фото
 use \App\Services\API\MidjourneyApi;
 use \App\Services\API\KlingApi;
 use \App\Services\API\LeonardoApi;
+use Telegram\Bot\Keyboard\Keyboard;
 
 class Image2VideoBot extends YKassaBot {
 
@@ -25,6 +26,7 @@ class Image2VideoBot extends YKassaBot {
     protected $taskModel;
     protected $firstStart;
     public $downloadClient;
+    protected $pmenuMap;
 
     protected function initialize() {
         parent::initialize();
@@ -37,12 +39,17 @@ class Image2VideoBot extends YKassaBot {
             'kling' => new KlingApi(KL_ACCESS_KEY, KL_SECRET_KEY, $this->taskModel, 'kling-v1-6', $this),
             'leo' => new LeonardoApi(LEO_APIKEY, $this, $this->taskModel, new LeoTasksModel())
         ];
+
+        $this->pmenuMap = [
+            '/create_image' => '🖼️',
+            '/create_video' => '🎥',
+            '/menu' => '📋'
+        ];
     }
 
     protected function initUser($update) {
         $this->firstStart = false;
         return parent::initUser($update);
-        return $result;
     }
 
     protected function doNewUser() {
@@ -91,10 +98,51 @@ class Image2VideoBot extends YKassaBot {
         return $result;
     }
 
-    private function _commandProcessor($command, $chatId, $data) {
+    private function showPMenu($chatId, $text = 'Меню установлено') {
+
+        return $this->api->sendMessage([
+            'chat_id' => $chatId,
+            'text' => $text,
+            'reply_markup' => json_encode([
+                'keyboard' => [ 
+                    [
+                        ['text' => $this->pmenuMap['create_image'].' '.Lang('Create an image')],
+                        ['text' => $this->pmenuMap['create_video'].' '.Lang('Bring a photo to life')]
+                    ],
+                    [
+                        ['text' => $this->pmenuMap['menu'].' '.Lang('More')]
+                    ]
+                ],
+                'resize_keyboard' => true,
+                'one_time_keyboard' => false,
+                'selective' => false
+            ], JSON_FLAGS)
+        ]);
+    }
+
+    private function hidePMenu($chatId, $text = 'Меню удалено') {
+
+        return $this->api->sendMessage([
+            'chat_id' => $chatId,
+            'text' => $text,
+            'reply_markup' => json_encode([
+                'remove_keyboard' => true,
+                'selective' => false
+            ], JSON_FLAGS)
+        ]);
+    }
+
+    private function _commandProcessor($command, $chatId, $data = null) {
         
         $this->stat($chatId, $command, $chatId);
+
         switch ($command) {
+            case 'show_menu': 
+                $this->showPMenu($chatId);
+                return true;
+            case 'hide_menu': 
+                $this->hidePMenu($chatId);
+                return true;
             case 'start':
                 $this->start($chatId);
                 return true;
@@ -244,25 +292,39 @@ class Image2VideoBot extends YKassaBot {
         }
     }
 
+    protected function pMenuProcess($chatId, $text) {
+        if (!empty($text)) {
+            foreach($this->pmenuMap as $command=>$char) {
+                if (substr($text, 0, strlen($char)) == $char) {
+                    $this->commandProcess($command, $chatId, null, $text);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     protected function messageProcess($chatId, $messageId, $text) {
 
-        if ($expect = $this->expect) {
-            if (method_exists($this, $expect))
-                $this->$expect($chatId, $text);
-        } else {
-            if ($photo = $this->getMessagePhoto()) {
+        if (!$this->pMenuProcess($chatId, $text)) {
+            if ($expect = $this->expect) {
+                if (method_exists($this, $expect))
+                    $this->$expect($chatId, $text);
+            } else {
+                if ($photo = $this->getMessagePhoto()) {
 
-                $this->setSession('userText', @$this->currentUpdate['message']['caption']);
-                $this->setSession('file_id', $photo['file_id']);
-                $this->Answer($chatId, $this->genContent(Lang("What to do about this?"), false, [
-                    [['text'=>Lang('Create a video'), 'callback_data' => "task.file_id.generateVideo"]]
-                ]));
+                    $this->setSession('userText', @$this->currentUpdate['message']['caption']);
+                    $this->setSession('file_id', $photo['file_id']);
+                    $this->Answer($chatId, $this->genContent(Lang("What to do about this?"), false, [
+                        [['text'=>Lang('Create a video'), 'callback_data' => "task.file_id.generateVideo"]]
+                    ]));
 
-            } else if (!empty($text)) {
-                $this->setSession('prompt', $text);
-                $this->Answer($chatId, $this->genContent(Lang("What to do about this?"), false, [
-                    [['text'=>Lang('Create an image'), 'callback_data' => "task.prompt.textToImage"]]
-                ]));
+                } else if (!empty($text)) {
+                    $this->setSession('prompt', $text);
+                    $this->Answer($chatId, $this->genContent(Lang("What to do about this?"), false, [
+                        [['text'=>Lang('Create an image'), 'callback_data' => "task.prompt.textToImage"]]
+                    ]));
+                }
             }
         }
     }
@@ -332,17 +394,19 @@ class Image2VideoBot extends YKassaBot {
 
         $result = $this->Answer($chatId, [
             'text' => Lang('Choose action').':',
-            'reply_markup' => json_encode(['inline_keyboard' => $this->startMenuList()])
+            'reply_markup' => json_encode([
+                'inline_keyboard' => $this->startMenuList()])
         ]);
     }
 
     protected function start($chatId) {
-        //$keyboard = array_merge($this->startMenuList(), $this->subscribeTypeList());
 
+        $this->showPMenu($chatId, Lang("BotDescription"));
+        /*
         $this->Answer($chatId, [
             'text' => Lang("BotDescription"), 
             'reply_markup'=> json_encode(['inline_keyboard' => $this->startMenuList()])
-        ]);
+        ]);*/
     }
 
     function gitPull($branch = 'main', $path = null) {
