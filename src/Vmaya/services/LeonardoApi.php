@@ -7,7 +7,6 @@ use \Telegram\Bot\FileUpload\InputFile;
 class LeonardoApi extends BaseApi
 {
     private $apiKey;
-    private $baseUrl = 'https://cloud.leonardo.ai/api/rest/v1';
     protected $modelTask;
     protected $modelReply;
 
@@ -20,7 +19,7 @@ class LeonardoApi extends BaseApi
     }
 
     public function defaultUrl() {
-        return 'https://cloud.leonardo.ai/api/rest/v1';
+        return 'https://cloud.leonardo.ai/api/rest/v1/generations';
     }
 
     public function generateImage($prompt, $options=[])
