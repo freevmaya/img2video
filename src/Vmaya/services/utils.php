@@ -38,7 +38,7 @@ function hasRussianWords(string $text): bool {
 }
 
 function checkRusAndTranslate($text) {
-	if (hasRussianWords($text))
+	if (!empty($text) && hasRussianWords($text))
 		$text = YaTranslate($text);
 
 	return $text;
