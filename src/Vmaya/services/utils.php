@@ -34,7 +34,7 @@ function YaTranslate($ru_text, $target="en", $baseUrl = 'https://translate.api.c
 }
 
 function hasRussianWords(string $text): bool {
-    return preg_match('/[а-яё]/iu', $text) === 1;
+    return empty($text) ? false :preg_match('/[а-яё]/iu', $text) === 1;
 }
 
 function checkRusAndTranslate($text) {
