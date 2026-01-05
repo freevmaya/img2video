@@ -33,24 +33,7 @@ $dbp = null;
 
 // === ОСНОВНОЙ КОД БОТА ===
 try {
-
-    $guzzleClient = new Client([
-        'timeout' => 20,
-        'connect_timeout' => 20,
-        'read_timeout' => 20,
-        'curl' => [
-            CURLOPT_TIMEOUT => 20,
-            CURLOPT_CONNECTTIMEOUT => 20,
-            CURLOPT_LOW_SPEED_LIMIT => 1024,
-            CURLOPT_LOW_SPEED_TIME => 300,
-        ],
-    ]);
-
-    $httpClient = new GuzzleHttpClient($guzzleClient);
-
-
     $telegram = new Api(BOTTOKEN);
-    $telegram->setHttpClientHandler($httpClient);
 
     $dbp = new mySQLProvider(_dbhost, _dbname_default, _dbuser, _dbpassword);
     $bot = new Image2VideoBot($telegram, $dbp, __FILE__.'.cfg');
@@ -65,7 +48,7 @@ try {
     // Основной цикл с обработкой обновлений
     while ($lock->isFile()) {
 
-        $bot->GetUpdates(5);
+        $bot->GetUpdates();
         
         // Проверяем, не нужно ли завершить работу
         if (function_exists('pcntl_signal_dispatch')) {

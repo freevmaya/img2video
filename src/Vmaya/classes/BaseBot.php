@@ -1,4 +1,7 @@
 <?
+use GuzzleHttp\Client;
+use Telegram\Bot\HttpClients\GuzzleHttpClient;
+
 abstract class BaseBot {
     private $session;
     private $sessionChanged;
@@ -7,6 +10,7 @@ abstract class BaseBot {
     private $sessionModel;
     private $currentLanguage;
     private $file_settings;
+    private $time_settings;
 
     protected $user;
     protected $api;
@@ -27,22 +31,69 @@ abstract class BaseBot {
         $this->initialize();
     }
 
+    public function setSettings($settings)
+    {
+        $this->settings = $settings;
+        $this->time_settings = time();
+
+        if ($client_timeout = $this->getSetting('client_timeout', 10)) {
+
+            $connect_timeout = round($client_timeout + $client_timeout * 0.1);
+            $guzzleClient = new Client([
+                'timeout' => $client_timeout,
+                'connect_timeout' => $connect_timeout,
+                'read_timeout' => $client_timeout,
+                'curl' => [
+                    CURLOPT_TIMEOUT => $client_timeout,
+                    CURLOPT_CONNECTTIMEOUT => $connect_timeout,
+                    CURLOPT_LOW_SPEED_LIMIT => 1024,
+                    CURLOPT_LOW_SPEED_TIME => 300,
+                ],
+            ]);
+
+            $httpClient = new GuzzleHttpClient($guzzleClient);
+            $this->api->setHttpClientHandler($httpClient);
+        }
+
+        trace("Set settings: ".json_encode($settings, JSON_FLAGS));
+    }
+
+    public function getDefaultSettings()
+    {
+        return ['lastUpdateId' => 0, 'update_timeout' => 10, 'client_timeout' => 20];
+    }
+
     protected function openSettings($file_settings)
     {
         if (!empty($file_settings)) {
             $this->file_settings = $file_settings;
             if (file_exists($file_settings)) {
-                $this->settings = json_decode(file_get_contents($this->file_settings), true);
-            } else {
-                $this->settings = ['lastUpdateId' => 0];
+                $this->setSettings(json_decode(file_get_contents($this->file_settings), true));
+                $this->time_settings = filemtime($this->file_settings);
+            } else if (empty($this->settings)) {
+                $this->setSettings($this->getDefaultSettings());
             }
         }
+    }
+
+    public function getSetting($param_name, $default_value = null) {
+        if (isset($this->settings[$param_name]))
+            return $this->settings[$param_name];
+        return $default_value;
     }
 
     protected function saveSettings() {
         if (!empty($this->file_settings) && !empty($this->settings)) {
             file_put_contents($this->file_settings, json_encode($this->settings, JSON_FLAGS));
+            $this->time_settings = filemtime($this->file_settings);
         }
+    }
+
+    public function checkAndUpdateSettings() {
+        
+        if (file_exists($this->file_settings) &&
+            (filemtime($this->file_settings) != $this->time_settings))
+            $this->openSettings($this->file_settings);
     }
 
     public function Api() {
@@ -332,14 +383,16 @@ abstract class BaseBot {
         }
     }
 
-    public function GetUpdates($timeout = 10) {
+    public function GetUpdates() {
 
         try {
+            $this->checkAndUpdateSettings();
+            
             //Получаем обновления с учетом последнего обработанного ID
             try {
                 $updates = $this->api->getUpdates([
-                    'offset' => $this->settings['lastUpdateId'] + 1,
-                    'timeout' => $timeout, // Длительность ожидания новых сообщений (сек)
+                    'offset' => $this->getSetting('lastUpdateId', 0) + 1,
+                    'timeout' => $this->getSetting('update_timeout', 0), // Длительность ожидания новых сообщений (сек)
                 ]);
 
                 //Обрабатываем каждое обновление

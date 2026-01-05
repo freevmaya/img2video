@@ -56,8 +56,8 @@ class Image2VideoBot extends YKassaBot {
         $this->firstStart = true;
     }
 
-    public function GetUpdates($timeout = 10) {
-        parent::GetUpdates($timeout);
+    public function GetUpdates() {
+        parent::GetUpdates();
         $this->downloadClient->Run();
     }
 
