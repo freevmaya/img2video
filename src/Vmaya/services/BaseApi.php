@@ -26,7 +26,15 @@ abstract class BaseApi implements APIInterface
     }
 
     public function getModelInfo($model_name) {
-        return isset($this->modelList[$model_name]) ? $this->modelList[$model_name] : null;
+        return $this->hasModel($model_name) ? $this->modelList[$model_name] : null;
+    }
+
+    public function hasModel($model_name) {
+        return isset($this->modelList[$model_name]);
+    }
+
+    public function getDefaultOptions($model_name) {
+        return $this->hasModel($model_name) ? $this->defaultModel[$model_name] : null;
     }
 
     public function getModels() {
@@ -45,6 +53,10 @@ abstract class BaseApi implements APIInterface
     			return $this->defaultModel[$model_name];
     	}
     	return false;
+    }
+
+    public function prepareImage($imageUrl) {
+        return false;
     }
 
     public static function SetPrompt(&$list, $prompt) {

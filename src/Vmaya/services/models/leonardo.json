@@ -2,23 +2,28 @@
 	"list": {
 		"Lucid Origin": {
 			"enabled": true,
-			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
+			"url": "https://cloud.leonardo.ai/api/rest/v1/generations",
+			"type": "textToImage"
 		},
 		"Lucid Realism": {
 			"enabled": true,
-			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
+			"url": "https://cloud.leonardo.ai/api/rest/v1/generations",
+			"type": "textToImage"
 		},
 		"Leonardo Phoenix": {
 			"enabled": true,
-			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
+			"url": "https://cloud.leonardo.ai/api/rest/v1/generations",
+			"type": "textToImage"
 		},
 		"Nano Banana Pro": {
 			"enabled": true,
-			"url": "https://cloud.leonardo.ai/api/rest/v2/generations"
+			"url": "https://cloud.leonardo.ai/api/rest/v2/generations",
+			"type": "textToImage"
 		},
 		"Nano Banana": {
 			"enabled": true,
-			"url": "https://cloud.leonardo.ai/api/rest/v2/generations"
+			"url": "https://cloud.leonardo.ai/api/rest/v2/generations",
+			"type": "textToImage"
 		},
 		"FLUX.2 Pro": {
 			"enabled": false,
@@ -32,11 +37,13 @@
 		},
 		"Leonardo FLUX.1 Kontext": {
 			"enabled": true,
-			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
+			"url": "https://cloud.leonardo.ai/api/rest/v1/generations",
+			"type": "textToImage"
 		},
 		"Flux": {
 			"enabled": true,
-			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
+			"url": "https://cloud.leonardo.ai/api/rest/v1/generations",
+			"type": "textToImage"
 		},
 		"Seedream": {
 			"enabled": false,
@@ -50,7 +57,8 @@
 		},
 		"Alchemy": {
 			"enabled": true,
-			"url": "https://cloud.leonardo.ai/api/rest/v1/generations"
+			"url": "https://cloud.leonardo.ai/api/rest/v1/generations",
+			"type": "textToImage"
 		},
 		"Image Guidance": {
 			"enabled": false,
@@ -66,6 +74,12 @@
 			"enabled": false,
 			"url": "https://cloud.leonardo.ai/api/rest/v1/generations-lcm",
 			"dev": "Требуются какие то еще картинки, надо разобраться"
+		},
+		"Kling O1": {
+			"enabled": true,
+			"url": "https://cloud.leonardo.ai/api/rest/v2/generations",
+			"type": "imageToVideo",
+			"images": [1, 5]
 		}
 	},
 	"default": {

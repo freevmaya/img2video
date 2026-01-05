@@ -34,28 +34,24 @@ class BaseKlingApi extends BaseApi
 	    return JWT::encode($payload, $this->secretKey, "HS256");
 	}
 
-    protected function extendOptions() {
-        return [];
-    }
-
     public function generateImage($prompt, $options=[]) {
 
     }
 
-    public function generateImageFromImage($imagePath, $prompt, $options=[]) {
+    public function generateImageFromImage($imageDatas, $prompt, $options=[]) {
     	
     }
 
-    public function generateVideoFromImage($imagePath, $prompt, $options=[]) {
+    public function generateVideoFromImage($imageDatas, $prompt, $options=[]) {
 
     	return $this->makeRequest('v1/videos/image2video', array_merge([
     		'model_name' => $this->model_name,
     		"mode" => "pro",
     		"duration" => "5",
-    		"image" => $imagePath,
+    		"image" => $imageDatas[0],
 		    "prompt" => $prompt,
 		    "cfg_scale" => 0.5
-    	], $this->extendOptions(), $options));    	
+    	], $options));    	
     }
 
     protected function makeRequest($endpoint, $data)

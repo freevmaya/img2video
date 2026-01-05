@@ -67,33 +67,168 @@ class LeonardoApi extends BaseApi
 
     }
 
+    protected function curl($url, $data, $callbackError = null /* ($error, $response) */) {
+        $ch = curl_init($url);
+                
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => is_string($data) ? $data : json_encode($data),
+            CURLOPT_HTTPHEADER => [
+                'content-type: application/json',
+                'accept: application/json',
+                'authorization: Bearer '.$this->apiKey
+            ]
+        ]);
+
+        if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+            curl_close($ch);
+        }
+
+        $response = json_decode(curl_exec($ch), true);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error    = curl_error($ch);
+
+        if ($httpCode !== 200) {
+            if ($callbackError)
+                $callbackError($error, $response);
+            else trace_error("Error response: ".$error);
+            $response = null;
+        }
+
+        return $response;
+    }
+
+    private function getPresignedUrl($extension = 'jpg') {
+        $payload = json_encode(["extension" => $extension]);
+        $data    = $this->curl("https://cloud.leonardo.ai/api/rest/v1/init-image", $payload);
+
+        if ($data)
+            return [
+                'id' => $data['uploadInitImage']['id'],
+                'url' => $data['uploadInitImage']['url'],
+                'fields' => json_decode($data['uploadInitImage']['fields'], true)
+            ];
+        return false;
+    }
+
+    private function getMimeType($filePath) {
+        if (function_exists('mime_content_type')) {
+            return mime_content_type($filePath);
+        }
+        
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        $mimeTypes = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            'bmp' => 'image/bmp'
+        ];
+        
+        return $mimeTypes[$extension] ?? 'image/jpeg';
+    }
+
+    private function uploadImage($presignedData, $imagePath) {
+        if (!file_exists($imagePath)) {
+            throw new Exception("Файл изображения не найден: " . $imagePath);
+        }
+        
+        // Определяем MIME-тип
+        $mimeType = $this->getMimeType($imagePath);
+        
+        // Подготавливаем данные для отправки
+        $postData = $presignedData['fields'];
+        
+        // Добавляем файл
+        $postData['file'] = new \CURLFile(
+            $imagePath,
+            $mimeType,
+            basename($imagePath)
+        );
+        
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $presignedData['url'],
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $postData,
+            CURLOPT_RETURNTRANSFER => true,
+            // Важно: не передаем заголовки для presigned URL!
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_TIMEOUT => 60
+        ]);
+        
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+
+        if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+            curl_close($ch);
+        }
+        
+        if ($error) {
+            trace_error("Ошибка при загрузке изображения: " . $error);
+        } else {
+        
+            // Для presigned URL успешный код обычно 204 (No Content)
+            if ($httpCode >= 200 && $httpCode < 300) {
+                return [
+                    'success'   => true,
+                    'image_id'  => $presignedData['id'],
+                    'http_code' => $httpCode
+                ];
+            } else {
+                trace_error("Ошибка загрузки. HTTP код: " . $httpCode . " Ответ: " . $response);
+            }
+        }
+
+        return false;
+    }
+
+    public function Upload($imagePath) {
+
+        if (!file_exists($imagePath)) {
+            throw new Exception("Файл изображения не найден: " . $imagePath);
+        }
+
+        $extension = pathinfo($imagePath, PATHINFO_EXTENSION);
+        if ($presignedData = $this->getPresignedUrl($extension)) {
+            return $this->uploadImage($presignedData, $imagePath);
+        }
+
+        return false;
+    }
+
+    public function uploadMultiple($imagePaths) {
+        $results = [];
+        
+        foreach ($imagePaths as $index => $imagePath) {
+            //echo "\n=== Загрузка изображения " . ($index + 1) . " из " . count($imagePaths) . " ===\n";
+            
+            $result = $this->upload($imagePath);
+            $results[] = [
+                'path' => $imagePath,
+                'result' => $result
+            ];
+            
+            // Небольшая задержка между запросами
+            if ($index < count($imagePaths) - 1) {
+                sleep(1);
+            }
+        }
+        
+        return $results;
+    }
+
     private function makeRequest($url, $data)
     {
 
         if (PRODUCTION) {
             try {
-
-                $ch = curl_init($url);
-                
-                curl_setopt_array($ch, [
-                    CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_POST => true,
-                    CURLOPT_POSTFIELDS => json_encode($data),
-                    CURLOPT_HTTPHEADER => [
-                        'content-type: application/json',
-                        'accept: application/json',
-                        'authorization: Bearer '.$this->apiKey
-                    ]
-                ]);
-
-                $response   = json_decode(curl_exec($ch), true);
-                $error      = curl_error($ch);
+                $response   = $this->curl($url, $data);
             } catch (Exception $e) {
                 trace_error('Caught exception: ',  $e->getMessage());
-            }
-
-            if (version_compare(PHP_VERSION, '8.0.0', '<')) {
-                curl_close($ch);
             }
         }
         else {
@@ -105,15 +240,10 @@ class LeonardoApi extends BaseApi
             ];
         }
 
-        $logstr = "Endpoint: {$url}\nResponse: ".json_encode($response, JSON_FLAGS);
+        $logstr = "Endpoint: {$url}\nResponse: ".json_encode($response, JSON_FLAGS).".\nSend data:".json_encode($data, JSON_FLAGS);
 
-        if (isset($response['error']) || !empty($error) || 
-            (isset($response['status']) && ($response['status'] === false))) {
-            
-            trace_error($logstr.".\nSend data:".json_encode($data, JSON_FLAGS));
-            if (!empty($error))
-                trace_error($error);
-        }
+        if (!$response || isset($response['error']))
+            trace_error($logstr);
         else {
 
 //{"generate":{"apiCreditCost":140,"generationId":"1f0e854a-f871-6d90-bd02-8c15f93ff666"}}.
@@ -126,8 +256,6 @@ class LeonardoApi extends BaseApi
                 $generate = $response['generate'];
                 $hash = isset($generate['generationId']) ? trim($generate['generationId']) : false;
             }
-
-            trace($hash);
 
             if ($hash && $this->modelTask && $this->bot) {
         

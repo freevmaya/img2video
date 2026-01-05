@@ -43,3 +43,7 @@ function checkRusAndTranslate($text) {
 
 	return $text;
 }
+
+function getExt($filename) {
+    return pathinfo($filename)['extension'];
+}

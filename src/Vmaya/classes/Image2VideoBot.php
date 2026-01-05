@@ -185,7 +185,7 @@ class Image2VideoBot extends YKassaBot {
                 return true;
             case 'create_video':
                 if ($this->isAllowedVideo())
-                    $this->image2video($chatId);
+                    $this->askSendPhoto($chatId);
                 else $this->notEnough($chatId);
                 return true;
             case 'support':
@@ -214,8 +214,6 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function commandProcess($command, $chatId, $messageId, $text) {
-
-        $this->unsetSessions(['expect']);
         if (!$this->_commandProcessor(substr($command, 1), $chatId, $text))
             parent::commandProcess($command, $chatId, $messageId, $text);
     }
@@ -296,6 +294,10 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function processTask($chatId, $parts) {
+
+        if (DEV)
+            echo "processTask: ".print_r($parts, true)."\n";
+
         if (count($parts) > 2) {
             $action = $parts[2];
             switch ($action) {
@@ -309,7 +311,12 @@ class Image2VideoBot extends YKassaBot {
                     break;
                 case 'generateVideo':
                     $this->DeleteMessage();
-                    $this->image2video_photo($chatId, $this->popSession('userText'), $this->popSession('file_id'));
+                    $this->image2video_photo($chatId, $this->popSession('userText'), $this->getSession('file_id'));
+                    break;
+                case 'imageToVideo': 
+                    $this->DeleteMessage();
+
+                    $this->image2video_photo_prompt($chatId, $this->getPrompt($parts[1]));
                     break;
             }
         }
@@ -352,22 +359,44 @@ class Image2VideoBot extends YKassaBot {
         }
     }
 
+    protected function findModelGen($model_name) {
+        foreach ($this->generators as $generator)
+            if ($generator->hasModel($model_name))
+                return $generator;
+        return false;
+    }
+
+    protected function generateVideo($model_name, $imageData, $prompt) {
+        if ($gen = $this->findModelGen($model_name)) {
+            $gen->generateVideoFromImage($imageData, $prompt, $gen->getDefaultOptions($model_name));
+        } else trace_error("Model not found: {$model_name}");
+    }
+
     protected function klingGenerateVideo($chatId, $prompt) {
 
-        $this->DeleteMessage($chatId, $this->popSession('promptMessageId'));
-
-        $file_id = $this->popSession('file_id');
+        $file_id = $this->getSession('file_id');
         if (($image_url = $this->GetFileUrl($file_id)) && !empty($prompt)) {
 
-            if (!empty($image_url) && !empty($prompt)) {
-                $this->generators['kling']->generateVideoFromImage($image_url, $prompt);
-            }
-            else $this->Wrong($chatId);
-        } else $this->Wrong($chatId);
+            if (!($kling_model = $this->getSession('kling_model')))
+                $kling_model = 'kling-v1';
+
+            $this->generateVideo($kling_model, [$image_url], $prompt);
+
+        } else {
+            trace_error("Empty prompt or file_id");
+            $this->Wrong($chatId);
+        }
     }
 
     protected function image2video_photo_prompt($chatId, $prompt) {
         $this->klingGenerateVideo($chatId, $prompt);
+    }
+
+    protected function getPrompt($index) {
+        if ($index == 'userText')
+            return $this->getSession('userText');
+
+        return is_numeric($index) ? Lang('imageToVideoPrompts')[$index] : false;
     }
 
     protected function image2video_photo($chatId, $text, $photo_id = null) {
@@ -382,19 +411,18 @@ class Image2VideoBot extends YKassaBot {
 
             if ($photo_id) {
 
-                $this->setSession('file_id', $photo_id); 
-                $this->setSession('expect', 'image2video_photo_prompt');     
+                $this->setSession('file_id', $photo_id);
 
                 $promptList = Lang('imageToVideoPrompts');
                 $menu = [];
 
                 if (!empty($text)) {
                     $this->setSession('userText', $text); 
-                    $menu[] = [['text' => $text, 'callback_data' => "task.userText.klingVideo"]];
+                    $menu[] = [['text' => $text, 'callback_data' => "task.userText.imageToVideo"]];
                 }
 
                 foreach ($promptList as $i=>$prompt)
-                    $menu[] = [['text' => Lang($prompt), 'callback_data' => "task.{$i}.klingVideo"]];
+                    $menu[] = [['text' => Lang($prompt), 'callback_data' => "task.{$i}.imageToVideo"]];
 
 
                 $result = $this->Answer($chatId, ['text' => Lang("Send a prompt for video"), 'reply_markup'=> json_encode([
@@ -404,7 +432,7 @@ class Image2VideoBot extends YKassaBot {
                 if (isset($result['message_id']))
                     $this->setSession('promptMessageId', $result['message_id']);
 
-            } else $this->image2video($chatId);
+            } else $this->askSendPhoto($chatId);
 
         } else $this->notEnough($chatId);
     }
@@ -533,7 +561,7 @@ class Image2VideoBot extends YKassaBot {
             $this->setSession('promptMessageId', $result['message_id']);
     }
 
-    protected function image2video($chatId) {
+    protected function askSendPhoto($chatId) {
         $this->Answer($chatId, $this->genContent(Lang("Send you photo"), true));
         $this->setSession("expect", 'image2video_photo');
     }

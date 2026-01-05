@@ -39,13 +39,18 @@ class KlingApi extends BaseKlingApi
         if (isset($response['data']) && (@$response['code'] == 0)) {
         	$data = $response['data'];
 
+            $request_data_json = json_encode(array_merge($request_data, ['endpoint'=>$endpoint]), JSON_FLAGS);
+
         	$params = [
         		'hash'=>$data['task_id'],
         		'service'=>'kling',
                 'user_id'=>ADMIN_USERID,
                 'chat_id'=>ADMIN_USERID,
-                'request_data' => json_encode(array_merge($request_data, ['endpoint'=>$endpoint]), JSON_FLAGS)
+                'request_data' => $request_data_json
         	];
+
+            if (DEV)
+                trace('Request data: '.$request_data_json);
 
         	if ($this->bot) {
         		$params['user_id'] = $this->bot->getUserId();

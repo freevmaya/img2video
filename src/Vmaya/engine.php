@@ -1,10 +1,17 @@
 <?
 	include(dirname(__DIR__, 3).'/config/config.php');
 
-	define('RESULT_PATH', BASEPATH.'downloads'.DS.'results'.DS);
-	define('PROCESS_PATH', BASEPATH.'downloads'.DS.'progress'.DS);
-	define('RESULT_URL', BASEURL.DS.'downloads'.DS.'results'.DS);
-	define('PROCESS_URL', BASEURL.DS.'downloads'.DS.'progress'.DS);
+	define('DOWNLOADS_PATH', BASEPATH.'downloads'.DS);
+	define('DOWNLOADS_URL', BASEURL.'downloads'.DS);
+
+	define('RESULT_PATH', DOWNLOADS_PATH.'results'.DS);
+	define('PROCESS_PATH', DOWNLOADS_PATH.'progress'.DS);
+	define('USER_PATH', DOWNLOADS_PATH.'users'.DS);
+	
+	define('RESULT_URL', DOWNLOADS_URL.'results'.DS);
+	define('PROCESS_URL', DOWNLOADS_URL.'progress'.DS);
+	define('USER_URL', DOWNLOADS_URL.'users'.DS);
+
 	define('ADMIN_USERID', 1573356581);
 	define('SUPPORT_USERID', 1573356581);
 	define("NUMBER_DOWNLOAD_ATTEMPTS", 8);
