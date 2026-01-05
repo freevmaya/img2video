@@ -377,33 +377,36 @@ abstract class BaseBot {
 
         $this->currentUpdate = $update;
 
-        $message = $update->getMessage();
-        $chat    = $message ? $message->getChat() : null;
+        if ($message = $update->getMessage()) {
+            $chat = $update->getChat();        
 
-        if ($chat) {
-            $chatId = $chat->getId();
-            $messageId = $message['message_id'];
+            if ($chat) {
+                $chatId = $chat->getId();
+                $messageId = $message['message_id'];
 
-            $text = $message->getText();
-            if ($this->beforeProcess($chatId, $text)) {
+                $text = $message->getText();
+                if ($this->beforeProcess($chatId, $text)) {
 
-                $this->reply_to_message = isset($message['reply_to_message']) ? $message['reply_to_message'] : null;
+                    $this->reply_to_message = isset($message['reply_to_message']) ? $message['reply_to_message'] : null;
 
-                if ($text && ($text[0] == '/')) {
-                    $ctext = explode('@', $text);
-                    if (!isset($ctext[1]) || ($ctext[1] == BOTALIASE))
-                        $this->commandProcess($ctext[0], $chatId, $messageId, $text);
-                }
-                else if (isset($update['callback_query'])) 
-                    $this->_callbackProcess();
-                else if ($this->reply_to_message)
-                    $this->replyToMessage($this->reply_to_message, $chatId, $messageId, $text);
-                else $this->messageProcess($chatId, $messageId, $text);
-            } else 
+                    if ($text && ($text[0] == '/')) {
+                        $ctext = explode('@', $text);
+                        if (!isset($ctext[1]) || ($ctext[1] == BOTALIASE))
+                            $this->commandProcess($ctext[0], $chatId, $messageId, $text);
+                    }
+                    else if (isset($update['callback_query'])) 
+                        $this->_callbackProcess();
+                    else if ($this->reply_to_message)
+                        $this->replyToMessage($this->reply_to_message, $chatId, $messageId, $text);
+                    else $this->messageProcess($chatId, $messageId, $text);
+                } else 
+                    $this->session = [];
+                    
+            } else {
                 $this->session = [];
-                
+            }
         } else {
-            $this->session = [];
+            trace_error("Message is null");
         }
     }
 
