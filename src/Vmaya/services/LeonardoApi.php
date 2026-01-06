@@ -24,7 +24,7 @@ class LeonardoApi extends BaseApi
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => is_string($data) ? $data : json_encode($data),
+            CURLOPT_POSTFIELDS => is_string($data) ? $data : json_encode($data, JSON_FLAGS),
             CURLOPT_HTTPHEADER => [
                 'content-type: application/json',
                 'accept: application/json',
