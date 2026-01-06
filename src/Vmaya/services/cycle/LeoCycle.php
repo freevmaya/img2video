@@ -41,7 +41,7 @@ class LeoCycle extends BaseCycle {
             'file_path' => RESULT_PATH.$file_name
         ];
 
-        $this->parent->downloadClient->AddTask(function($record, $data) {
+        return $this->parent->downloadClient->AddTask(function($record, $data) {
             $method     = 'select';
             $task       = $data['task'];
             $response   = $data['response'];
@@ -91,7 +91,7 @@ class LeoCycle extends BaseCycle {
             'file_path' => RESULT_PATH.$file_name
         ];
 
-        $this->parent->downloadClient->AddTask(function($record, $data) {
+        return $this->parent->downloadClient->AddTask(function($record, $data) {
             $method     = 'select';
             $task       = $data['task'];
             $response   = $data['response'];
