@@ -32,8 +32,8 @@ class KlingApi extends BaseKlingApi
             ];
         }
             
-        $request_data_json = json_encode(array_merge($request_data, ['url'=>$url]), JSON_FLAGS);
-        $log_data = "\nResponse: ".json_encode($response, JSON_FLAGS)."\n\nRequest data: ".$request_data_json;
+        $request_data_json = json_encode($request_data, JSON_FLAGS);
+        $log_data = "\nUrl: {$url}\n\nResponse: ".json_encode($response, JSON_FLAGS)."\n\nRequest data: ".$request_data_json;
 
         if (isset($response['data']) && (@$response['code'] == 0)) {
         	$data = $response['data'];
