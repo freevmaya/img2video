@@ -615,6 +615,22 @@ class Image2VideoBot extends YKassaBot {
         return [null, null];
     }
 
+    protected function isAllowType($type) {
+        switch ($type) {
+            case 'textToImage': 
+                    if ($this->isAllowedImage())
+                        return true;
+                    else $this->notEnough($this->getCurrentChatId());
+                break;
+            case 'imageToVideo': 
+                    if ($this->isAllowedVideo())
+                        return true;
+                    else $this->notEnough($this->getCurrentChatId());
+                break;
+        }
+        return false;
+    }
+
     protected function Generate($type, $images, $prompt) {
         if (!empty($prompt)) {
             [$gen, $model_name] = $this->getCurrentGenModel($type);
@@ -636,9 +652,10 @@ class Image2VideoBot extends YKassaBot {
                     return false;
                 }
 
-                if ($gen->Generate($type, $images_url, $prompt, $model_name))
-                    return true;
-                else $this->Wrong();
+                if ($this->isAllowType($type)) {
+                    if ($gen->Generate($type, $images_url, $prompt, $model_name))
+                        return true;
+                }
             }
             else trace_error("Generator not found for type {$type}");
         } else $this->Wrong("Отсутствует промпт");
