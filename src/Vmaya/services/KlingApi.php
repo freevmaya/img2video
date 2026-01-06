@@ -31,11 +31,13 @@ class KlingApi extends BaseKlingApi
                 ]
             ];
         }
+            
+        $request_data_json = json_encode(array_merge($request_data, ['url'=>$url]), JSON_FLAGS);
+        $log_data = "\nResponse: ".json_encode($response, JSON_FLAGS)."\n\nRequest data: ".$request_data_json;
 
         if (isset($response['data']) && (@$response['code'] == 0)) {
         	$data = $response['data'];
 
-            $request_data_json = json_encode(array_merge($request_data, ['url'=>$url]), JSON_FLAGS);
 
         	$params = [
         		'hash'=>$data['task_id'],
@@ -46,7 +48,7 @@ class KlingApi extends BaseKlingApi
         	];
 
             if (DEV)
-                trace('Request data: '.$request_data_json);
+                trace($log_data);
 
             if ($this->modelTask) {
                 $this->modelTask->Update($params);
@@ -60,7 +62,7 @@ class KlingApi extends BaseKlingApi
             $this->Answer(Lang("The task has been accepted"));
 
             return $response;
-        }
+        } else trace_error($log_data);
 
         $this->Wrong();
 
