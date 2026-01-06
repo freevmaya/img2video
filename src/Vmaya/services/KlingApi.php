@@ -62,7 +62,7 @@ class KlingApi extends BaseKlingApi
             return $response;
         }
 
-        $this->Wrond();
+        $this->Wrong();
 
         return false;
     }
