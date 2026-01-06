@@ -227,8 +227,14 @@ abstract class BaseBot {
         }
     }
 
-    public function Wrong($chatId = null, $messageId = false) {
-        $this->Answer($chatId, ['text' => Lang("Something wrong"), 'reply_markup'=> json_encode([
+    public function Wrong($chatIdOrMessage = null, $messageId = false) {
+
+        if (is_string($chatIdOrMessage)) {
+            $text = $chatIdOrMessage;
+            $chatIdOrMessage = null;
+        } else $text = Lang("Something wrong");
+
+        $this->Answer($chatIdOrMessage, ['text' => $text, 'reply_markup'=> json_encode([
                 'inline_keyboard' => [
                     [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']]
                 ]
@@ -237,7 +243,9 @@ abstract class BaseBot {
     }
 
     public function getCurrentChatId() {
-        return @$this->CurrentUpdate()->getMessage()->getChat()->getId();
+        if ($this->currentUpdate)
+            return @$this->currentUpdate->getMessage()->getChat()->getId();
+        else return $this->getUserId();
     }
 
     public function Answer($chatId, $msg, $messageEditId = false, $reply_to_message_id = false, $parse_mode = 'Markdown') {
@@ -518,6 +526,10 @@ abstract class BaseBot {
     }
 
     public function GetFileUrl($file_id) {
+
+        if (filter_var($file_id, FILTER_VALIDATE_URL))
+            return $file_id;
+        
         $response = $this->api->getFile([
             'file_id' => $file_id
         ]);        

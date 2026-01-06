@@ -79,30 +79,34 @@
 			"enabled": true,
 			"url": "https://cloud.leonardo.ai/api/rest/v2/generations",
 			"type": "imageToVideo",
-			"images": [1, 5]
+			"require_images": [1, 4]
 		}
+	},
+	"defaultModelName": {
+		"textToImage": "Lucid Origin",
+		"imageToVideo": "Kling O1"
 	},
 	"default": {
 		"Lucid Origin": {
 			"alchemy": false,
-			"height": 1080,
 			"modelId": "7b592283-e8a7-4c5a-9ba6-d18c31f258b9",
 			"contrast": 3.5,
 			"num_images": 1,
 			"styleUUID": "111dc692-d470-4eec-b791-3475abac4c46",
 			"prompt": "",
-			"width": 1920,
+			"width": 848,
+			"height": 1264,
 			"ultra": false
 		},
 		"Lucid Realism": {
 			"alchemy": false,
-			"height": 1024,
 			"modelId": "05ce0082-2d80-4a2d-8653-4d1c85e2418e",
 			"contrast": 3.5,
 			"num_images": 1,
 			"styleUUID": "111dc692-d470-4eec-b791-3475abac4c46",
 			"prompt": "",
-			"width": 1024,
+			"width": 848,
+			"height": 1264,
 			"ultra": false
 		},
 		"Leonardo Phoenix": {
@@ -119,8 +123,8 @@
 		"Nano Banana Pro": {
 			"model": "gemini-image-2",
 			"parameters": {
-				"width": 1024,
-				"height": 1024,
+				"width": 848,
+				"height": 1264,
 				"prompt": "",
 				"quantity": 1,
 				"style_ids": [
@@ -230,30 +234,30 @@
 		    "public": false
 		},
 		"PhotoReal": {
-			"height": 512,
 			"prompt": "",
 			"negative_prompt": "trees",
 			"modelId": "aa77f04e-3eec-4034-9c07-d0f619684628",
 			"width": 512,
+			"height": 512,
 			"alchemy": true,
 			"presetStyle": "DYNAMIC",
 			"photoReal": true,
 			"photoRealVersion":"v2"
 		},
 		"Alchemy": {
-			"height": 512,
 			"prompt": "",
 			"modelId": "aa77f04e-3eec-4034-9c07-d0f619684628",
 			"width": 512,
+			"height": 512,
 			"alchemy": true,
 			"presetStyle": "CINEMATIC"
 		},
 		"Image Guidance": {
-			"height": 512,
 			"modelId": "aa77f04e-3eec-4034-9c07-d0f619684628",
 			"prompt": "",
 			"presetStyle":"CINEMATIC",
 			"width": 1024,
+			"height": 512,
 			"photoReal": true,
 			"photoRealVersion":"v2",
 			"alchemy":true,
@@ -292,6 +296,43 @@
 			"prompt": "",
 			"style": "DYNAMIC",
 			"strength": 0.7
+		}
+		,
+		"Kling O1": {
+			"model": "kling-video-o-1",
+		    "public": false,
+		    "parameters": {
+		      "prompt": "",
+		      "guidances": {
+		        "start_frame": [
+		          {
+		            "image": {
+		              "id": "<YOUR_START_IMAGE_ID>",
+		              "type": "UPLOADED"
+		            }
+		          }
+		        ],
+		        "end_frame": [
+		          {
+		            "image": {
+		              "id": "<YOUR_END_IMAGE_ID>",
+		              "type": "UPLOADED"
+		            }
+		          }
+		        ],
+		        "image_reference": [
+		          {
+		            "image": {
+		              "id": "<YOUR_IMAGE_ID_1>",
+		              "type": "UPLOADED"
+		            }
+		          }
+		        ]
+		      },
+		      "duration": 5,
+		      "width": 848,
+		      "height": 1264
+		    }
 		}
 	}
 }

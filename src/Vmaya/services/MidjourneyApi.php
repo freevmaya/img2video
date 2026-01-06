@@ -148,7 +148,7 @@ class MidjourneyApi extends BaseApi
         return $this->makeRequest('/midjourney/v2/describe', $data);
     }
 
-    private function makeRequest($endpoint, $data)
+    protected function makeRequest($endpoint, $data)
     {
         $ch = curl_init($this->baseUrl . $endpoint);
         

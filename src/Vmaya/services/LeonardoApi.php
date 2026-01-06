@@ -18,55 +18,6 @@ class LeonardoApi extends BaseApi
         $this->modelReply   = $modelReply;
     }
 
-    public function defaultUrl() {
-        return 'https://cloud.leonardo.ai/api/rest/v1/generations';
-    }
-
-    public function generateImage($prompt, $options=[])
-    {
-        $models = $this->getModels();
-
-        $prompt = checkRusAndTranslate($prompt);
-
-        $model = false;
-        if (isset($options['model'])) {
-            $model = $options['model'];
-            unset($options['model']);
-        }
-
-        $url = $this->defaultUrl();
-
-        if (!empty($model) && isset($models[$model])) {
-            if ($models[$model]['enabled'] && ($data = $this->setModelPrompt($model, $prompt))) {
-                $data = array_merge($data, $options);
-                $url = $this->getModelUrl($model);
-            }
-            else return false;
-        } else {
-            $data = array_merge([
-                'alchemy'       => false,
-                "height"        => 1080,
-                'prompt'        => $prompt,
-                'modelId'       => "7b592283-e8a7-4c5a-9ba6-d18c31f258b9",
-                'contrast'      => 3.5,
-                'num_images'    => 1,
-                "styleUUID"     => '111dc692-d470-4eec-b791-3475abac4c46',
-                "width"         => 1920,
-                "ultra"         => false
-            ], $options);
-        }
-
-        return $this->makeRequest($url, $data);
-    }
-
-    public function generateImageFromImage($imagePath, $prompt, $options=[]) {
-
-    }
-
-    public function generateVideoFromImage($imagePath, $prompt, $options=[]) {
-
-    }
-
     protected function curl($url, $data, $callbackError = null /* ($error, $response) */) {
         $ch = curl_init($url);
                 
@@ -132,7 +83,8 @@ class LeonardoApi extends BaseApi
 
     private function uploadImage($presignedData, $imagePath) {
         if (!file_exists($imagePath)) {
-            throw new Exception("Файл изображения не найден: " . $imagePath);
+            trace_error("Файл изображения не найден: " . $imagePath);
+            return false;
         }
         
         // Определяем MIME-тип
@@ -189,7 +141,8 @@ class LeonardoApi extends BaseApi
     public function Upload($imagePath) {
 
         if (!file_exists($imagePath)) {
-            throw new Exception("Файл изображения не найден: " . $imagePath);
+            trace_error("Файл изображения не найден: " . $imagePath);
+            return false;
         }
 
         $extension = pathinfo($imagePath, PATHINFO_EXTENSION);
@@ -221,18 +174,78 @@ class LeonardoApi extends BaseApi
         return $results;
     }
 
-    private function makeRequest($url, $data)
+    protected function validateImage($file_id) {
+        if (filter_var($file_id, FILTER_VALIDATE_URL)) {
+
+            if ($this->bot)
+                $filePath = USER_PATH.$this->bot->getUserId().'_'.basename($file_id);
+            else $filePath = USER_PATH.basename($file_id);
+
+            if (!file_exists($filePath))
+                downloadFile($file_id, $filePath);
+
+            if ($result = $this->Upload($filePath))
+                return $result['image_id'];
+            else {
+                trace_error("Error upload file: {$file_id}");
+                return false;
+            }
+        }
+
+        return $file_id;
+    }
+
+    private function setImagesKlingO1(&$options, $images) {
+        $count = count($images);
+        switch ($count) {
+            case 1:
+                unset($options['parameters']['guidances']['start_frame']);
+                unset($options['parameters']['guidances']['end_frame']);
+                $options['parameters']['guidances']['image_reference'][0]['image']['id'] = $images[0];
+                $options['parameters']['guidances']['image_reference'][0]['image']['type'] = $images[0] ? 'UPLOADED' : 'GENERATED';
+                break;
+            case 2:
+                $options['parameters']['guidances']['start_frame'][0]['image']['id'] = $images[0];
+                $options['parameters']['guidances']['end_frame'][0]['image']['id'] = $images[1];
+                $options['parameters']['guidances']['start_frame'][0]['image']['type'] = $images[0] ? 'UPLOADED' : 'GENERATED';
+                $options['parameters']['guidances']['end_frame'][0]['image']['type'] = $images[1] ? 'UPLOADED' : 'GENERATED';
+                unset($options['parameters']['guidances']['image_reference']);
+                break;
+            default:
+                return false;
+        }
+        return true;
+    }
+
+    protected function setImages($model_name, &$options, $images) {
+        if (!empty($images))
+            for ($i=0; $i<count($images); $i++)
+                if (!$images[$i] = $this->validateImage($images[$i]))
+                    return false;
+
+        if ($model_name == 'Kling O1')
+            return $this->setImagesKlingO1($options, $images);
+        
+        $info = $this->getModelInfo($model_name);
+        if ($info && ($info['type'] == 'textToImage'))
+            return true;
+
+        return false;
+    }
+
+    protected function makeRequest($url, $data)
     {
 
         if (PRODUCTION) {
             try {
                 $response   = $this->curl($url, $data);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 trace_error('Caught exception: ',  $e->getMessage());
+                return false;
             }
         }
         else {
-            echo "DEV Leonardo AI REQUEST!";
+            echo "DEV Leonardo AI REQUEST!\n";
             $response = [
                 'sdGenerationJob' => [
                     'generationId' => md5(strtotime('now'))
@@ -240,7 +253,7 @@ class LeonardoApi extends BaseApi
             ];
         }
 
-        $logstr = "Endpoint: {$url}\nResponse: ".json_encode($response, JSON_FLAGS).".\nSend data:".json_encode($data, JSON_FLAGS);
+        $logstr = "Endpoint: {$url}\n\nResponse: ".json_encode($response, JSON_FLAGS).".\n\nSend data:".json_encode($data, JSON_FLAGS);
 
         if (!$response || isset($response['error']))
             trace_error($logstr);
@@ -257,21 +270,24 @@ class LeonardoApi extends BaseApi
                 $hash = isset($generate['generationId']) ? trim($generate['generationId']) : false;
             }
 
-            if ($hash && $this->modelTask && $this->bot) {
+            if ($hash) {
         
                 trace($logstr);
 
-                $this->modelTask->Update([
-                    'user_id'=>$this->bot->getUserId(),
-                    'chat_id'=>$this->bot->getCurrentChatId(),
-                    'service'=>'leo',
-                    'hash'=>$response['hash'] = $hash,
-                    'request_data'=> json_encode(array_merge($data, ['url'=>$url]), JSON_FLAGS),
-                    'response_data'=> json_encode($response, JSON_FLAGS)
-                ]);
+                if ($this->modelTask) {
+
+                    $this->modelTask->Update([
+                        'user_id'=>$this->bot->getUserId(),
+                        'chat_id'=>$this->bot->getCurrentChatId(),
+                        'service'=>'leo',
+                        'hash'=>$response['hash'] = $hash,
+                        'request_data'=> json_encode(array_merge($data, ['url'=>$url]), JSON_FLAGS),
+                        'response_data'=> json_encode($response, JSON_FLAGS)
+                    ]);
+                }
 
                 $this->Answer(Lang("The task has been accepted"));
-                return $hash;
+                return $response;
 
             } else trace_error($logstr.".\nSend data:".json_encode($data, JSON_FLAGS));
         }

@@ -3,6 +3,7 @@ namespace App\Services\API;
 
 abstract class BaseApi implements APIInterface
 {
+    private $defaultModels;
     private $modelList;
     private $defaultModel;
     protected $bot;
@@ -11,18 +12,98 @@ abstract class BaseApi implements APIInterface
     {
     	if (!empty($modes_file)) {
     		$data = json_decode(file_get_contents(__DIR__."/models/{$modes_file}.json"), true);
-    		$this->modelList 	= $data['list'];
-	        $this->defaultModel = $data['default']; 
+    		$this->modelList 	    = $data['list'];
+            $this->defaultModels    = $data['defaultModelName'];
+	        $this->defaultModel    = $data['default']; 
     	}
         $this->bot = $bot;
     }
 
-    public function getModelUrl($model_name) {
+    public function getModelUrl($type, $model_name = null) {
+        $model_name = empty($model_name) ? $this->getDefaultModelName($type) : $model_name;
+
         return isset($this->modelList[$model_name]['url']) ? $this->modelList[$model_name]['url'] : $this->defaultUrl();
     }
 
-    public function defaultUrl() {
-        return "";
+    public function getDefaultModelName($type) {
+        return isset($this->defaultModels[$type]) ? $this->defaultModels[$type] : false;
+    }
+
+    public function Generate($type, $images, $prompt, $model_name = null)
+    {
+        $data = $this->PrepareRequestData($type, $images, $prompt, $model_name);
+
+        if ($data) {
+            $url = $this->getModelUrl($type, $model_name);
+            return $this->makeRequest($url, $data);
+        }
+        return false;
+    }
+
+    protected function makeRequest($url, $data) {
+        return null;
+    }
+
+    public function PrepareRequestData($type, $images, $prompt, $model_name = null) {
+        $model_name = empty($model_name) ? $this->getDefaultModelName($type) : $model_name;
+
+        if (!empty($model_name) && isset($this->defaultModel[$model_name])) {
+            $info = $this->getModelInfo($model_name);
+            if (!$info['enabled']) {
+                trace_error("Model disabled: {$model_name}");
+                return false;
+            }
+
+            $defaultOptions = isset($this->defaultModel[$model_name]) ? $this->defaultModel[$model_name] : null;
+            if ($defaultOptions) {
+
+                $data = array_merge([], $defaultOptions);
+                $prompt = checkRusAndTranslate($prompt);
+
+                if (!$this->setPrompt($model_name, $data, $prompt)) {
+                    trace_error("Error set prompt model: '{$model_name}'");
+                    return false;
+                }
+                
+                if (!$this->setImages($model_name, $data, $images)) {
+                    trace_error("Error set images model: '{$model_name}'");
+                    return false;
+                }
+
+                return $data;
+            } else trace_error("Not found default options for model: '{$model_name}'");
+        } else trace_error("Unknown model: {$model_name}");
+        return false;
+    }
+
+    protected function setImages($model_name, &$options, $images) {
+
+        if (count($images) == 0)
+            return false;
+
+        foreach ($options as $key=>$rec)
+            if ($key == 'image') {
+                $options['image'] = $images[0];
+                return true;
+            }
+            else if (is_array($rec)) {
+                if ($this->setImages($model_name, $options[$key], $images))
+                    return true;
+            }
+        return false;
+    }
+
+    protected function setPrompt($model_name, &$options, $prompt) {
+        foreach ($options as $key=>$rec)
+            if ($key == 'prompt') {
+                $options['prompt'] = $prompt;
+                return true;
+            }
+            else if (is_array($rec)) {
+                if ($this->setPrompt($model_name, $options[$key], $prompt))
+                    return true;
+            }
+        return false;
     }
 
     public function getModelInfo($model_name) {
@@ -37,7 +118,7 @@ abstract class BaseApi implements APIInterface
         return $this->hasModel($model_name) ? $this->defaultModel[$model_name] : null;
     }
 
-    public function getModels() {
+    public function getActualyModelsInfo() {
         return array_filter($this->modelList, function($model) {
         	return $model['enabled'];
         });
@@ -47,29 +128,8 @@ abstract class BaseApi implements APIInterface
     	return isset($this->defaultModel[$model_name]) ? $this->defaultModel[$model_name] : [];
     }
 
-    public function setModelPrompt($model_name, $prompt) {
-    	if (!empty($prompt) && isset($this->defaultModel[$model_name])) {
-    		if (BaseApi::SetPrompt($this->defaultModel[$model_name], $prompt))
-    			return $this->defaultModel[$model_name];
-    	}
-    	return false;
-    }
-
     public function prepareImage($imageUrl) {
         return false;
-    }
-
-    public static function SetPrompt(&$list, $prompt) {
-    	foreach ($list as $key=>$rec)
-    		if ($key == 'prompt') {
-    			$list['prompt'] = $prompt;
-    			return true;
-    		}
-    		else if (is_array($rec)) {
-    			if (BaseApi::SetPrompt($list[$key], $prompt))
-    				return true;
-    		}
-    	return false;
     }
 
     public function Answer($content) {

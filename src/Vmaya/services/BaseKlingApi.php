@@ -8,19 +8,13 @@ class BaseKlingApi extends BaseApi
 {
     private $accessKey;
     private $secretKey;
-    private $model_name;
     private $baseUrl = 'https://api-singapore.klingai.com/';
 
-    public function __construct($accessKey, $secretKey, $model_name='kling-v1', $bot=null)
+    public function __construct($accessKey, $secretKey, $bot=null)
     {
         parent::__construct('kling', $bot);
         $this->accessKey    = $accessKey;
         $this->secretKey 	= $secretKey;
-        $this->model_name 	= $model_name;
-    }
-
-    public function defaultUrl() {
-        return $this->baseUrl;
     }
 
     public function generateToken() {
@@ -33,26 +27,6 @@ class BaseKlingApi extends BaseApi
 
 	    return JWT::encode($payload, $this->secretKey, "HS256");
 	}
-
-    public function generateImage($prompt, $options=[]) {
-
-    }
-
-    public function generateImageFromImage($imageDatas, $prompt, $options=[]) {
-    	
-    }
-
-    public function generateVideoFromImage($imageDatas, $prompt, $options=[]) {
-
-    	return $this->makeRequest('v1/videos/image2video', array_merge([
-    		'model_name' => $this->model_name,
-    		"mode" => "pro",
-    		"duration" => "5",
-    		"image" => $imageDatas[0],
-		    "prompt" => $prompt,
-		    "cfg_scale" => 0.5
-    	], $options));    	
-    }
 
     protected function makeRequest($endpoint, $data)
     {

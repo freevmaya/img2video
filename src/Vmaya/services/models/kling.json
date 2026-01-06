@@ -2,84 +2,119 @@
 	"list": {
 		"kling-v1": {
 			"enabled": true,
-			"type": "imageToVideo"
+			"url": "https://api-singapore.klingai.com/v1/videos/image2video",
+			"type": "imageToVideo",
+			"require_images": [1, 4]
 		},
 		"kling-v1-5": {
 			"enabled": true,
-			"type": "imageToVideo"
+			"url": "https://api-singapore.klingai.com/v1/videos/image2video",
+			"type": "imageToVideo",
+			"require_images": [1, 4]
 		},
 		"kling-v1-6": {
 			"enabled": true,
-			"type": "imageToVideo"
+			"url": "https://api-singapore.klingai.com/v1/videos/image2video",
+			"type": "imageToVideo",
+			"require_images": [1, 4]
 		},
 		"kling-v2-master": {
 			"enabled": true,
-			"type": "imageToVideo"
+			"url": "https://api-singapore.klingai.com/v1/videos/image2video",
+			"type": "imageToVideo",
+			"require_images": [1, 4]
 		},
 		"kling-v2-1": {
 			"enabled": true,
-			"type": "imageToVideo"
+			"url": "https://api-singapore.klingai.com/v1/videos/image2video",
+			"type": "imageToVideo",
+			"require_images": [1, 4]
 		},
 		"kling-v2-1-master": {
 			"enabled": true,
-			"type": "imageToVideo"
+			"url": "https://api-singapore.klingai.com/v1/videos/image2video",
+			"type": "imageToVideo",
+			"require_images": [1, 4]
 		},
 		"kling-v2-5-turbo": {
 			"enabled": true,
-			"type": "imageToVideo"
+			"url": "https://api-singapore.klingai.com/v1/videos/image2video",
+			"type": "imageToVideo",
+			"require_images": [1, 4]
 		},
 		"kling-v2-6": {
 			"enabled": true,
-			"type": "imageToVideo"
+			"url": "https://api-singapore.klingai.com/v1/videos/image2video",
+			"type": "imageToVideo",
+			"require_images": [1, 4]
 		}
+	},
+	"defaultModelName": {
+		"imageToVideo": "kling-v1"
 	},
 	"default": {
 		"kling-v1": {
 			"model_name": "kling-v1",
 		    "mode": "pro",
 		    "duration": "5",
+		    "image": "",
+		    "prompt": "",
 		    "cfg_scale": 0.5
 		},
 		"kling-v1-5": {
 			"model_name": "kling-v1-5",
 		    "mode": "pro",
 		    "duration": "5",
+		    "image": "",
+		    "prompt": "",
 		    "cfg_scale": 0.5
 		},
 		"kling-v1-6": {
 			"model_name": "kling-v1-6",
 		    "mode": "pro",
 		    "duration": "5",
+		    "image": "",
+		    "prompt": "",
 		    "cfg_scale": 0.5
 		},
 		"kling-v2-master": {
 			"model_name": "kling-v2-master",
 		    "mode": "pro",
 		    "duration": "5",
+		    "image": "",
+		    "prompt": "",
 		    "cfg_scale": 0.5
 		},
 		"kling-v2-1": {
 			"model_name": "kling-v2-1",
 		    "mode": "pro",
 		    "duration": "5",
+		    "image": "",
+		    "prompt": "",
 		    "cfg_scale": 0.5
 		},
 		"kling-v2-1-master": {
 			"model_name": "kling-v2-1-master",
 		    "mode": "pro",
 		    "duration": "5",
+		    "image": "",
+		    "prompt": "",
 		    "cfg_scale": 0.5
 		},
 		"kling-v2-5-turbo": {
 			"model_name": "kling-v2-5-turbo",
 		    "mode": "pro",
 		    "duration": "5",
+		    "image": "",
+		    "prompt": "",
 		    "cfg_scale": 0.5
 		},
 		"kling-v2-6": {
 			"model_name": "kling-v2-6",
 		    "mode": "pro",
 		    "duration": "5",
+		    "image": "",
+		    "prompt": "",
 		    "cfg_scale": 0.5
 		}
 	}

@@ -69,7 +69,9 @@ function downloadFile($url, $savePath)
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $error = curl_error($ch);
     
-    curl_close($ch);
+    if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+        curl_close($ch);
+    }
     
     if ($httpCode === 200 && $fileContent !== false) {
         // Сохраняем файл
