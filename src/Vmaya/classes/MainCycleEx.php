@@ -44,11 +44,16 @@ class MainCycleEx {
     }
 
     public function Update() {
-        $tasks = $this->modelTask->getItems(['state'=>'active']);
-        if (count($tasks) > 0) {
-            foreach ($tasks as $task) {
-                $this->updateTask($task);
+
+        try {
+            $tasks = $this->modelTask->getItems(['state'=>'active']);
+            if (count($tasks) > 0) {
+                foreach ($tasks as $task) {
+                    $this->updateTask($task);
+                }
             }
+        } catch (Exception $e) {
+            trace_error($e->getMessage());
         }
 
         $this->downloadClient->Run();
