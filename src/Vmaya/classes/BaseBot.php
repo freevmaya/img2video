@@ -472,7 +472,7 @@ abstract class BaseBot {
     }
 
     private function _runUpdate($update) {
-        if (DEV)
+        if (DEV || $this->getSetting('log'))
             trace($update);
 
         $this->sessionChanged = false;
