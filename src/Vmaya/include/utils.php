@@ -342,7 +342,9 @@ function resizeImageIfTooLarge($source_path, $dest_path = null, $options = []) {
                 // Сохраняем временный файл с исправленной ориентацией
                 $temp_path = tempnam(sys_get_temp_dir(), 'orient_');
                 imagejpeg($source_image, $temp_path, 100);
-                imagedestroy($source_image);
+                if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+                    imagedestroy($source_image);
+                }
                 $source_path = $temp_path;
             }
         }

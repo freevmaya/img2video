@@ -52,8 +52,6 @@ class LeoCycle extends BaseCycle {
 
             trace("Attempt send photo {$data['file_path']}");
 
-            resizeImageIfTooLarge($data['file_path']);
-
             if ($dl_state == 'finished') {
                 $result = $parent->sendMp4($task, $data['file_path'], $data['file_name'], Lang('Your photo is ready'));
 
