@@ -45,7 +45,10 @@ class BaseKlingApi extends BaseApi
         ]);
 
         $response = json_decode(curl_exec($ch), true);
-        curl_close($ch);
+
+        if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+            curl_close($ch);
+        }
 
         if (isset($response['code']) && (intval($response['code']) > 0))
             trace_error($response);

@@ -171,7 +171,9 @@ class MidjourneyApi extends BaseApi
             ];
         }
 
-        curl_close($ch);
+        if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+            curl_close($ch);
+        }
 
         $logstr = "Endpoint: {$endpoint}\nResponse: ".json_encode($response, JSON_FLAGS);
 

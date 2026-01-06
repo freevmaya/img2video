@@ -36,8 +36,10 @@ class MLStudioClient extends BaseMLStudioClient {
 
 		$result = json_decode(curl_exec($ch), true);
 		$error = curl_error($ch);
-		
-		curl_close($ch); // Явное закрытие соединения
+
+        if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+            curl_close($ch);
+        }
 		
 		if ($error) {
 		    die("cURL Error: " . $error);

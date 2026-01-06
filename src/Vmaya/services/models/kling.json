@@ -31,7 +31,7 @@
 			"require_images": [1, 4]
 		},
 		"kling-v2-1-master": {
-			"enabled": true,
+			"enabled": false,
 			"url": "https://api-singapore.klingai.com/v1/videos/image2video",
 			"type": "imageToVideo",
 			"require_images": [1, 4]

@@ -291,7 +291,7 @@ class LeonardoApi extends BaseApi
 
             } else trace_error($logstr.".\nSend data:".json_encode($data, JSON_FLAGS));
         }
-        $this->Wrong(Lang("Something wrong"));
+        $this->Wrong();
 
         return false;
     }

@@ -31,13 +31,16 @@ abstract class BaseApi implements APIInterface
 
     public function Generate($type, $images, $prompt, $model_name = null)
     {
-        $data = $this->PrepareRequestData($type, $images, $prompt, $model_name);
+        $result = false;
+        $data   = $this->PrepareRequestData($type, $images, $prompt, $model_name);
 
         if ($data) {
+            $model_name = empty($model_name) ? $this->getDefaultModelName($type) : $model_name;
+
             $url = $this->getModelUrl($type, $model_name);
-            return $this->makeRequest($url, $data);
+            $result = $this->makeRequest($url, $data);
         }
-        return false;
+        return $result;
     }
 
     protected function makeRequest($url, $data) {
