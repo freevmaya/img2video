@@ -504,4 +504,16 @@ function resizeImageIfTooLarge($source_path, $dest_path = null, $options = []) {
     
     return $result;
 }
+
+function isUrl(string $url): bool {
+    $url = trim($url);
+    
+    // Быстрая проверка на наличие протокола и точки
+    if (!preg_match('/^https?:\/\/.+\..+/i', $url)) {
+        return false;
+    }
+    
+    // Проверка через filter_var
+    return filter_var($url, FILTER_VALIDATE_URL) !== false;
+}
 ?>

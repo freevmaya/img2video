@@ -34,8 +34,12 @@ abstract class BaseCycle {
     protected abstract function doProcessResponse($task, $response);
 
     protected function finishResponse($response) {
+        $this->setResponseProcessed($response, 1);
+    }
+
+    protected function setResponseProcessed($response, $value = 1) {
         $this->modelReply->Update([
-            'id'=>$response['id'], 'processed'=>1
+            'id'=>$response['id'], 'processed'=>$value
         ]);
     }
 }

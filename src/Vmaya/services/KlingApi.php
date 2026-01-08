@@ -15,12 +15,20 @@ class KlingApi extends BaseKlingApi
         $this->modelTask = $modelTask;
     }
 
-    protected function makeRequest($url, $request_data)
+
+
+    public function AccountInfo() {
+        return $this->makeRequest('/account/costs', [], false);
+    }
+
+    protected function makeRequest($url, $request_data, $post = true)
     {
+        $url = isUrl($url) ? $url : $this->baseUrl . $url;
+
         $request_data['callback_url'] = KL_HOOK_URL;
 
         if (PRODUCTION) 
-            $response = parent::makeRequest($url, $request_data);
+            $response = parent::makeRequest($url, $request_data, $post);
         else {
             echo("DEV REQUEST!\n");
 
@@ -35,7 +43,7 @@ class KlingApi extends BaseKlingApi
         $request_data_json = json_encode($request_data, JSON_FLAGS);
         $log_data = "\nUrl: {$url}\n\nResponse: ".json_encode($response, JSON_FLAGS)."\n\nRequest data: ".$request_data_json;
 
-        if (isset($response['data']) && (@$response['code'] == 0)) {
+        if (isset($response['data']) && ($response['code'] == 0)) {
         	$data = $response['data'];
 
 

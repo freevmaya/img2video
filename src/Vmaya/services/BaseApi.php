@@ -29,6 +29,10 @@ abstract class BaseApi implements APIInterface
         return isset($this->defaultModels[$type]) ? $this->defaultModels[$type] : false;
     }
 
+    public function AccountInfo() {
+        return [];
+    }
+
     public function Generate($type, $images, $prompt, $model_name = null)
     {
         $result = false;
@@ -47,6 +51,10 @@ abstract class BaseApi implements APIInterface
         return null;
     }
 
+    protected function requireTranslate($info) {
+        return true;
+    }
+
     public function PrepareRequestData($type, $images, $prompt, $model_name = null) {
         $model_name = empty($model_name) ? $this->getDefaultModelName($type) : $model_name;
 
@@ -61,7 +69,9 @@ abstract class BaseApi implements APIInterface
             if ($defaultOptions) {
 
                 $data = array_merge([], $defaultOptions);
-                $prompt = checkRusAndTranslate($prompt);
+
+                if ($this->requireTranslate($info))
+                    $prompt = checkRusAndTranslate($prompt);
 
                 if (!$this->setPrompt($model_name, $data, $prompt)) {
                     trace_error("Error set prompt model: '{$model_name}'");

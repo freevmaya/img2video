@@ -11,9 +11,8 @@ class KlingCycle extends BaseCycle {
             $this->parent->PayVideo($task['user_id'], [
                 'hash'=>$task['hash']
             ]);
-        	
-        }
-        $this->parent->finishTask($task);
+            $this->parent->finishTask($task);
+        } else $this->setResponseProcessed($response, 0);
 	}
 
     protected function getResponses($task) {
@@ -49,14 +48,14 @@ class KlingCycle extends BaseCycle {
 
                         if ($state == 'failure') {
 
-                            $parent->finishTask($task, $state);
-
-                            $parent->Message($task['chat_id'], ['text' => sprintf(Lang("DownloadFailure"), $task['id']), 'reply_markup'=> json_encode([
+                            if ($parent->Message($task['chat_id'], ['text' => sprintf(Lang("DownloadFailure"), $task['id']), 'reply_markup'=> json_encode([
                                     'inline_keyboard' => [
                                         [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']]
                                     ]
                                 ])
-                            ]);
+                            ])) {
+                                $parent->finishTask($task, $state);
+                            } else $this->setResponseProcessed($response, 0);
                         } else $this->finalyDownloadfile($task, $response, $data['file_path'], $data['file_name']);
 
 

@@ -8,7 +8,7 @@ class BaseKlingApi extends BaseApi
 {
     private $accessKey;
     private $secretKey;
-    private $baseUrl = 'https://api-singapore.klingai.com/';
+    protected $baseUrl = 'https://api-singapore.klingai.com/';
 
     public function __construct($accessKey, $secretKey, $bot=null)
     {
@@ -28,18 +28,23 @@ class BaseKlingApi extends BaseApi
 	    return JWT::encode($payload, $this->secretKey, "HS256");
 	}
 
-    protected function makeRequest($endpoint, $data)
+    protected function requireTranslate($info) {
+        return false;
+    }
+
+    protected function makeRequest($url, $data, $post = true)
     {
-        $ch = curl_init($this->baseUrl . $endpoint);
+        $ch = curl_init($url);
+        $token = $this->generateToken();
 
         //trace($data);
         
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POST => true,
+            CURLOPT_POST => $post,
             CURLOPT_POSTFIELDS => json_encode($data),
             CURLOPT_HTTPHEADER => [
-                'Authorization: Bearer '.$this->generateToken(),
+                "Authorization: Bearer {$token}",
                 'Content-Type: application/json'
             ]
         ]);
@@ -49,10 +54,6 @@ class BaseKlingApi extends BaseApi
         if (version_compare(PHP_VERSION, '8.0.0', '<')) {
             curl_close($ch);
         }
-
-        if (isset($response['code']) && (intval($response['code']) > 0))
-            trace_error($response);
-        else trace($response);
 
         return $response;
     }

@@ -83,9 +83,10 @@ class MainCycleEx {
             return;
         }
 
-        try {  
+        try { 
+            usleep(500); 
 
-            return $this->api->sendVideo([
+            $message = $this->api->sendVideo([
                 'chat_id' => $task['chat_id'],
                 'video' => fopen($filePath, 'r'),
                 'caption' => $message,
@@ -93,9 +94,24 @@ class MainCycleEx {
                 'height' => 512,
                 'supports_streaming' => true
             ]);
+            return $message->getMessageId();
+
         } catch (Exception $e) {
-            trace_error($e->getMessage());
+
+            sleep(1);
+
+            $message = $this->api->sendVideo([
+                'chat_id' => $task['chat_id'],
+                'video' => fopen($filePath, 'r'),
+                'caption' => $message,
+                'width' => 512,
+                'height' => 512,
+                'supports_streaming' => true
+            ]);
+            return $message->getMessageId();
         }
+
+        trace_error("Failed to send mp4");
 
         return false;
     }
@@ -116,22 +132,57 @@ class MainCycleEx {
                 ]);
 
             try {
+
                 usleep(500);
                 $photoMessage = $this->api->sendPhoto($params);
                 return $photoMessage->getMessageId();
+
             } catch (Exception $e) {
 
-                trace_error($e->getMessage());
                 sleep(2);
 
                 $photoMessage = $this->api->sendPhoto($params);
                 return $photoMessage->getMessageId();
+
             }
         } else {
             trace_error("File ({$file_path}) is not exists");
             return true;
         }
 
+        trace_error("Failed to send photo");
+        return false;
+    }
+
+    public function Message($chatId, $msg, $parse_mode = 'Markdown') {
+
+        try {
+
+            $params = array_merge([
+                'chat_id' => $chatId,
+                'text' => $msg,
+                'parse_mode' => $parse_mode
+            ], is_string($msg) ? ['text' => $msg] : $msg);
+
+            $message = $this->api->sendMessage($params);
+            return $message->getMessageId();
+
+        } catch (Exception $e) {
+
+            sleep(1);
+
+            $params = array_merge([
+                'chat_id' => $chatId,
+                'text' => $msg,
+                'parse_mode' => $parse_mode
+            ], is_string($msg) ? ['text' => $msg] : $msg);
+
+            $message = $this->api->sendMessage($params);
+            return $message->getMessageId();
+
+        }
+
+        trace_error("Failed to send message");
         return false;
     }
 
@@ -145,16 +196,5 @@ class MainCycleEx {
 
     public function error($error) {
         $this->Message(ADMIN_USERID, $error);
-    }
-
-    public function Message($chatId, $msg, $parse_mode = 'Markdown') {
-
-        $params = array_merge([
-            'chat_id' => $chatId,
-            'text' => $msg,
-            'parse_mode' => $parse_mode
-        ], is_string($msg) ? ['text' => $msg] : $msg);
-
-        return $this->api->sendMessage($params);
     }
 }
