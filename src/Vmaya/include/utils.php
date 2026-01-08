@@ -480,7 +480,6 @@ function resizeImageIfTooLarge($source_path, $dest_path = null, $options = []) {
         }
         
         // Освобождаем память
-
         if (version_compare(PHP_VERSION, '8.0.0', '<')) {
             imagedestroy($source_image);
             imagedestroy($new_image);
