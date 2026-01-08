@@ -452,7 +452,9 @@ function resizeImageIfTooLarge($source_path, $dest_path = null, $options = []) {
             
             imagecopyresampled($temp_image, $source_image, 0, 0, 0, 0, $new_width, $new_height, $orig_width, $orig_height);
             imagecopy($new_image, $temp_image, 0, 0, $crop_x, $crop_y, $crop_width, $crop_height);
-            imagedestroy($temp_image);
+            if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+                imagedestroy($temp_image);
+            }
         } else {
             imagecopyresampled($new_image, $source_image, 0, 0, 0, 0, $new_width, $new_height, $orig_width, $orig_height);
         }
@@ -478,8 +480,11 @@ function resizeImageIfTooLarge($source_path, $dest_path = null, $options = []) {
         }
         
         // Освобождаем память
-        imagedestroy($source_image);
-        imagedestroy($new_image);
+
+        if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+            imagedestroy($source_image);
+            imagedestroy($new_image);
+        }
         
         if ($save_result) {
             $result['success'] = true;

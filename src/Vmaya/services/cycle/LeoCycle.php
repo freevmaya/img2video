@@ -64,8 +64,11 @@ class LeoCycle extends BaseCycle {
 
                     $parent->finishTask($task, 'finished');
                 } else {
+                    /*
                     $parent->Message($task['chat_id'], Lang('Something wrong'));
                     $parent->finishTask($task, 'failure');
+                    */
+                    $_this->setResponseProcessed($response, 0);
                 }
             } else {
                 $parent->Message($task['chat_id'], Lang('Fail download image'));
@@ -114,8 +117,11 @@ class LeoCycle extends BaseCycle {
 
                     $parent->finishTask($task, 'finished');
                 } else {
+                    /*
                     $parent->Message($task['chat_id'], Lang('Something wrong'));
                     $parent->finishTask($task, 'failure');
+                    */
+                    $_this->setResponseProcessed($response, 0);
                 }
             } else {
                 $parent->Message($task['chat_id'], Lang('Fail download image'));
