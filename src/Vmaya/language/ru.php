@@ -54,6 +54,10 @@ $lang = [
 	'Video'=>'Видео',
 	'imageToVideo'=>'Видео из изображения',
 	'textToImage'=>'Изображение по промпту',
+	'imagesToImage'=>'Изображения в изображение',
+	'What kind of magic do you want to do?'=>'Какую магию хотите сделать?',
+	'Submit your first image'=>'Отправьте первое изображение',
+	'Submit a second image'=>'Отправьте второе изображение',
 	'imageToVideoPrompts'=>[
 		'Человек смеётся',
 		'Человек улыбается',

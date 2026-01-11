@@ -217,14 +217,32 @@ class LeonardoApi extends BaseApi
         return true;
     }
 
+    private function setImageGuidance(&$options, $images)
+    {
+        $count = count($images);
+        switch ($count) {
+            case 2:
+                $options['controlnets'][0]['initImageId'] = $images[0];
+                $options['controlnets'][1]['initImageId'] = $images[1];
+                break;
+            default:
+                return false;
+        }
+        return true;
+    }
+
     protected function setImages($model_name, &$options, $images) {
         if (!empty($images))
             for ($i=0; $i<count($images); $i++)
                 if (!$images[$i] = $this->validateImage($images[$i]))
                     return false;
 
-        if ($model_name == 'Kling O1')
+        if ($model_name == 'Kling O1') {
             return $this->setImagesKlingO1($options, $images);
+        }
+
+        if ($model_name == 'Image Guidance')
+            return $this->setImageGuidance($options, $images);
         
         $info = $this->getModelInfo($model_name);
         if ($info && ($info['type'] == 'textToImage'))

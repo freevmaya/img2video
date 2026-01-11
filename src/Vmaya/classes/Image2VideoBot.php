@@ -179,7 +179,7 @@ class Image2VideoBot extends YKassaBot {
                 $this->discribe($chatId, $data);
                 return true;
             case 'create_image':
-                $this->textToImage(0, $chatId);
+                $this->createImage(0, $chatId);
                 return true;
             case 'create_video':
                 $this->imageToVideo(0);
@@ -209,6 +209,8 @@ class Image2VideoBot extends YKassaBot {
                 return $this->imageToVideo($data);
             case 'textToImage':
                 return $this->textToImage($data);
+            case 'imagesToImage':
+                return $this->imagesToImage($data);
         }
         return false;
     }
@@ -627,6 +629,14 @@ class Image2VideoBot extends YKassaBot {
                         return true;
                     else $this->notEnough($this->getCurrentChatId());
                 break;
+            case 'imagesToImage': 
+                    if ($this->isAllowedImage())
+                        return true;
+                    else $this->notEnough($this->getCurrentChatId());
+                break;
+            default:
+                $this->Answer(null, Lang('Unknown type: %s', $type));
+                break;
         }
         return false;
     }
@@ -736,6 +746,45 @@ class Image2VideoBot extends YKassaBot {
                     return $this->Generate('textToImage', [], $prompt);
                 break;
         }
+    }
+
+    protected function imagesToImage($stage) {
+        if (is_array($stage))
+            [$stage, $prompt] = $this->parseCommandData('imagesToImage', $stage);
+
+        switch ($stage) {
+            case 0: 
+                    $this->Answer(null, $this->genContent(Lang("Submit your first image"), true));
+                    $this->setSession("expect", 'imagesToImage(1)');
+                break;
+            case 1: 
+                    $this->Answer(null, $this->genContent(Lang("Submit a second image"), true));
+                    $this->setSession("expect", 'imagesToImage(2)');
+                break;
+            case 2: 
+                    $this->askSendPrompt('textToImage', 1);
+                    $this->setSession("expect", 'imagesToImage(3)');
+                break;
+            case 3: 
+                    $prompt = isset($prompt) ? $prompt : $this->popSession('prompt');
+                    return $this->Generate('imagesToImage', $this->popImages(), $prompt);
+                break;
+        }
+
+    }
+
+    protected function createImage() {
+        $imagesToImage_model = $this->getSession('imagesToImage_model');
+        $textToImage_model = $this->getSession('textToImage_model');
+
+        if ($imagesToImage_model && $textToImage_model) {
+            $this->Answer(null, $this->genContent(Lang("What kind of magic do you want to do?"), false, [
+                [
+                    ['text'=>Lang('imagesToImage'), 'callback_data' => "imagesToImage.0.prompt"],
+                    ['text'=>Lang('textToImage'), 'callback_data' => "textToImage.0.prompt"]
+                ]
+            ]));
+        } else $this->textToImage(0);
     }
 
     protected function textToVideo($chatId, $prompt) {

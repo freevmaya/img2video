@@ -61,9 +61,10 @@
 			"type": "textToImage"
 		},
 		"Image Guidance": {
-			"enabled": false,
+			"enabled": true,
 			"url": "https://cloud.leonardo.ai/api/rest/v1/generations",
-			"dev": "Требуются какие то еще картинки, надо разобраться"
+			"type": "imagesToImage",
+			"require_images": [2, 2]
 		},
 		"Canvas Inpainting": {
 			"enabled": false,
@@ -264,7 +265,7 @@
 			"controlnets": [
 			    {
 			        "initImageId": "<YOUR_GENERATED_IMAGE_ID>",
-			        "initImageType": "GENERATED",
+			        "initImageType": "UPLOADED",
 			        "preprocessorId": 67,
 			        "strengthType": "High",
 			        "influence": 0.39
