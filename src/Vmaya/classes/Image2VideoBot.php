@@ -762,7 +762,7 @@ class Image2VideoBot extends YKassaBot {
                     $this->setSession("expect", 'imagesToImage(2)');
                 break;
             case 2: 
-                    $this->askSendPrompt('textToImage', 1);
+                    $this->askSendPrompt('imagesToImage', 3);
                     $this->setSession("expect", 'imagesToImage(3)');
                 break;
             case 3: 
