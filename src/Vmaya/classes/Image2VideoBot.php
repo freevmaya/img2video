@@ -290,17 +290,45 @@ class Image2VideoBot extends YKassaBot {
         $models = $this->getActualyModelsInfo();
         if (count($models) > 0) {
             $cur_type = null;
+            $models_tree = [];
+
             foreach ($models as $info) {
                 if ($cur_type != $info['type'])
-                    $list[] = [['text'=>'-------- '.Lang($info['type']).' -------', 'callback_data' => 'ignore']];
-
+                    $models_tree[$info['type']] = [];
+                
+                $models_tree[$info['type']][] = $info;
                 $cur_type = $info['type'];
-                $current_model_index = $this->getSession($cur_type);
-                $name = $info['name'];
+            }
 
-                $line = [['text' => $current_model_index == $info['index'] ? '🟢 '.$name : $name, 'callback_data' => "set_model.{$cur_type}.{$info['index']}"]];
+            $maxchars = 20;
 
-                $list[] = $line;
+            foreach ($models_tree as $type=>$items) {
+                $list[] = [['text'=>'-------- '.Lang($type).' -------', 'callback_data' => 'ignore']];
+                $current_model_index = $this->getSession($type);
+
+                $count = count($items);
+                $line = [];
+                $chars = 0;
+
+                for ($i=0; $i<$count; $i++) {
+
+                    $info       = $items[$i];
+                    $name       = $info['name'];
+
+                    if ($chars >= $maxchars) {
+                        if (count($line) > 0)
+                            $list[] = $line;
+                        $line = [];
+                        $chars = 0;
+                    }
+
+                    $line[] = ['text' => $current_model_index == $info['index'] ? '🟢 '.$name : $name, 'callback_data' => "set_model.{$type}.{$info['index']}"];
+
+                    $chars += strlen($name);
+
+                    if ($i == $count - 1)
+                        $list[] = $line;
+                }
             }
         }
 
