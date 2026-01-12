@@ -6,21 +6,17 @@
 	use Telegram\Bot\Api;
 
 	$telegram = new Api(BOTTOKEN);
+	echo BASEURL."\n";
 
-	if (isset($argv[1]) && ($argv[1] == 'reset')) {
+	$telegram->deleteWebhook();
 
-		echo BASEURL."\n";
+	// 2. Устанавливаем новый вебхук
+	$response = $telegram->setWebhook([
+	    'url' => BASEURL,
+	    //'certificate' => '/path/to/your/certificate.pem', // Опционально для HTTPS
+	    'max_connections' => 40
+	]);
 
-		$telegram->deleteWebhook();
-
-		// 2. Устанавливаем новый вебхук
-		$response = $telegram->setWebhook([
-		    'url' => BASEURL,
-		    //'certificate' => '/path/to/your/certificate.pem', // Опционально для HTTPS
-		    'max_connections' => 40
-		]);
-
-		print_r($response);
-		echo "\n";
-	}
+	print_r($response);
+	echo "\n";
 ?>
