@@ -399,7 +399,7 @@ abstract class BaseBot {
             //Получаем обновления с учетом последнего обработанного ID
             try {
                 $updates = $this->api->getUpdates([
-                    'offset' => $this->getSetting('lastUpdateId', 0),
+                    'offset' => $this->getSetting('lastUpdateId', 0) + 1,
                     'timeout' => $this->getSetting('update_timeout', 0), // Длительность ожидания новых сообщений (сек)
                 ]);
 
