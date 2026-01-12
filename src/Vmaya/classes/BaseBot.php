@@ -116,13 +116,11 @@ abstract class BaseBot {
         $messageId = $callback['message']['message_id'];
         $callback_data = $callback['data']; // Здесь содержится ваш callback_data
         
-        /*
         // 1. Ответим на callback (убирает "часики" у кнопки)
         $this->api->answerCallbackQuery([
             'callback_query_id' => $callback['id'],
             'text' => 'Обрабатываю ваш выбор...'
         ]);
-        */
 
         return $this->callbackProcess($callback, $chatId, $messageId, $callback_data);
     }
@@ -171,12 +169,8 @@ abstract class BaseBot {
         return isset($this->session[$name]);
     }
 
-    protected function getSession($name) {
-        /*
-        if (!$this->hasSession($name))
-            trace("Session field $name not found!\n");
-            */
-        return $this->hasSession($name) ? $this->session[$name] : false;
+    protected function getSession($name, $default = false) {
+        return $this->hasSession($name) ? $this->session[$name] : $default;
     }
 
     protected function unsetSessions($names) {
@@ -280,8 +274,14 @@ abstract class BaseBot {
             $result = $this->api->sendMessage($params);
         }
 
-        if (isset($result['message_id']))
+        if (isset($result['message_id'])) {
             $this->setSession('lastBotMessageId', $result['message_id']);
+
+            $history = $this->getSession('history', []);
+            $history[] = $result['message_id'];
+            if (count($history) > 10) array_shift($history);
+            $this->setSession('history', $history);
+        }
         return $result;
     }
 

@@ -202,6 +202,9 @@ class Image2VideoBot extends YKassaBot {
             case 'set_model':
                 $this->setModel($chatId, $data);
                 return true;
+            case 'set_model_finish':
+                $this->set_model_finish($data);
+                return true;
             case 'info':
                 $this->getModelInfo($chatId, $data);
                 return true;
@@ -211,6 +214,12 @@ class Image2VideoBot extends YKassaBot {
                 return $this->textToImage($data);
             case 'imagesToImage':
                 return $this->imagesToImage($data);
+            case 'selectModelType':
+                return $this->selectModelType($data[1]);
+            case 'selectedModel':
+                return $this->setModel($data[1]);
+            case 'closeLast':
+                return $this->DeleteMessage();
         }
         return false;
     }
@@ -225,9 +234,35 @@ class Image2VideoBot extends YKassaBot {
         $parts = explode('.', $data);
 
         if (DEV) print_r($parts);
+
         if ($this->_commandProcessor($parts[0], $chatId, $parts))
             return true;
         else return parent::callbackProcess($callback, $chatId, $messageId, $data);
+    }
+
+    protected function messageProcess($chatId, $messageId, $text) {
+
+        if (!$this->pMenuProcess($chatId, $text)) {
+
+            if ($photo = $this->getMessagePhoto()) {
+                $this->pushImage($photo['file_id']);
+
+
+                if ($caption = $this->currentUpdate->getMessage()->get('caption'))               
+                    $this->setSession('prompt', $caption);
+            } else 
+                if (!empty($text))
+                    $this->setSession('prompt', $text);
+
+            if ($expect = $this->expect) {
+                if (DEV) echo "Expect: $expect\n";
+
+                [$before, $inside] = extractParenthesesContent($this->expect);
+                $method = $before ? $before : $expect;
+
+                $this->callMethod($method, $inside);
+            } else $this->whatDo($photo);
+        }
     }
 
     protected function initAdmin($user, $update) {
@@ -283,6 +318,31 @@ class Image2VideoBot extends YKassaBot {
         return $infos;
     }
 
+    protected function set_model_finish($data) {
+        $this->setSession($data[1], $data[2]);
+        $history = $this->getSession('history');
+        if ($history && (($count = count($history)) > 1)) {
+            $this->DeleteMessage(null, $history[$count - 1]);
+            $this->DeleteMessage(null, $history[$count - 2]);
+            $this->whatDo($data[1] == 'imageToVideo');
+        }
+    }
+
+    protected function selectModelType($type) {
+
+        $list = [];
+
+        $models = $this->getActualyModelsInfo();
+        if (count($models) > 0) {
+
+            foreach ($models as $info)
+                if ($type == $info['type'])
+                    $list[] = [['text' => $info['name'], 'callback_data' => "set_model_finish.{$type}.{$info['index']}"]];
+
+            $this->Answer(null, $this->genContent(Lang('Models'), true, $list));
+        }
+    }
+
     protected function models($chatId, $callbackMessageId = null) {
 
         $list = [];
@@ -332,18 +392,25 @@ class Image2VideoBot extends YKassaBot {
             }
         }
 
+        $list[] = [['text'=>Lang('Close'), 'callback_data' => 'closeLast']];
+
         $this->Answer($chatId, $this->genContent(Lang('Models'), true, $list), $callbackMessageId);
     }
 
-    protected function setModel($chatId, $data) {
-        $this->setSession($data[1], $data[2]);
+    protected function callbackMessageId() {
 
-        $messageId = 0;
+        $messageId = null;
         if ($callback = @$this->currentUpdate['callback_query']) {
             $messageId = $callback['message']['message_id'];
         }
 
-        $this->models($chatId, $messageId);
+        return $messageId;
+    }
+
+    protected function setModel($chatId, $data) {
+
+        $this->setSession($data[1], $data[2]);
+        $this->models($chatId, $this->callbackMessageId());
 
         //$this->Answer($chatId, $this->genContent(sprintf(Lang('Selected model %s'), $gen_model), true), $messageId);
     }
@@ -423,38 +490,25 @@ class Image2VideoBot extends YKassaBot {
         }
     }
 
-    protected function messageProcess($chatId, $messageId, $text) {
+    protected function whatDo($photoOrText = false, $messageEditId = null) {
 
-        if (!$this->pMenuProcess($chatId, $text)) {
+        $text = Lang("What to do about this?");
+        if ($photoOrText) {
 
-            if ($photo = $this->getMessagePhoto()) {
-                $this->pushImage($photo['file_id']);
+            $text .= "\n(".$this->getCurrentModelForText('imageToVideo').')';
 
+            $this->Answer(null, $this->genContent($text, false, [
+                [['text'=>Lang('Create a video'), 'callback_data' => "imageToVideo.1.prompt"],
+                 ['text'=>Lang('Select model'), 'callback_data' => "selectModelType.imageToVideo"]]
+            ]), $messageEditId);
+        } else if (!empty($text)) {
 
-                if ($caption = $this->currentUpdate->getMessage()->get('caption'))               
-                    $this->setSession('prompt', $caption);
-            } else 
-                if (!empty($text))
-                    $this->setSession('prompt', $text);
+            $text .= "\n(".$this->getCurrentModelForText('textToImage').')';
 
-            if ($expect = $this->expect) {
-                if (DEV) echo "Expect: $expect\n";
-
-                [$before, $inside] = extractParenthesesContent($this->expect);
-                $method = $before ? $before : $expect;
-
-                $this->callMethod($method, $inside);
-            } else {
-                if ($photo) {
-                    $this->Answer($chatId, $this->genContent(Lang("What to do about this?"), false, [
-                        [['text'=>Lang('Create a video'), 'callback_data' => "imageToVideo.1.prompt"]]
-                    ]));
-                } else if (!empty($text)) {
-                    $this->Answer($chatId, $this->genContent(Lang("What to do about this?"), false, [
-                        [['text'=>Lang('Create an image'), 'callback_data' => "textToImage.1.prompt"]]
-                    ]));
-                }
-            }
+            $this->Answer(null, $this->genContent($text, false, [
+                [['text'=>Lang('Create an image'), 'callback_data' => "textToImage.1.prompt"],
+                 ['text'=>Lang('Select model'), 'callback_data' => "selectModelType.textToImage"]]
+            ]), $messageEditId);
         }
     }
 
@@ -716,14 +770,24 @@ class Image2VideoBot extends YKassaBot {
         return null;
     }
 
+    protected function getCurrentModelForText($genType) {
+
+        if ($gen_model = $this->getCurrentModelName($genType))
+            return Lang("Current model %s", $gen_model);
+
+        foreach ($this->generators as $gen) {
+            if ($gen_model = $gen->getDefaultModelName($genType))
+                return Lang("Current model %s", $gen_model);
+        }
+    }
+
     protected function askSendPrompt($genType, $stage) {
 
         $params = [
             'text' => Lang("Send a prompt")
         ];
 
-        if ($gen_model = $this->getCurrentModelName($genType))
-            $params['text'] .= "\n".Lang("Current model %s", $gen_model);
+        $params['text'] .= "\n".$this->getCurrentModelForText($genType);
 
         $promptList = Lang($genType.'Prompts');
 

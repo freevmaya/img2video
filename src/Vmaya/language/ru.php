@@ -60,6 +60,8 @@ $lang = [
 	'What kind of magic do you want to do?'=>'Какую магию хотите сделать?',
 	'Submit your first image'=>'Отправьте первое изображение',
 	'Submit a second image'=>'Отправьте второе изображение',
+	'Select model'=>'Выбрать модель',
+	'Close'=>'Закрыть',
 	'imageToVideoPrompts'=>[
 		'Человек смеётся',
 		'Человек улыбается',
