@@ -62,6 +62,7 @@
 		},
 		"Image Guidance": {
 			"enabled": true,
+			"description": "",
 			"url": "https://cloud.leonardo.ai/api/rest/v1/generations",
 			"type": "imagesToImage",
 			"require_images": [2, 2]

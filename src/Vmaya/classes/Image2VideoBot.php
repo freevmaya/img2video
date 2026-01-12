@@ -253,6 +253,15 @@ class Image2VideoBot extends YKassaBot {
         }
     }
 
+    protected function getActualyModelInfo($model_index) {
+        $models_info = $this->getActualyModelsInfo();
+        foreach ($models_info as $info)
+            if ($info['index'] == $model_index)
+                return [$this->generators[$info['gen_index']], $info];
+
+        return [null];
+    }
+
     protected function getActualyModelsInfo() {
         $infos = [];
         foreach ($this->generators as $gen_name=>$gen) {
@@ -261,6 +270,7 @@ class Image2VideoBot extends YKassaBot {
             foreach ($m_infos as $name=>$info) {
                 $infos[] = array_merge([
                     'gen_index'=>$gen_name,
+                    'index'=> str_replace('.', '_', $gen_name.'_'.$name),
                     'name'=>$name
                 ], $info);
             }
@@ -273,7 +283,7 @@ class Image2VideoBot extends YKassaBot {
         return $infos;
     }
 
-    protected function models($chatId) {
+    protected function models($chatId, $callbackMessageId = null) {
 
         $list = [];
 
@@ -285,29 +295,29 @@ class Image2VideoBot extends YKassaBot {
                     $list[] = [['text'=>'-------- '.Lang($info['type']).' -------', 'callback_data' => 'ignore']];
 
                 $cur_type = $info['type'];
-                $current_model = $this->getSession($cur_type.'_model');
+                $current_model_index = $this->getSession($cur_type);
                 $name = $info['name'];
-                $gen_index = $info['gen_index'];
 
-                $line = [['text' => $current_model == $info['gen_index'].'.'.$name ? '🟢 '.$name : $name, 'callback_data' => "set_model.{$cur_type}.{$gen_index}_{$name}"]];
-                if ($info && isset($info['info']))
-                    $line[] = ['text'=>'ⓘ', 'callback_data' => "info.{$cur_type}.{$gen_index}_{$name}"];
+                $line = [['text' => $current_model_index == $info['index'] ? '🟢 '.$name : $name, 'callback_data' => "set_model.{$cur_type}.{$info['index']}"]];
 
                 $list[] = $line;
             }
         }
 
-        $this->Answer($chatId, $this->genContent(Lang('Models'), true, $list));
+        $this->Answer($chatId, $this->genContent(Lang('Models'), true, $list), $callbackMessageId);
     }
 
     protected function setModel($chatId, $data) {
+        $this->setSession($data[1], $data[2]);
 
-        $gen_model = str_replace('_', '.', $data[2]);
-        $key = $data[1].'_model';
+        $messageId = 0;
+        if ($callback = @$this->currentUpdate['callback_query']) {
+            $messageId = $callback['message']['message_id'];
+        }
 
-        $this->setSession($key, $gen_model);
+        $this->models($chatId, $messageId);
 
-        $this->Answer($chatId, $this->genContent(sprintf(Lang('Selected model %s'), $gen_model), true), $this->getSession('lastBotMessageId'));
+        //$this->Answer($chatId, $this->genContent(sprintf(Lang('Selected model %s'), $gen_model), true), $messageId);
     }
 
     protected function getModelInfo($chatId, $data) {
@@ -604,9 +614,8 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function getCurrentGenModel($type) {
-        if ($gen_model = $this->getSession($type.'_model')) {
-            $index = explode('.', $gen_model);
-            return [$this->generators[$index[0]], $index[1]];
+        if ($gen_model_index = $this->getSession($type)) {
+            return $this->getActualyModelInfo($gen_model_index);
         } else {
             foreach ($this->generators as $gen) {
                 if ($model_name = $gen->getDefaultModelName($type))
@@ -672,13 +681,22 @@ class Image2VideoBot extends YKassaBot {
         return false;
     }
 
+    protected function getCurrentModelName($genType) {
+        if ($gen_model_index = $this->getSession($genType)) {
+            [$gen, $info] = $this->getActualyModelInfo($gen_model_index);
+            return $info['name'];
+        }
+        return null;
+    }
+
     protected function askSendPrompt($genType, $stage) {
 
-        $params = [];
+        $params = [
+            'text' => Lang("Send a prompt")
+        ];
 
-        if ($gen_model = $this->getSession($genType.'_model'))
-            $params['text'] = sprintf(Lang("Send a prompt. Current model %s"), $gen_model);
-        else $params['text'] = Lang("Send a prompt");
+        if ($gen_model = $this->getCurrentModelName($genType))
+            $params['text'] .= "\n".Lang("Current model %s", $gen_model);
 
         $promptList = Lang($genType.'Prompts');
 
@@ -718,7 +736,11 @@ class Image2VideoBot extends YKassaBot {
 
         switch ($stage) {
             case 0: 
-                    $this->Answer($this->getCurrentChatId(), $this->genContent(Lang("Send you photo"), true));
+                    $text = Lang("Submit you image");
+                    if ($gen_model = $this->getCurrentModelName('imageToVideo'))
+                        $text .= "\n".Lang("Current model %s", $gen_model);
+
+                    $this->Answer($this->getCurrentChatId(), $this->genContent($text, true));
                     $this->setSession("expect", 'imageToVideo(1)');
                 break;
             case 1: 
@@ -754,11 +776,20 @@ class Image2VideoBot extends YKassaBot {
 
         switch ($stage) {
             case 0: 
-                    $this->Answer(null, $this->genContent(Lang("Submit your first image"), true));
+                    $text = Lang("Submit your first image");
+                    if ($gen_model = $this->getCurrentModelName('imagesToImage'))
+                        $text .= "\n".Lang("Current model %s", $gen_model);
+
+                    $this->Answer(null, $this->genContent($text, true));
                     $this->setSession("expect", 'imagesToImage(1)');
                 break;
             case 1: 
-                    $this->Answer(null, $this->genContent(Lang("Submit a second image"), true));
+
+                    $text = Lang("Submit a second image");
+                    if ($gen_model = $this->getCurrentModelName('imagesToImage'))
+                        $text .= "\n".Lang("Current model %s", $gen_model);
+
+                    $this->Answer(null, $this->genContent($text, true));
                     $this->setSession("expect", 'imagesToImage(2)');
                 break;
             case 2: 

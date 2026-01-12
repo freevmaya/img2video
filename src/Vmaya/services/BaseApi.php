@@ -14,7 +14,7 @@ abstract class BaseApi implements APIInterface
     		$data = json_decode(file_get_contents(__DIR__."/models/{$modes_file}.json"), true);
     		$this->modelList 	    = $data['list'];
             $this->defaultModels    = $data['defaultModelName'];
-	        $this->defaultModel    = $data['default']; 
+	        $this->defaultModel    = $data['default'];
     	}
         $this->bot = $bot;
     }

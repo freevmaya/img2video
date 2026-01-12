@@ -1,19 +1,6 @@
 <?
 define('EARTHRADIUS', 6378.137);
 
-function Lang($strIndex, $param=null) {
-	GLOBAL $lang;
-
-    $result = $strIndex;
-	if (isset($lang[$strIndex])) {
-		$result = $lang[$strIndex];
-        if (empty($param))
-            $result = sprintf($result, $param);
-    }
-
-	return $result;
-}
-
 
 function getGUID() {
     if (function_exists('com_create_guid')){
