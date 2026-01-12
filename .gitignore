@@ -8,6 +8,7 @@ config/*
 sessions/*
 /sessions
 /test
+/tmp
 test*.*
 config*.php
 downloads

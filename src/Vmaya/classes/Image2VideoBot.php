@@ -680,10 +680,9 @@ class Image2VideoBot extends YKassaBot {
 
     protected function Generate($type, $images, $prompt) {
         if (!empty($prompt)) {
-            [$gen, $model_name] = $this->getCurrentGenModel($type);
+            [$gen, $info] = $this->getCurrentGenModel($type);
             if ($gen) {
 
-                $info = $gen->getModelInfo($model_name);
                 $min_max_images = null;
 
                 if (isset($info['require_images']))
@@ -700,7 +699,7 @@ class Image2VideoBot extends YKassaBot {
                 }
 
                 if ($this->isAllowType($type)) {
-                    if ($gen->Generate($type, $images_url, $prompt, $model_name))
+                    if ($gen->Generate($type, $images_url, $prompt, $info['name']))
                         return true;
                 }
             }
