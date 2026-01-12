@@ -22,13 +22,5 @@
 		]);
 
 		print_r($response);
-	} else {
-
-		$dbp = new mySQLProvider('localhost', _dbname_default, _dbuser, _dbpassword);
-
-		$bot = new Image2VideoBot($telegram, $dbp);
-		$bot->GetUpdates();
-
-		$dbp->Close();
 	}
 ?>
