@@ -17,10 +17,10 @@
 		$response = $telegram->setWebhook([
 		    'url' => BASEURL,
 		    //'certificate' => '/path/to/your/certificate.pem', // Опционально для HTTPS
-		    'max_connections' => 40,
-		    'allowed_updates' => ['message', 'callback_query'] // Какие обновления получать
+		    'max_connections' => 40
 		]);
 
 		print_r($response);
+		echo "\n";
 	}
 ?>
