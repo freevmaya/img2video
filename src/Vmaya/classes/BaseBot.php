@@ -116,11 +116,13 @@ abstract class BaseBot {
         $messageId = $callback['message']['message_id'];
         $callback_data = $callback['data']; // Здесь содержится ваш callback_data
         
+        /*
         // 1. Ответим на callback (убирает "часики" у кнопки)
         $this->api->answerCallbackQuery([
             'callback_query_id' => $callback['id'],
             'text' => 'Обрабатываю ваш выбор...'
         ]);
+        */
 
         return $this->callbackProcess($callback, $chatId, $messageId, $callback_data);
     }
