@@ -231,6 +231,26 @@ class LeonardoApi extends BaseApi
         return true;
     }
 
+    private function setImagesSeedream(&$options, $images)
+    {
+        $count = count($images);
+        if ($count < 1)
+            return false;
+
+        $ref = [];
+        for ($i=0; $i<$count; $i++) {
+            $ref[] = [
+                "image" => [
+                    "id"    => $images[$i],
+                    "type"  => "UPLOADED"
+                ],
+                "strength" => "MID"
+            ];
+        }
+        $options['parameters']['guidances']['image_reference'] = $ref;
+        return true;
+    }
+
     protected function setImages($model_name, &$options, $images) {
         if (!empty($images))
             for ($i=0; $i<count($images); $i++)
@@ -243,6 +263,9 @@ class LeonardoApi extends BaseApi
 
         if ($model_name == 'Image Guidance')
             return $this->setImageGuidance($options, $images);
+
+        if ($model_name == 'Seedream')
+            return $this->setImagesSeedream($options, $images);
         
         $info = $this->getModelInfo($model_name);
         if ($info && ($info['type'] == 'textToImage'))

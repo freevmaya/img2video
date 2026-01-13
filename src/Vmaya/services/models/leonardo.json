@@ -46,9 +46,10 @@
 			"type": "textToImage"
 		},
 		"Seedream": {
-			"enabled": false,
+			"enabled": true,
 			"url": "https://cloud.leonardo.ai/api/rest/v2/generations",
-			"dev": "Требуются какие то еще картинки, надо разобраться"
+			"type": "imagesToImage",
+			"require_images": [1, 2]
 		},
 		"PhotoReal": {
 			"enabled": false,
@@ -215,9 +216,9 @@
 		"Seedream": {
 		    "model": "seedream-4.0",
 		    "parameters": {
-		        "width": 1920,
-		        "height": 1080,
-		        "prompt": "Koala with purple wizard hat on a skateboard",
+		        "width": 1024,
+		        "height": 1024,
+		        "prompt": "",
 		        "quantity": 2,
 		        "guidances": {
 		            "image_reference": [

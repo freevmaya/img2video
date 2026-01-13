@@ -778,42 +778,39 @@ class Image2VideoBot extends YKassaBot {
         if (is_array($stage))
             [$stage, $prompt] = $this->parseCommandData('imagesToImage', $stage);
 
-        switch ($stage) {
-            case 0: 
-                    $text = Lang("Submit your first image");
-                    if ($gen_model = $this->getCurrentModelName('imagesToImage'))
-                        $text .= "\n".Lang("Current model %s", $gen_model);
+        [$gen, $info] = $this->getCurrentGenModel('imagesToImage');
+        $count_images = count($this->getSession('images'));
+        $require_images = isset($info['require_images']) ? $info['require_images'][0] : 1;
 
-                    $this->pushRecallMethod($this->messageIndex(), "imagesToImage({$stage})");
-                    $this->Answer(null, $this->genContent($text, true, [
-                        [$this->createButton('Select model', "selectModelType.imagesToImage.{$this->messageIndex()}")]
-                    ]));
-                    $this->setSession("expect", 'imagesToImage(1)');
-                break;
-            case 1: 
+        if ($count_images < $require_images) {
+            $text = Lang("Submit your image")." {$count_images}/{$require_images}\n".
+                    Lang("Current model %s", $info['name']);
 
-                    $text = Lang("Submit a second image");
-                    if ($gen_model = $this->getCurrentModelName('imagesToImage'))
-                        $text .= "\n".Lang("Current model %s", $gen_model);
+            $this->pushRecallMethod($this->messageIndex(), "imagesToImage(0)");
+            $this->Answer(null, $this->genContent($text, true, [
+                [$this->createButton('Select model', "selectModelType.imagesToImage.{$this->messageIndex()}")]
+            ]));
 
-                    $this->Answer(null, $this->genContent($text, true));
-                    $this->setSession("expect", 'imagesToImage(2)');
-                break;
-            case 2: 
-                    $this->askSendPrompt('imagesToImage', 3);
-                    $this->setSession("expect", 'imagesToImage(3)');
-                break;
-            case 3: 
-                    $prompt = isset($prompt) ? $prompt : $this->popSession('prompt');
-                    return $this->Generate('imagesToImage', $this->popImages(), $prompt);
-                break;
+            $this->setSession("expect", "imagesToImage(0)");
+        } else {
+            $prompt = isset($prompt) ? $prompt : $this->popSession('prompt');
+            if (empty($prompt)) {
+
+                $this->askSendPrompt('imagesToImage', 2);
+                $this->setSession("expect", 'imagesToImage(2)');
+            } else {
+
+                return $this->Generate('imagesToImage', $this->popImages(), $prompt);
+            }
         }
-
     }
 
     protected function create_image() {
         [$gen, $imagesToImage_model] = $this->getCurrentGenModel('imagesToImage');
         [$gen, $textToImage_model] = $this->getCurrentGenModel('textToImage');
+
+        $this->setSession('images', []);
+        $this->setSession('prompt', '');
 
         if ($imagesToImage_model && $textToImage_model) {
             $this->Answer(null, $this->genContent(Lang("What kind of magic do you want to do?"), false, [
