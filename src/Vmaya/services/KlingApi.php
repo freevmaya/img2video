@@ -30,7 +30,11 @@ class KlingApi extends BaseKlingApi
         if (PRODUCTION) 
             $response = parent::makeRequest($url, $request_data, $post);
         else {
-            echo("DEV REQUEST!\n");
+
+            if (DEV) {
+                echo("DEV Kling REQUEST!\n");
+                print_r($request_data);
+            }
 
             $response = [
                 'code'=>0,

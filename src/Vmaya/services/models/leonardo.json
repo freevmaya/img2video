@@ -86,6 +86,7 @@
 	},
 	"defaultModelName": {
 		"textToImage": "Lucid Origin",
+		"imagesToImage": "Image Guidance",
 		"imageToVideo": "Kling O1"
 	},
 	"default": {

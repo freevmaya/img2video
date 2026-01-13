@@ -263,7 +263,10 @@ class LeonardoApi extends BaseApi
             }
         }
         else {
-            echo "DEV Leonardo AI REQUEST!\n";
+            if (DEV) {
+                echo "DEV Leonardo AI REQUEST!\n";
+                print_r($data);
+            }
             $response = [
                 'sdGenerationJob' => [
                     'generationId' => md5(strtotime('now'))

@@ -286,7 +286,7 @@ class Image2VideoBot extends YKassaBot {
         $fileName = LANGUAGE_PATH.$this->user['language_code'].DS.'agreement.txt';
         if (file_exists($fileName)) {            
             $text = file_get_contents($fileName);
-            $this->Answer($chatId, $this->genContent($text, true));
+            $this->Answer($chatId, $this->genContent($text, 'Close'));
         }
     }
 
@@ -338,8 +338,6 @@ class Image2VideoBot extends YKassaBot {
                 if ($type == $info['type'])
                     $list[] = [['text' => $info['name'], 
                 'callback_data' => "set_model_finish.{$type}.{$info['index']}.{$this->messageIndex()}.{$backMessageIndex}"]];
-
-            print_r($list);
 
             $this->Answer(null, $this->genContent(Lang('Models'), true, $list));
         }
@@ -394,7 +392,7 @@ class Image2VideoBot extends YKassaBot {
             }
         }
 
-        $this->Answer($chatId, $this->genContent(Lang('Models'), true, $list), $callbackMessageId);
+        $this->Answer($chatId, $this->genContent(Lang('Models'), 'Close', $list), $callbackMessageId);
     }
 
     protected function callbackMessageId() {
@@ -428,35 +426,6 @@ class Image2VideoBot extends YKassaBot {
             $this->popSession("replace_user_id");
         else $this->setSession("replace_user_id", $newId);
     }
-
-/*
-    protected function processTask($chatId, $parts) {
-
-        if (DEV)
-            echo "processTask: ".print_r($parts, true)."\n";
-
-        if (count($parts) > 2) {
-            $action = $parts[2];
-            switch ($action) {
-                case 'textToImage':
-                    if ($prompt = $this->popSession($parts[1])) {
-                        $this->DeleteMessage();
-                        if ($this->isAllowedImage() || $this->firstStart)
-                            $this->textToImage($prompt);
-                        else $this->notEnough($chatId);
-                    }
-                    break;
-                case 'generateVideo':
-                    $this->DeleteMessage();
-                    $this->image2video_photo($chatId, $this->popSession('userText'), $this->getSession('file_id'));
-                    break;
-                case 'imageToVideo': 
-                    $this->DeleteMessage();
-                    $this->image2video_photo_prompt($chatId, $this->getPrompt($parts[1]));
-                    break;
-            }
-        }
-    }*/
 
     protected function pMenuProcess($chatId, $text) {
         if (!empty($text)) {
@@ -582,7 +551,7 @@ class Image2VideoBot extends YKassaBot {
     protected function Support($chatId) {
 
         $link = 'tg://user?id='.SUPPORT_USERID;
-        $this->Answer($chatId, $this->genContent(sprintf(Lang("HelpDeskDescription"), $this->getUserId()), true, [
+        $this->Answer($chatId, $this->genContent(sprintf(Lang("HelpDeskDescription"), $this->getUserId()), 'Close', [
             [['text' => Lang("Go to dialogue"), 'url' => $link]]
         ]));
     }
@@ -624,9 +593,14 @@ class Image2VideoBot extends YKassaBot {
         if ($gen_model_index = $this->getSession($type)) {
             return $this->getActualyModelInfo($gen_model_index);
         } else {
+            $modelsInfo = $this->getActualyModelsInfo();
+
             foreach ($this->generators as $gen) {
-                if ($model_name = $gen->getDefaultModelName($type))
-                    return [$gen, $model_name];
+                if ($model_name = $gen->getDefaultModelName($type)) {
+                    foreach ($modelsInfo as $info)
+                        if ($info['name'] == $model_name)
+                            return [$gen, $info];
+                }
             }
         }
 
@@ -687,12 +661,20 @@ class Image2VideoBot extends YKassaBot {
         return false;
     }
 
+    public function getDefaultModelName($type) {
+        foreach ($this->generators as $gen) {
+            if ($result = $gen->getDefaultModelName($type))
+                return $result;
+        }
+        return null;
+    }
+
     protected function getCurrentModelName($genType) {
         if ($gen_model_index = $this->getSession($genType)) {
             [$gen, $info] = $this->getActualyModelInfo($gen_model_index);
             return $info['name'];
         }
-        return null;
+        return $this->getDefaultModelName($genType);
     }
 
     protected function getCurrentModelForText($genType) {
@@ -830,8 +812,8 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function create_image() {
-        $imagesToImage_model = $this->getSession('imagesToImage_model');
-        $textToImage_model = $this->getSession('textToImage_model');
+        [$gen, $imagesToImage_model] = $this->getCurrentGenModel('imagesToImage');
+        [$gen, $textToImage_model] = $this->getCurrentGenModel('textToImage');
 
         if ($imagesToImage_model && $textToImage_model) {
             $this->Answer(null, $this->genContent(Lang("What kind of magic do you want to do?"), false, [
