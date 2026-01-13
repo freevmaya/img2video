@@ -526,4 +526,24 @@ function isUrl(string $url): bool {
     // Проверка через filter_var
     return filter_var($url, FILTER_VALIDATE_URL) !== false;
 }
+
+function isAssoc(array $arr): bool
+{
+    if ([] === $arr) return false;
+    return array_keys($arr) !== range(0, count($arr) - 1);
+}
+
+function array_add_limit(&$array, $key, $value, $maxSize = 10) {
+    $array[$key] = $value;
+    
+    // Если превышен лимит, удалить самые старые элементы
+    if (count($array) > $maxSize) {
+        $keys = array_keys($array);
+        
+        // Удалить первые N элементов, где N - количество превышающих лимит
+        for ($i = 0; $i < count($array) - $maxSize; $i++) {
+            unset($array[$keys[$i]]);
+        }
+    }
+}
 ?>

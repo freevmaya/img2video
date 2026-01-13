@@ -11,11 +11,11 @@ abstract class BaseBot {
     private $currentLanguage;
     private $file_settings;
     private $time_settings;
-
     protected $user;
     protected $api;
     protected $dbp;
     protected $settings;
+    protected $settingsChange;
     protected $currentUpdate = null;
 
     public function getUser() { return $this->user; }
@@ -31,7 +31,7 @@ abstract class BaseBot {
         $this->initialize();
     }
 
-    public function setSettings($settings)
+    public function setSettingsAll($settings)
     {
         $this->settings = $settings;
         $this->time_settings = time();
@@ -60,7 +60,7 @@ abstract class BaseBot {
 
     public function getDefaultSettings()
     {
-        return ['lastUpdateId' => 0, 'update_timeout' => 10, 'client_timeout' => 20];
+        return ['messageIndex' => 0, 'lastUpdateId' => 0, 'update_timeout' => 10, 'client_timeout' => 20];
     }
 
     protected function openSettings($file_settings)
@@ -68,10 +68,10 @@ abstract class BaseBot {
         if (!empty($file_settings)) {
             $this->file_settings = $file_settings;
             if (file_exists($file_settings)) {
-                $this->setSettings(json_decode(file_get_contents($this->file_settings), true));
+                $this->setSettingsAll(json_decode(file_get_contents($this->file_settings), true));
                 $this->time_settings = filemtime($this->file_settings);
             } else if (empty($this->settings)) {
-                $this->setSettings($this->getDefaultSettings());
+                $this->setSettingsAll($this->getDefaultSettings());
             }
         }
     }
@@ -82,10 +82,16 @@ abstract class BaseBot {
         return $default_value;
     }
 
+    public function setSetting($param_name, $value) {
+        $this->settings[$param_name] = $value;
+        $this->settingsChange = true;
+    }
+
     protected function saveSettings() {
         if (!empty($this->file_settings) && !empty($this->settings)) {
             file_put_contents($this->file_settings, json_encode($this->settings, JSON_FLAGS));
             $this->time_settings = filemtime($this->file_settings);
+            $this->settingsChange = false;
         }
     }
 
@@ -198,6 +204,11 @@ abstract class BaseBot {
         return $result;
     }
 
+    public function DeleteMessageByIndex($message_index=null) {
+        if ($message_index)
+            $this->DeleteMessage(null, $this->getMessageId($message_index));
+    }
+
     public function DeleteMessage($chatId=null, $message_id=null) {
         if (empty($message_id))
             $message_id = $this->getSession('lastBotMessageId');
@@ -269,20 +280,87 @@ abstract class BaseBot {
 
         if ($messageEditId) {
             $params['message_id'] = $messageEditId;
-            $result = $this->api->editMessageText($params);
-        } else {
-            $result = $this->api->sendMessage($params);
-        }
+            $result = $this->afterSend($this->api->editMessageText($params));
+        } else $result = $this->sendMessage($params);
 
-        if (isset($result['message_id'])) {
-            $this->setSession('lastBotMessageId', $result['message_id']);
+        return $result;
+    }
+
+    public function getMessageId($messageIndex) {
+        if (($history = $this->getSession('history')) &&
+            isset($history[$messageIndex])) {
+
+            if (DEV) echo "MessageID: {$history[$messageIndex]}\n";
+            return $history[$messageIndex];
+        }
+        return null;
+    }
+
+    public function pushRecallMethod($messageIndex, $eval) {
+        $recall = $this->getSession('recall', []);
+        array_add_limit($recall, $messageIndex, $eval, 5);
+        $this->setSession('recall', $recall);
+    }
+
+    public function recall($messageIndex) {
+        $recall = $this->getSession('recall', []);
+        if (isset($recall[$messageIndex])) {
+            $eval = "\$this->{$recall[$messageIndex]};";
+            if (DEV) echo "$eval\n";
+            eval($eval);
+        }
+    }
+
+    public function messageIndex() {
+        return $this->getSetting('messageIndex', 0);
+    }
+
+    protected function afterSend($sendResult) {
+
+        if (isset($sendResult['message_id'])) {
+
+            $this->setSession('lastBotMessageId', $sendResult['message_id']);
+            $messageIndex = $this->messageIndex();
 
             $history = $this->getSession('history', []);
-            $history[] = $result['message_id'];
-            if (count($history) > 10) array_shift($history);
+            if (!isAssoc($history)) $history = [];
+
+            array_add_limit($history, $messageIndex, $sendResult['message_id'], 20);
+
+            if (DEV) 
+                echo "Index: {$messageIndex}, MessageID: {$sendResult['message_id']}\n";
+
             $this->setSession('history', $history);
+
+            $this->setSetting('messageIndex', $messageIndex + 1);
         }
+
+        return $sendResult;
+    }
+
+    public function popMessageHistory() {
+        $history = $this->getSession('history', []);
+        $result = array_pop($history);
+        $this->setSession('history', $history);
         return $result;
+    }
+
+    public function DeleteLastMessage($count = 1) {
+        
+        for ($i=0; $i<$count; $i++)
+            $this->DeleteMessage(null, $this->popMessageHistory());
+    }
+
+    public function sendMessage($params) {
+        return $this->afterSend($this->api->sendMessage($params));
+    }
+
+    public function closeMessageButton($eng_caption = 'Cancel') {
+        return ['text'=>Lang($eng_caption), 'callback_data' => "deleteMessage.{$this->messageIndex()}"];
+    }
+
+    public function createButton($eng_caption, $command) {
+        return ['text'=>Lang($eng_caption), 'callback_data' => $command];
     }
 
     /*
@@ -418,6 +496,9 @@ abstract class BaseBot {
             echo 'Ошибка: ' . $e->getMessage() . PHP_EOL;
             sleep(5); // Пауза перед повторной попыткой
         }
+
+        if ($this->settingsChange)
+            $this->saveSettings();
     }
 
     /*
@@ -480,8 +561,7 @@ abstract class BaseBot {
         $this->sessionChanged = false;
 
         // 6. Обновляем ID последнего обработанного сообщения
-        $this->settings['lastUpdateId'] = $update->getUpdateId();
-        $this->saveSettings();
+        $this->setSetting('lastUpdateId', $update->getUpdateId());
         $this->runUpdate($update);
 
         if ($this->sessionChanged && $this->currentUpdate->getMessage())
@@ -599,13 +679,7 @@ abstract class BaseBot {
         $btList = empty($buttons) ? [] : $buttons;
         $result = ['text' => $text];
 
-        /*
-        if ($backToMenu && $this->hasSession('lastBotMessageId')) {
-            $back = ['text' => Lang("Back"), 'callback_data' => 'menu'];
-            if (count($btList) > 0)
-                $btList[count($btList) - 1][] = $back;
-            else $btList[] = [$back];            
-        }*/
+        if ($backToMenu) $btList[] = [$this->closeMessageButton(is_string($backToMenu) ? $backToMenu : 'Cancel')];
 
         if ($btList && is_array($btList) && (count($btList) > 0))
             $result['reply_markup'] = json_encode(['inline_keyboard' => $btList]);

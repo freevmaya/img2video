@@ -67,7 +67,7 @@ abstract class YKassaBot extends BaseBot {
         $this->updateOrderStatus($invoice_payload, true, $provider_payment_charge_id);
         
         // Отправляем подтверждение пользователю
-        $this->api->sendMessage([
+        $this->sendMessage([
             'chat_id' => $chat_id,
             'text' => '✅ Спасибо за оплату! Вы приобрели подписку.',
             'parse_mode' => 'HTML'
