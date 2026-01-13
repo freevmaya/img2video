@@ -783,7 +783,10 @@ class Image2VideoBot extends YKassaBot {
         $require_images = isset($info['require_images']) ? $info['require_images'][0] : 1;
 
         if ($count_images < $require_images) {
-            $text = Lang("Submit your image")." {$count_images}/{$require_images}\n".
+
+            $countText = $count_images == 0 ? '' : ("\n".sprintf(Lang("Loaded %s of %s"), $count_images, $require_images));
+
+            $text = Lang("Submit your image").$countText."\n".
                     Lang("Current model %s", $info['name']);
 
             $this->pushRecallMethod($this->messageIndex(), "imagesToImage(0)");
