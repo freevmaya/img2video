@@ -449,6 +449,10 @@ class Image2VideoBot extends YKassaBot {
         return $this->popSession('images');
     }
 
+    protected function getImages() {
+        return $this->getSession('images');
+    }
+
     protected function callMethod($method, $data) {
         if (method_exists($this, $method)) {
             if ($data) {
@@ -753,7 +757,7 @@ class Image2VideoBot extends YKassaBot {
                 break;
             case 2: 
                     $prompt = isset($prompt) ? $prompt : $this->popSession('prompt');
-                    return $this->Generate('imageToVideo', $this->popImages(), $prompt);
+                    return $this->Generate('imageToVideo', $this->getImages(), $prompt);
                 break;
         }
     }
@@ -803,7 +807,7 @@ class Image2VideoBot extends YKassaBot {
                 $this->setSession("expect", 'imagesToImage(2)');
             } else {
 
-                return $this->Generate('imagesToImage', $this->popImages(), $prompt);
+                return $this->Generate('imagesToImage', $this->getImages(), $prompt);
             }
         }
     }

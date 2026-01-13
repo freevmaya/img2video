@@ -54,7 +54,7 @@
 		"PhotoReal": {
 			"enabled": false,
 			"url": "https://cloud.leonardo.ai/api/rest/v1/generations",
-			"dev": "Требуются какие то еще картинки, надо разобраться"
+			"type": "textToImage"
 		},
 		"Alchemy": {
 			"enabled": true,
@@ -87,7 +87,7 @@
 	},
 	"defaultModelName": {
 		"textToImage": "Lucid Origin",
-		"imagesToImage": "Image Guidance",
+		"imagesToImage": "Seedream",
 		"imageToVideo": "Kling O1"
 	},
 	"default": {
