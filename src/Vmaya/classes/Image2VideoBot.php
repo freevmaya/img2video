@@ -681,7 +681,7 @@ class Image2VideoBot extends YKassaBot {
 
                         $this->Answer(null, $this->genContent(Lang('Send you photo')));
                         $this->setSession("expect", "runPreset('{$presetName}', 1, {$subIndex})");
-                        $this->setSession('images', [])
+                        $this->setSession('images', []);
 
                         break;
                     case 1:
@@ -826,7 +826,7 @@ class Image2VideoBot extends YKassaBot {
                         [$this->createButton('Select model', "selectModelType.imageToVideo.{$this->messageIndex()}")]
                     ]));
                     $this->setSession("expect", 'imageToVideo(1)');
-                    $this->setSession('images', [])
+                    $this->setSession('images', []);
                 break;
             case 1: 
                     $this->askSendPrompt('imageToVideo', 2);
