@@ -681,6 +681,7 @@ class Image2VideoBot extends YKassaBot {
 
                         $this->Answer(null, $this->genContent(Lang('Send you photo')));
                         $this->setSession("expect", "runPreset('{$presetName}', 1, {$subIndex})");
+                        $this->setSession('images', [])
 
                         break;
                     case 1:
@@ -702,8 +703,10 @@ class Image2VideoBot extends YKassaBot {
                         }
 
                         if ($this->isAllowType($type)) {
-                            if ($gen->GeneratePreset($info['name'], $model_data['options'], $images))
+                            if ($gen->GeneratePreset($info['name'], $model_data['options'], $images)) {
+                                $this->setSession('images', []);
                                 return true;
+                            }
                         }
                         break;
                 }
@@ -727,8 +730,10 @@ class Image2VideoBot extends YKassaBot {
                 }
 
                 if ($this->isAllowType($type)) {
-                    if ($gen->Generate($type, $images_url, $prompt, $info['name']))
+                    if ($gen->Generate($type, $images_url, $prompt, $info['name'])) {
+                        $this->setSession('images', []);
                         return true;
+                    }
                 }
             }
             else trace_error("Generator not found for type {$type}");
@@ -821,6 +826,7 @@ class Image2VideoBot extends YKassaBot {
                         [$this->createButton('Select model', "selectModelType.imageToVideo.{$this->messageIndex()}")]
                     ]));
                     $this->setSession("expect", 'imageToVideo(1)');
+                    $this->setSession('images', [])
                 break;
             case 1: 
                     $this->askSendPrompt('imageToVideo', 2);
