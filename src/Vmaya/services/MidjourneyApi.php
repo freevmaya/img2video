@@ -192,7 +192,8 @@ class MidjourneyApi extends BaseApi
                     'user_id'=>$this->bot->getUserId(),
                     'chat_id'=>$this->bot->getCurrentChatId(),
                     'hash'=>$response['hash'] = $hash,
-                    'request_data'=> json_encode(array_merge($data, ['endpoint'=>$endpoint]), JSON_FLAGS)
+                    'request_data'=> json_encode(array_merge($data, ['endpoint'=>$endpoint]), JSON_FLAGS),
+                    'response_data'=> json_encode($response, JSON_FLAGS)
                 ]);
                 $this->Answer(Lang("The task has been accepted"));
             }
