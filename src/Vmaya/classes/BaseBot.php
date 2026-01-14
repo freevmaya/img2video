@@ -2,18 +2,14 @@
 use GuzzleHttp\Client;
 use Telegram\Bot\HttpClients\GuzzleHttpClient;
 
-abstract class BaseBot {
-    private $session;
-    private $sessionChanged;
+abstract class BaseBot extends SessionManager {
     private $origin_user_id;
     private $reply_to_message;
-    private $sessionModel;
     private $currentLanguage;
     private $file_settings;
     private $time_settings;
     protected $user;
     protected $api;
-    protected $dbp;
     protected $settings;
     protected $settingsChange;
     protected $currentUpdate = null;
@@ -23,11 +19,10 @@ abstract class BaseBot {
     public function getOriginUserId() { return $this->origin_user_id; }
     public function getReplyToMessage() { return $this->reply_to_message; }
 
-	function __construct($api, $dbp, $file_settings = null) {
+	function __construct($api, $file_settings = null) {
         $this->api = $api;
 
         $this->openSettings($file_settings);
-
         $this->initialize();
     }
 
@@ -106,10 +101,6 @@ abstract class BaseBot {
         return $this->api;
     }
 
-    protected function initialize() {
-        $this->sessionModel = new SessionsModel();
-    }
-
     public static function getUserLink($userId, $userName) {
         $escapedName = str_replace(['_', '*'], ['\\_', '\\*'], $userName);
         return "[{$escapedName}](tg://user?id={$userId})";
@@ -136,72 +127,27 @@ abstract class BaseBot {
     protected abstract function replyToMessage($reply, $chatId, $messageId, $text);
     protected abstract function messageProcess($chatId, $messageId, $data);
 
-    protected function setSession($name, $value) {
-        $this->session[$name] = $value;
-        $this->sessionChanged = true;
-    }
-
-    protected function saveSession($chatId, $data) {
-        $this->sessionModel->Update([
-            'chat_id' => $chatId,
-            'data' => json_encode($data, JSON_FLAGS)
-        ], 'chat_id');
-    }
-
     protected function stat($userId, $type, $data = null) {
         if ($userId != ADMIN_USERID)
             StatisticModel::trace($type, $data);
     }
 
-    protected function readSession($chatId) {
-        $result = [];
-
-        if ($item = $this->sessionModel->getItem($chatId, 'chat_id'))
-            $result = json_decode($item['data'], true);
-        else $this->sessionModel->Update(['chat_id'=>$chatId, 'data'=>'{}']);
-
-        if ($chatId != ADMIN_USERID)
-            trace("Attempt read session: {$chatId}. Result: ".json_encode($item, JSON_FLAGS));
-
-        return $result;
-    }
-
-
     public function CurrentUpdate() {
         return $this->currentUpdate;
     }
 
-    protected function hasSession($name) {
-        return isset($this->session[$name]);
-    }
-
-    protected function getSession($name, $default = false) {
-        return $this->hasSession($name) ? $this->session[$name] : $default;
-    }
-
     protected function unsetSessions($names) {
-
-        if ($this->currentUpdate) {
-            foreach ($names as $name)
-                if (isset($this->session[$name])) {
-                    unset($this->session[$name]);
-                    $this->sessionChanged = true;
-                }
-        }
+        if ($this->currentUpdate) 
+            parent::unsetSessions($names);
     }
 
     protected function popSession($name) {
 
         $result = null;
-        if ($this->currentUpdate) {           
-            if (isset($this->session[$name])) {
-                $result = $this->session[$name];
-                unset($this->session[$name]);
-                $this->sessionChanged = true;
-            }
-        }
+        if ($this->currentUpdate)
+            $result = parent::popSession($name);
 
-        return $result;
+        return null;
     }
 
     public function DeleteMessageByIndex($message_index=null) {
@@ -403,13 +349,11 @@ abstract class BaseBot {
         if ($block = $this->findUserBlock($update))
             $user = $block['from'];
 
-        $this->session = [];
         if ($user) {
             try {
                 $chatId = isset($block['chat']) ? $block['chat']['id'] : @$block['message']['chat']['id'];
                 if (empty($chatId)) $chatId = $user['id'];
 
-                $this->session = $this->readSession($chatId);
                 $this->origin_user_id = $user['id'];
 
                 if ($this->origin_user_id == ADMIN_USERID)
@@ -501,25 +445,11 @@ abstract class BaseBot {
             $this->saveSettings();
     }
 
-    /*
-    public function GetWebhookUpdates() {
-
-        //$this->sendImmediateHttpResponse();
-        $update = $this->api->getWebhookUpdate();
-
-        if ($this->initUser($update)) {
-            if ($this->settings['lastUpdateId'] != $update->getUpdateId())
-                $this->_runUpdate($update);
-        }
-    }*/
-
     protected function beforeProcess($chatId, $text) {
         return true;
     }
 
     protected function runUpdate($update) {
-
-        $this->currentUpdate = $update;
 
         if ($message = $update->getMessage()) {
             $chat = $update->getChat();        
@@ -543,11 +473,7 @@ abstract class BaseBot {
                     else if ($this->reply_to_message)
                         $this->replyToMessage($this->reply_to_message, $chatId, $messageId, $text);
                     else $this->messageProcess($chatId, $messageId, $text);
-                } else 
-                    $this->session = [];
-                    
-            } else {
-                $this->session = [];
+                }
             }
         } else {
             trace_error("Message is null");
@@ -555,17 +481,19 @@ abstract class BaseBot {
     }
 
     private function _runUpdate($update) {
+
+        $this->currentUpdate = $update;
         if (DEV || $this->getSetting('log'))
             trace($update);
 
-        $this->sessionChanged = false;
-
+        $chatId = $this->getCurrentChatId();
+        $this->readSession($chatId);
         // 6. Обновляем ID последнего обработанного сообщения
         $this->setSetting('lastUpdateId', $update->getUpdateId());
         $this->runUpdate($update);
 
-        if ($this->sessionChanged && $this->currentUpdate->getMessage())
-            $this->saveSession($this->currentUpdate->getMessage()->getChat()->getId(), $this->session);
+        if ($this->isSessionChanged() && $chatId)
+            $this->saveSession($chatId);
     }
 
     protected function MLQuery($message, $start_promt="Отвечай на русском языке. Коротко.", $session_id=false)

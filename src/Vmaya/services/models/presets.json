@@ -1,32 +1,34 @@
 {
-	"Фантастический портрет": {
+	"Fantastic portrait": {
+		"description": "Просто загрузите свое фото и получите новый, фантастический образ себя!",
 		"subsequence": [
 			{
 				"model_name": "Image Guidance",
 				"options": {
-					"prompt": "",
-					"presetStyle":"CINEMATIC",
-					"width": 1024,
-					"height": 512,
-					"photoReal": true,
-					"photoRealVersion":"v2",
-					"alchemy":true,
-					"controlnets": [
-					    {
-					        "initImageId": "<USER_IMAGE>",
-					        "initImageType": "UPLOADED",
-					        "preprocessorId": 67,
-					        "strengthType": "High",
-					        "influence": 0.39
-					    },
-					    {
-					        "initImageId": "",
-					        "initImageType": "UPLOADED",
-					        "preprocessorId": 67,
-					        "strengthType": "High",
-					        "influence": 0.64
-					    }
-					]
+					"prompt": "A fantastic portrait. A soft, warm, golden glow emanates from the girl, as if she has a light source inside. The light softly highlights the contours of her face and armor. The look is kind and direct. Dark background.",
+				    "presetStyle": "CINEMATIC",
+				    "width": 1024,
+				    "height": 512,
+				    "photoReal": true,
+				    "photoRealVersion": "v2",
+				    "alchemy": true,
+				    "controlnets":
+				    [
+				        {
+				            "initImageId": "<USER_IMAGE>",
+				            "initImageType": "UPLOADED",
+				            "preprocessorId": 67,
+				            "strengthType": "High",
+				            "influence": 0.39
+				        },
+				        {
+				            "initImageId": "6f5db5ef-4242-4fc9-9836-3d8a7fbe71b9",
+				            "initImageType": "UPLOADED",
+				            "preprocessorId": 67,
+				            "strengthType": "High",
+				            "influence": 0.64
+				        }
+				    ]
 				}
 			}
 		]
