@@ -54,21 +54,23 @@ class KlingApi extends BaseKlingApi
         	$params = [
         		'hash'=>$data['task_id'],
         		'service'=>'kling',
-                'user_id'=>ADMIN_USERID,
-                'chat_id'=>ADMIN_USERID,
-                'request_data' => $request_data_json
+                'request_data' => $request_data_json,
+                'response_data'=> json_encode($response, JSON_FLAGS)
         	];
 
             if (DEV)
                 trace($log_data);
 
             if ($this->modelTask) {
-                $this->modelTask->Update($params);
 
                 if ($this->bot) {
                     $params['user_id'] = $this->bot->getUserId();
                     $params['chat_id'] = $this->bot->getCurrentChatId();
+                } else if (DEV) {
+                    $params['user_id'] = ADMIN_USERID;
+                    $params['chat_id'] = ADMIN_USERID;
                 }
+                $this->modelTask->Update($params);
             }
 
             $this->Answer(Lang("The task has been accepted"));

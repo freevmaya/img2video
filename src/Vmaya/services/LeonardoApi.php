@@ -321,8 +321,8 @@ class LeonardoApi extends BaseApi
                 if ($this->modelTask) {
 
                     $this->modelTask->Update([
-                        'user_id'=>$this->bot->getUserId(),
-                        'chat_id'=>$this->bot->getCurrentChatId(),
+                        'user_id'=> $this->bot ? $this->bot->getUserId() : ADMIN_USERID,
+                        'chat_id'=> $this->bot ? $this->bot->getCurrentChatId() : ADMIN_USERID,
                         'service'=>'leo',
                         'hash'=>$response['hash'] = $hash,
                         'request_data'=> json_encode(array_merge($data, ['url'=>$url]), JSON_FLAGS),
