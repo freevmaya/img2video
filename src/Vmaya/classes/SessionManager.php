@@ -4,6 +4,7 @@ class SessionManager {
     private $session;
     private $sessionChanged;
     private $sessionModel;
+    private $sessionId;
 
 	function __construct() {
         $this->initialize();
@@ -17,31 +18,48 @@ class SessionManager {
         $this->sessionModel = new SessionsModel();
     }
 
+    public function sessionId() {
+        return $this->sessionId;
+    }
+
+    protected function checkSessionId($sessionId) {
+        if ($sessionId && ($sessionId != $this->sessionId)) {
+
+            if ($this->isSessionChanged())
+                $this->saveSession();
+
+            $this->readSession($sessionId);
+            return true;
+        }
+        return false;
+    }
+
     protected function setSession($name, $value) {
         $this->session[$name] = $value;
         $this->sessionChanged = true;
     }
 
-    protected function saveSession($chatId) {
-    	trace($this->session);
-        $this->sessionModel->Update([
-            'chat_id' => $chatId,
-            'data' => json_encode($this->session, JSON_FLAGS)
-        ], 'chat_id');
+    protected function saveSession() {
+        if ($this->sessionId)
+            $this->sessionModel->Update([
+                'chat_id' => $this->sessionId,
+                'data' => json_encode($this->session, JSON_FLAGS)
+            ], 'chat_id');
     }
 
-    protected function readSession($chatId) {
+    protected function readSession($sessionId) {
         $result = [];
 
-        if ($chatId) {
-	        if ($item = $this->sessionModel->getItem($chatId, 'chat_id'))
+        if ($sessionId) {
+	        if ($item = $this->sessionModel->getItem($sessionId, 'chat_id'))
 	            $result = json_decode($item['data'], true);
-	        else $this->sessionModel->Update(['chat_id'=>$chatId, 'data'=>'{}']);
+	        else $this->sessionModel->Update(['chat_id'=>$sessionId, 'data'=>'{}']);
 
-	        if ($chatId != ADMIN_USERID)
-	            trace("Attempt read session: {$chatId}. Result: ".json_encode($item, JSON_FLAGS));
+	        if ($sessionId != ADMIN_USERID)
+	            trace("Attempt read session: {$sessionId}. Result: ".json_encode($item, JSON_FLAGS));
 	    }
 
+        $this->sessionId = $sessionId;
     	$this->sessionChanged = false;
     	$this->session = $result;
     }

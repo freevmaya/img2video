@@ -6,7 +6,7 @@ use App\Services\API\cycle\MjCycle;
 use App\Services\API\cycle\KlingCycle;
 use App\Services\API\cycle\LeoCycle;
 
-class MainCycleEx {
+class MainCycleEx extends SettingsManager {
 
     private $lastMessageId;
     private $currentLanguage;
@@ -17,8 +17,9 @@ class MainCycleEx {
     protected $transactionModel;
     public $downloadClient;
 
-    public function __construct($api)
+    public function __construct($api, $file_settings = null)
     {
+        parent::__construct($file_settings);
         $this->api          = $api;
         $this->modelTask    = new TaskModel();
         $this->transactionModel = new TransactionsModel();
@@ -60,13 +61,16 @@ class MainCycleEx {
     }
 
     protected function updateTask($task) {
-        if ($this->user = (new TGUserModel())->getItem($task['user_id']))
+        if ($this->user = (new TGUserModel())->getItem($task['user_id'])) {
             $this->initLang($this->user['language_code']);
-
+            $this->readSession($task['chat_id']);
         
-    	foreach ($this->processors as $key=>$processor)
-    		if ($key == $task['service'])
-    			$processor->doServiceAction($task);
+            foreach ($this->processors as $key=>$processor)
+                if ($key == $task['service'])
+                    $processor->doServiceAction($task);
+
+            if ($this->isSessionChanged()) $this->saveSession();
+        }
     }
 
     public function finishTask($task, $state='finished') {        
@@ -92,15 +96,15 @@ class MainCycleEx {
             sleep(round(pow($attempt_count, 1.5) * 3));
             try {
 
-                $message = $this->api->sendVideo([
+                $message = $this->afterSend($this->api->sendVideo([
                     'chat_id' => $task['chat_id'],
                     'video' => fopen($filePath, 'r'),
                     'caption' => $message,
                     'width' => 512,
                     'height' => 512,
                     'supports_streaming' => true
-                ]);
-                if ($message->getMessageId())
+                ]), true);
+                if ($message->getMessageId()) 
                     return true;
 
             } catch (Exception $e) {
@@ -138,7 +142,7 @@ class MainCycleEx {
                 try {
 
                     sleep(round(pow($attempt_count, 1.5) * 3));
-                    $photoMessage = $this->api->sendPhoto($params);
+                    $photoMessage = $this->afterSend($this->api->sendPhoto($params), true);
                     if ($photoMessage->getMessageId()) {
                         return true;
                     }
@@ -174,7 +178,7 @@ class MainCycleEx {
             sleep(round(pow($attempt_count, 1.5) * 3));
             try {
 
-                $message = $this->api->sendMessage($params);
+                $message = $this->afterSend($this->api->sendMessage($params), true);
                 if ($message->getMessageId())
                     return true;
 
