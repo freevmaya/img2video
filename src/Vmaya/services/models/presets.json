@@ -1,0 +1,34 @@
+{
+	"Фантастический портрет": {
+		"subsequence": [
+			{
+				"model_name": "Image Guidance",
+				"options": {
+					"prompt": "",
+					"presetStyle":"CINEMATIC",
+					"width": 1024,
+					"height": 512,
+					"photoReal": true,
+					"photoRealVersion":"v2",
+					"alchemy":true,
+					"controlnets": [
+					    {
+					        "initImageId": "<USER_IMAGE>",
+					        "initImageType": "UPLOADED",
+					        "preprocessorId": 67,
+					        "strengthType": "High",
+					        "influence": 0.39
+					    },
+					    {
+					        "initImageId": "",
+					        "initImageType": "UPLOADED",
+					        "preprocessorId": 67,
+					        "strengthType": "High",
+					        "influence": 0.64
+					    }
+					]
+				}
+			}
+		]
+	}
+}

@@ -41,7 +41,7 @@ try {
     // 1. Удаляем вебхук, если он был установлен
     $telegram->deleteWebhook(['drop_pending_updates' => true]);
 
-    $head = "======= Бот запущен. PID: " . getmypid().' =======';
+    $head = "======= Бот запущен. PID: " . getmypid().', date: '.date('d.m H:i:s').' =======';
     echo $head."\n";
     trace($head);
     

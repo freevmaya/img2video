@@ -10,7 +10,7 @@ class DownloadClient {
     	$this->model = new TaskDownloadModel();
     }
 
-    public function AddTask($callback, $url, $destancePath, $data = null) {
+    public function AddTask(callable $callback, $url, $destancePath, $data = null) {
     	$id = $this->model->AddTask($url, $destancePath);
 
     	$this->listeners[] = [

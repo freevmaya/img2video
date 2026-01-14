@@ -19,6 +19,27 @@ class KlingCycle extends BaseCycle {
         return $this->modelReply->getItems(['processed'=>0, 'task_id'=>$task['hash']]);
     }
 
+    public function afterDownloadVideo($record, $data) {
+
+        $task       = $data['task'];
+        $response   = $data['response'];
+        $hash       = $task['hash'];
+        $state      = $record['state'];
+
+        if ($state == 'failure') {
+
+            if ($this->parent->Message($task['chat_id'], ['text' => sprintf(Lang("DownloadFailure"), $task['id']), 'reply_markup'=> json_encode([
+                    'inline_keyboard' => [
+                        [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']]
+                    ]
+                ])
+            ])) {
+                $this->parent->finishTask($task, $state);
+            } else $this->setResponseProcessed($response, 0);
+        } else $this->finalyDownloadfile($task, $response, $data['file_path'], $data['file_name']);
+
+    }
+
 	protected function doProcessResponse($task, $response) {
 
         if (($response['status'] == 'processing') || ($response['status'] == 'submitted')) {
@@ -37,57 +58,12 @@ class KlingCycle extends BaseCycle {
                     $this->finalyDownloadfile($task, $response, $file_path, $filename);
                 } else {
 
-                    $this->parent->downloadClient->AddTask(function($record, $data) {
-
-                        $task       = $data['task'];
-                        $response   = $data['response'];
-                        $hash       = $task['hash'];
-                        $state      = $record['state'];
-                        $_this      = $data['this'];
-                        $parent     = $_this->parent;
-
-                        if ($state == 'failure') {
-
-                            if ($parent->Message($task['chat_id'], ['text' => sprintf(Lang("DownloadFailure"), $task['id']), 'reply_markup'=> json_encode([
-                                    'inline_keyboard' => [
-                                        [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']]
-                                    ]
-                                ])
-                            ])) {
-                                $parent->finishTask($task, $state);
-                            } else $this->setResponseProcessed($response, 0);
-                        } else $this->finalyDownloadfile($task, $response, $data['file_path'], $data['file_name']);
-
-
-                    }, $response['result_url'], $file_path, [
-                        'this' => $this,
+                    $this->parent->downloadClient->AddTask([$this, 'afterDownloadVideo'], $response['result_url'], $file_path, [
                         'task' => $task,
                         'response' => $response,
                         'file_path' => $file_path,
                         'file_name' => $filename
                     ]);
-                    /*
-                    $downloadResult = downloadFile($response['result_url'], $file_path);
-
-                    if ($downloadResult['success']) {                   
-                    	$this->finalyDownloadfile($task, $response, $file_path, $filename);
-                        return true;
-                    } else {
-                        if ($response['fail_count'] >= NUMBER_DOWNLOAD_ATTEMPTS) {
-
-                            $this->parent->finishTask($task, 'failure');
-                            $this->finishResponse($response);
-
-                            $this->parent->Message($task['chat_id'], ['text' => sprintf(Lang("DownloadFailure"), $task['id']), 'reply_markup'=> json_encode([
-                                    'inline_keyboard' => [
-                                        [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']]
-                                    ]
-                                ])
-                            ]);
-                        } else $this->modelReply->Update([
-                            'id'=>$response['id'], 'fail_count'=>$response['fail_count'] + 1
-                        ]);
-                    }*/
                 }
             }
         }
