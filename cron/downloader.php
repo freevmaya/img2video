@@ -6,7 +6,6 @@ declare(ticks = 1);
 require dirname(__DIR__).'/vendor/autoload.php';
 require dirname(__DIR__).'/src/Vmaya/engine.php';
 
-use \Telegram\Bot\Api;
 use App\Services\API\cycle;
 
 // === ИНИЦИАЛИЗАЦИЯ БЛОКИРОВКИ ===

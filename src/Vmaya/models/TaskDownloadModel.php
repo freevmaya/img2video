@@ -37,16 +37,15 @@ class TaskDownloadModel extends BaseModel {
 
 	public function AddTask($url, $distancePath) {
 		$d_task_id = md5($url);
-
-		if (!$this->getItem($d_task_id))
-			$this->Update([
-	            'id'			=> $d_task_id,
-	            'url'			=> $url,
-	            'path'			=> $distancePath,
-	            'attempt_count' => 0,
-	            'last_attempt' 	=> date('Y-m-d H:i:s'),
-	            'state'			=> 'active'
-	        ]);
+		
+		$this->Update([
+            'id'			=> $d_task_id,
+            'url'			=> $url,
+            'path'			=> $distancePath,
+            'attempt_count' => 0,
+            'last_attempt' 	=> date('Y-m-d H:i:s'),
+            'state'			=> 'active'
+        ]);
         return $d_task_id;
 	}
 

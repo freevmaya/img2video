@@ -47,7 +47,7 @@ class DownloadClient {
                 if (file_exists($dl_task['path'])) {
         			$listener['callback']($dl_task, $listener['data']);
                 } else {
-                    trace("File not found: {$dl_task['path']}");
+                    trace_error("File not found: {$dl_task['path']}");
 
                     $dl_task['state'] = 'failure';
                     $listener['callback']($dl_task, $listener['data']);
