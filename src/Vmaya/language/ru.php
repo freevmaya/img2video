@@ -64,6 +64,7 @@ $lang = [
 	'Select model'=>'Выбрать модель',
 	'Close'=>'Закрыть',
 	'Cancel'=>'Отмена',
+	'Begin'=>'Начать',
 	'Loaded %s of %s'=>'Загружено %s из %s',
 	'imageToVideoPrompts'=>[
 		'Человек смеётся',

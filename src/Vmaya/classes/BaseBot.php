@@ -1,6 +1,7 @@
 <?
 use GuzzleHttp\Client;
 use Telegram\Bot\HttpClients\GuzzleHttpClient;
+use \Telegram\Bot\FileUpload\InputFile;
 
 abstract class BaseBot extends SettingsManager {
     private $origin_user_id;
@@ -176,6 +177,22 @@ abstract class BaseBot extends SettingsManager {
         } else $result = $this->sendMessage($params);
 
         return $result;
+    }
+
+    public function SendPhoto($caption, $photoPathOrUrl, $buttons = null, $parse_mode = 'Markdown') {
+        $chatId = $this->getCurrentChatId();
+
+        $params = array_merge([
+            'chat_id' => $chatId,
+            'photo' => isUrl($photoPathOrUrl) ? $photoPathOrUrl : InputFile::create($photoPathOrUrl),
+            'caption' => $caption,
+            'parse_mode' => $parse_mode
+        ], is_string($caption) ? ['caption' => $caption] : $caption);
+
+        if ($buttons && is_array($buttons) && (count($buttons) > 0))
+            $params['reply_markup'] = json_encode(['inline_keyboard' => $buttons]);
+
+        return $this->afterSend($this->api->sendPhoto($params));
     }
 
     public function getMessageId($messageIndex) {
@@ -407,7 +424,7 @@ abstract class BaseBot extends SettingsManager {
 
         $chatId = $this->getCurrentChatId();
         $this->readSession($chatId);
-        
+
         // 6. Обновляем ID последнего обработанного сообщения
         $this->setSetting('lastUpdateId', $update->getUpdateId());
         $this->runUpdate($update);

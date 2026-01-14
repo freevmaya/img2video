@@ -136,7 +136,7 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function hidePMenu($chatId, $text = 'Меню удалено') {
-        if ($this->getSession('pmenu_state') == 'show') {
+        if ($this->getSession('pmenu_state') != 'hide') {
             $result = $this->sendMessage([
                 'chat_id' => $chatId,
                 'text' => $text,
@@ -171,6 +171,8 @@ class Image2VideoBot extends YKassaBot {
                 return true;
             case 'start':
                 $this->start($chatId);
+            case 'preset':
+                $this->preset('Fantastic portrait');
                 return true;
             case 'menu':
                 $this->showMainMenu($chatId);
@@ -222,6 +224,8 @@ class Image2VideoBot extends YKassaBot {
                 return $this->DeleteMessage();
             case 'deleteMessage':
                 return $this->DeleteMessage(null, $this->getMessageId($data[1]));
+            case 'runPreset':
+                return $this->runPreset($data[1]);
         }
         return false;
     }
@@ -267,6 +271,22 @@ class Image2VideoBot extends YKassaBot {
         }
     }
 
+    protected function getPreset($presetName) {
+        $presets = json_decode(file_get_contents(BASEPATH.'data/presets.json'), true);
+        return isset($presets[$presetName]) ? $presets[$presetName] : null;
+    }
+
+    protected function preset($presetName) {
+
+        if ($preset = $this->getPreset($presetName)) {
+
+            $this->SendPhoto($preset['caption'], BASEPATH.$preset['image'], [
+                [['text'=>Lang('Begin'), 'callback_data' => "runPreset.{$presetName}"],
+                $this->closeMessageButton()]
+            ]);
+        }
+    }
+
     protected function initAdmin($user, $update) {
         $user = parent::initAdmin($user, $update);
 
@@ -296,7 +316,7 @@ class Image2VideoBot extends YKassaBot {
             if ($info['index'] == $model_index)
                 return [$this->generators[$info['gen_index']], $info];
 
-        return [null];
+        return [null, null];
     }
 
     protected function getActualyModelsInfo() {
@@ -451,6 +471,15 @@ class Image2VideoBot extends YKassaBot {
 
     protected function getImages() {
         return $this->getSession('images');
+    }
+
+    protected function getImagesUrl() {
+        $images = $this->getImages();
+        $images_url = [];
+        if (!empty($images))
+            foreach ($images as $image_id)
+                $images_url[] = $this->GetFileUrl($image_id);
+        return $images_url;
     }
 
     protected function callMethod($method, $data) {
@@ -635,7 +664,54 @@ class Image2VideoBot extends YKassaBot {
         return false;
     }
 
-    protected function Generate($type, $images, $prompt) {
+
+    protected function runPreset($presetName, $stage = 0, $subIndex = 0) {
+        if ($preset = $this->getPreset($presetName)) {
+
+            $model_data = $preset['subsequence'][$subIndex];
+            $model_index = $model_data['model_index'];
+
+            [$gen, $info] = $this->getActualyModelInfo($model_index);
+            $type = $info['type'];
+
+            if ($type == 'imagesToImage') {
+
+                switch ($stage) {
+                    case 0:
+
+                        $this->Answer(null, $this->genContent(Lang('Send you photo')));
+                        $this->setSession("expect", "runPreset('{$presetName}', 1, {$subIndex})");
+
+                        break;
+                    case 1:
+
+                        $images_url = $this->getImagesUrl();
+                        $images = [];
+                        $n = 0;
+
+                        for ($i=0; $i<count($model_data['images']); $i++) {
+                            if (!$model_data['images'][$i]) {
+                                if ($n < count($images_url)) {
+                                    $images[$i] = $images_url[$n];
+                                    $n++;
+                                } else {
+                                    $this->Wrong("Отсутствует минимальное количество изображений");
+                                    return false;
+                                }
+                            } else $images[$i] = $model_data['images'][$i];
+                        }
+
+                        if ($this->isAllowType($type)) {
+                            if ($gen->GeneratePreset($info['name'], $model_data['options'], $images))
+                                return true;
+                        }
+                        break;
+                }
+            }
+        }
+    }
+
+    protected function Generate($type, $images_url, $prompt) {
         if (!empty($prompt)) {
             [$gen, $info] = $this->getCurrentGenModel($type);
             if ($gen) {
@@ -644,11 +720,6 @@ class Image2VideoBot extends YKassaBot {
 
                 if (isset($info['require_images']))
                     $min_max_images = $info['require_images'];
-
-                $images_url = [];
-                if (!empty($images))
-                    foreach ($images as $image_id)
-                        $images_url[] = $this->GetFileUrl($image_id);
 
                 if ($min_max_images && (count($images_url) < $min_max_images[0])) {
                     $this->Wrong("Отсутствует минимальное количество изображений");
@@ -757,7 +828,7 @@ class Image2VideoBot extends YKassaBot {
                 break;
             case 2: 
                     $prompt = isset($prompt) ? $prompt : $this->popSession('prompt');
-                    return $this->Generate('imageToVideo', $this->getImages(), $prompt);
+                    return $this->Generate('imageToVideo', $this->getImagesUrl(), $prompt);
                 break;
         }
     }
@@ -807,7 +878,7 @@ class Image2VideoBot extends YKassaBot {
                 $this->setSession("expect", 'imagesToImage(2)');
             } else {
 
-                return $this->Generate('imagesToImage', $this->getImages(), $prompt);
+                return $this->Generate('imagesToImage', $this->getImagesUrl(), $prompt);
             }
         }
     }

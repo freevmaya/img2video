@@ -33,6 +33,14 @@ abstract class BaseApi implements APIInterface
         return [];
     }
 
+    protected function makeRequest($url, $data) {
+        return null;
+    }
+
+    protected function requireTranslate($info) {
+        return true;
+    }
+
     public function Generate($type, $images, $prompt, $model_name = null)
     {
         $result = false;
@@ -47,12 +55,28 @@ abstract class BaseApi implements APIInterface
         return $result;
     }
 
-    protected function makeRequest($url, $data) {
-        return null;
+    public function GeneratePreset($model_name, $presetOptions, $images)
+    {
+        $result     = false;
+        $options    = $this->preparePresetOptions($model_name, $presetOptions, $images);
+        $info       = $this->getModelInfo($model_name);
+
+        if ($options && $info && $info['enabled']) {
+            $result = $this->makeRequest($info['url'], $options);
+        }
+        return $result;
     }
 
-    protected function requireTranslate($info) {
-        return true;
+    protected function preparePresetOptions($model_name, $presetOptions, $images) {
+
+        $result = array_merge([], $this->defaultModel[$model_name], $presetOptions);
+        
+        if (!$this->setImages($model_name, $result, $images)) {
+            trace_error("Error set images model: '{$model_name}'");
+            return false;
+        }
+
+        return $result;
     }
 
     public function PrepareRequestData($type, $images, $prompt, $model_name = null) {

@@ -175,7 +175,7 @@ class LeonardoApi extends BaseApi
     }
 
     protected function validateImage($file_id) {
-        if (filter_var($file_id, FILTER_VALIDATE_URL)) {
+        if (isUrl($file_id)) {
 
             if ($this->bot)
                 $filePath = USER_PATH.$this->bot->getUserId().'_'.basename($file_id);
