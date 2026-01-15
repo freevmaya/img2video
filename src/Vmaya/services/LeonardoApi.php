@@ -260,8 +260,7 @@ class LeonardoApi extends BaseApi
                 if ($image_id = $this->validateImage($images[$i]['value']))
                     setArrayValueByPath($presetOptions, $images[$i]['path'], $image_id);
                 else return false;
-
-        trace($presetOptions);
+                
         return $presetOptions;
     }
 
