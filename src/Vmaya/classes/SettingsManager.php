@@ -13,7 +13,7 @@ class SettingsManager extends SessionManager {
 
     protected function openSettings($file_settings)
     {
-        if (!empty($file_settings)) {
+        if (!empty($file_settings) && is_string($file_settings)) {
             $this->file_settings = $file_settings;
             if (file_exists($file_settings)) {
                 $this->setSettingsAll(json_decode(file_get_contents($this->file_settings), true));
@@ -21,7 +21,7 @@ class SettingsManager extends SessionManager {
             } else if (empty($this->settings)) {
                 $this->setSettingsAll($this->getDefaultSettings());
             }
-        }
+        } else trace_error("file_settings must be string, but given ".get_class($file_settings));
     }
 
     public function setSettingsAll($settings)
