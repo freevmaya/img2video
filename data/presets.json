@@ -42,5 +42,35 @@
 				}
 			}
 		]
+	},
+
+	"Sorceress": {
+		"caption": "Просто загрузите свое фото и получите новый,✨ фантастический образ.\nПримерь на себя образ 👑принцессы из будущего!\n👇",
+		"video": "public/videos/Multi-Image-01.mp4",
+		"subsequence": [
+			{
+				"model_index": "kling_Multi-Elements",
+				"images": [
+					{
+						"value": null,
+						"path": "image_list/0/image"
+					}
+				],
+				"options":{
+					"model_name": "kling-v1-6",
+					"session_id": "",
+					"edit_mode": "swap",
+					"image_list": [
+						{
+							"image":"image_url"
+						}
+					],
+					"prompt": "",
+					"negative_prompt": "",
+					"mode": "std",
+					"duration": 5
+				}
+			}
+		]
 	}
 }

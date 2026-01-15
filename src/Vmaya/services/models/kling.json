@@ -47,6 +47,12 @@
 			"url": "https://api-singapore.klingai.com/v1/videos/image2video",
 			"type": "imageToVideo",
 			"require_images": [1, 4]
+		},
+		"Multi-Elements": {
+			"enabled": false,
+			"url": "https://api-singapore.klingai.com/v1/videos/multi-elements/",
+			"type": "imageToVideo",
+			"require_images": [1, 1]
 		}
 	},
 	"defaultModelName": {
@@ -116,6 +122,20 @@
 		    "image": "",
 		    "prompt": "",
 		    "cfg_scale": 0.5
+		},
+		"Multi-Elements": {
+			"model_name": "kling-v1-6",
+			"session_id": "",
+			"edit_mode": "swap",
+			"image_list": [
+				{
+					"image":"image_url"
+				}
+			],
+			"prompt": "",
+			"negative_prompt": "",
+			"mode": "std",
+			"duration": 5
 		}
 	}
 }

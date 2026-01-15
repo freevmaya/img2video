@@ -47,27 +47,39 @@ class BaseKlingApi extends BaseApi
         return true;
     }
 
-    public function prepareVideoMultiElement($videoUrl, $points) {
-        $session_id = md5(time());
-        $response = $this->baseRequest($this->baseUrl.'v1/videos/multi-elements/init-selection', [
-            'video_url' => $videoUrl
-        ]);
+    public function prepareVideoMultiElement($videoUrlOrSession, $points) {
 
-        if (!$this->checkResponse($response)) return false;
+        if (!is_string($videoUrlOrSession))
+            return false;
 
-        $session_id = $response['data']['session_id'];
+        if (isUrl($videoUrlOrSession)) {
+            $response = $this->baseRequest($this->baseUrl.'v1/videos/multi-elements/init-selection', [
+                'video_url' => $videoUrl
+            ]);
+
+            if (!$this->checkResponse($response)) return false;
+
+            $session_id = $response['data']['session_id'];
+        } else $session_id = $videoUrlOrSession;
 
         for ($i=0; $i<count($points); $i++) {
-            $response = $this->baseRequest($this->baseUrl.'/v1/videos/multi-elements/add-selection', [
+            $params = [
                 'session_id'    => $session_id,
                 'frame_index'   => $i,
                 'points'        => $points[$i]
-            ]);
+            ];
+
+            if (DEV)
+                echo json_encode($params, JSON_FLAGS)."\n";
+
+            $response = $this->baseRequest($this->baseUrl.'/v1/videos/multi-elements/add-selection', $params);
             if (!$this->checkResponse($response)) return false;
         }
+
+        return $session_id;
     }
 
-    protected function baseRequest($url, $data, $post = true)
+    public function baseRequest($url, $data, $post = true)
     {
         $ch = curl_init($url);
         $token = $this->generateToken();
