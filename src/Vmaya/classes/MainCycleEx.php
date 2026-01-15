@@ -27,7 +27,7 @@ class MainCycleEx extends SettingsManager {
         $this->notificationsModel = new NotificationsModel();
 
         $this->processors 	= [
-        	'mj' => new MjCycle($this, $this->modelTask, new MJModel()),
+        	//'mj' => new MjCycle($this, $this->modelTask, new MJModel()),
         	'kling' => new KlingCycle($this, $this->modelTask, new KlingModel()),
             'leo' => new LeoCycle($this, $this->modelTask, new LeoTasksModel())
         ];
