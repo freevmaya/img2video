@@ -30,6 +30,9 @@ class MjCycle extends BaseCycle {
                 $this->finishResponse($response);
                 trace_error("The method is missing: {$method}");
             }
+        } else {
+            if ($response['status'] != 'done')
+                $this->finishResponse($response);
         }
 	}
 
