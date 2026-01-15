@@ -54,9 +54,6 @@ class SessionManager {
 	        if ($item = $this->sessionModel->getItem($sessionId, 'chat_id'))
 	            $result = json_decode($item['data'], true);
 	        else $this->sessionModel->Update(['chat_id'=>$sessionId, 'data'=>'{}']);
-
-	        if ($sessionId != ADMIN_USERID)
-	            trace("Attempt read session: {$sessionId}. Result: ".json_encode($item, JSON_FLAGS));
 	    }
 
         $this->sessionId = $sessionId;

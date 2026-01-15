@@ -173,6 +173,7 @@ class Image2VideoBot extends YKassaBot {
                 return true;
             case 'start':
                 $this->start($chatId);
+                return true;
             case 'preset':
                 $this->preset(isset($commandParts[1]) ? $commandParts[1] : null);
                 return true;
@@ -275,6 +276,7 @@ class Image2VideoBot extends YKassaBot {
 
         if ($preset = $this->getPreset($presetName)) {
 
+            trace("preset");
             $this->SendPhoto($preset['caption'], BASEPATH.$preset['image'], [
                 [['text'=>Lang('Begin'), 'callback_data' => "runPreset.{$presetName}"],
                 $this->closeMessageButton()]
@@ -526,6 +528,10 @@ class Image2VideoBot extends YKassaBot {
         ]);
     }
 
+    protected function submitFirstPreset() {
+        $this->preset(null);
+    }
+
     protected function start($chatId) {
 
         $this->showPMenu($chatId, '----');
@@ -533,6 +539,7 @@ class Image2VideoBot extends YKassaBot {
             'text' => Lang("BotDescription"), 
             'reply_markup'=> json_encode(['inline_keyboard' => $this->startMenuList()])
         ]);
+        $this->submitFirstPreset();
     }
 
     function gitPull($branch = 'main', $path = null) {

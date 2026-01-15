@@ -99,10 +99,16 @@ class SettingsManager extends SessionManager {
         return $sendResult;
     }
 
-    protected function getPreset($presetName) {
-        if ($presetName) {
-            $presets = json_decode(file_get_contents(BASEPATH.'data/presets.json'), true);
+    protected function getPreset(&$presetName) {
+        $presets = json_decode(file_get_contents(BASEPATH.'data/presets.json'), true);
+        if (!empty($presetName))
             return isset($presets[$presetName]) ? $presets[$presetName] : null;
+        else {
+            $keys = array_keys($presets);
+            if (count($keys) > 0) {
+                $presetName = $keys[0];
+                return $presets[$keys[0]];
+            }
         }
         return null;
     }
