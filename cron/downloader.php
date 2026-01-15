@@ -38,7 +38,7 @@ try {
     while ($lock->isFile()) {
         $manager->Run();
         
-        usleep(100000);
+        usleep(500000);
     }
 
     $dbp->Close();
