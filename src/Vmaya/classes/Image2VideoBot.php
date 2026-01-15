@@ -160,9 +160,11 @@ class Image2VideoBot extends YKassaBot {
         $this->stat($chatId, $command, $chatId);
 
         if (DEV)
-            "Command: {$command}, ".json_encode($data, JSON_FLAGS)."\n";
+            echo("Command: {$command}\n".json_encode($data, JSON_FLAGS)."\n");
 
-        switch ($command) {
+        $commandParts = explode(' ', $command, 2);
+
+        switch ($commandParts[0]) {
             case 'show_menu': 
                 $this->showPMenu($chatId);
                 return true;
@@ -172,7 +174,7 @@ class Image2VideoBot extends YKassaBot {
             case 'start':
                 $this->start($chatId);
             case 'preset':
-                $this->preset('Fantastic portrait');
+                $this->preset(isset($commandParts[1]) ? $commandParts[1] : null);
                 return true;
             case 'menu':
                 $this->showMainMenu($chatId);
@@ -239,8 +241,6 @@ class Image2VideoBot extends YKassaBot {
 
         $parts = explode('.', $data);
 
-        if (DEV) print_r($parts);
-
         if ($this->_commandProcessor($parts[0], $chatId, $parts))
             return true;
         else return parent::callbackProcess($callback, $chatId, $messageId, $data);
@@ -284,7 +284,7 @@ class Image2VideoBot extends YKassaBot {
                 [['text'=>Lang('Begin'), 'callback_data' => "runPreset.{$presetName}"],
                 $this->closeMessageButton()]
             ]);
-        }
+        } else $this->Answer(null, $this->genContent(Lang('Preset "%s" not found', $presetName), true));
     }
 
     protected function initAdmin($user, $update) {

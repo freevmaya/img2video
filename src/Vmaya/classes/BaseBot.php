@@ -7,6 +7,8 @@ abstract class BaseBot extends SettingsManager {
     private $origin_user_id;
     private $reply_to_message;
     private $currentLanguage;
+    private $chatId;
+
     protected $user;
     protected $api;
     protected $currentUpdate = null;
@@ -143,9 +145,13 @@ abstract class BaseBot extends SettingsManager {
     }
 
     public function getCurrentChatId() {
-        if ($this->currentUpdate)
-            return @$this->currentUpdate->getMessage()->getChat()->getId();
-        else return $this->getUserId();
+        try {
+            return $this->currentUpdate->getMessage()->getChat()->getId();
+        } catch (Exception $e) {
+            if ($this->chatId)
+                return $this->chatId;
+            else return $this->getUserId();
+        }
     }
 
     public function Answer($chatId, $msg, $messageEditId = false, $reply_to_message_id = false, $parse_mode = 'Markdown') {
@@ -250,7 +256,7 @@ abstract class BaseBot extends SettingsManager {
         $message = $this->currentUpdate->getMessage();
     }*/
 
-    public function findUserBlock($update) {
+    public function findUpdateBlock($update) {
 
         $fields = [
             'message',
@@ -282,13 +288,15 @@ abstract class BaseBot extends SettingsManager {
     protected function initUser($update) {
         
         $user = null;
-        if ($block = $this->findUserBlock($update))
+        $this->chatId = 0;
+
+        if ($block = $this->findUpdateBlock($update))
             $user = $block['from'];
 
         if ($user) {
             try {
-                $chatId = isset($block['chat']) ? $block['chat']['id'] : @$block['message']['chat']['id'];
-                if (empty($chatId)) $chatId = $user['id'];
+                $this->chatId = isset($block['chat']) ? $block['chat']['id'] : @$block['message']['chat']['id'];
+                if (empty($this->chatId)) $this->chatId = $user['id'];
 
                 $this->origin_user_id = $user['id'];
 
@@ -357,24 +365,23 @@ abstract class BaseBot extends SettingsManager {
             $this->checkAndUpdateSettings();
             
             //Получаем обновления с учетом последнего обработанного ID
-            try {
-                $updates = $this->api->getUpdates([
-                    'offset' => $this->getSetting('lastUpdateId', 0) + 1,
-                    'timeout' => $this->getSetting('update_timeout', 0), // Длительность ожидания новых сообщений (сек)
-                ]);
-
-                //Обрабатываем каждое обновление
-                foreach ($updates as $update) {
-                    if ($this->initUser($update)) 
-                        $this->_runUpdate($update);
-                } 
-            } catch (Exception $e) {
-                trace_error($e->getMessage());
-            }
+            $updates = $this->api->getUpdates([
+                'offset' => $this->getSetting('lastUpdateId', 0) + 1,
+                'timeout' => $this->getSetting('update_timeout', 0), // Длительность ожидания новых сообщений (сек)
+            ]);
         } catch (Exception $e) {
-            // 9. Обработка ошибок
-            echo 'Ошибка: ' . $e->getMessage() . PHP_EOL;
-            sleep(5); // Пауза перед повторной попыткой
+            trace_error($e->getMessage());
+            usleep(500000); // Пауза перед повторной попыткой
+        }
+
+        //Обрабатываем каждое обновление
+        foreach ($updates as $update) {
+            try {
+                if ($this->initUser($update)) 
+                    $this->_runUpdate($update);
+            } catch (Exception $e) {
+                trace_error($e->getMessage()."\n\nUpdate:\n".json_encode($update, JSON_FLAGS));
+            }
         }
 
         if ($this->settingsChange)
@@ -391,10 +398,10 @@ abstract class BaseBot extends SettingsManager {
             $chat = $update->getChat();        
 
             if ($chat) {
-                $chatId = $chat->getId();
-                $messageId = $message['message_id'];
+                $chatId     = $chat->getId();
+                $messageId  = $message->getMessageId();
+                $text       = $message->getText();
 
-                $text = $message->getText();
                 if ($this->beforeProcess($chatId, $text)) {
 
                     $this->reply_to_message = isset($message['reply_to_message']) ? $message['reply_to_message'] : null;
