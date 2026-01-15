@@ -9,8 +9,8 @@
 				"options": {
 					"prompt": "A fantastic portrait. A soft, warm, golden glow emanates from the girl, as if she has a light source inside. The light softly highlights the contours of her face and armor. The look is kind and direct. Dark background.",
 				    "presetStyle": "CINEMATIC",
-				    "width": 900,
-				    "height": 600,
+				    "width": 1024,
+				    "height": 512,
 				    "photoReal": true,
 				    "photoRealVersion": "v2",
 				    "alchemy": true,
