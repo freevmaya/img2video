@@ -96,16 +96,28 @@ class MainCycleEx extends SettingsManager {
         ]);
     }
 
+    protected function getLastErrorsIds() {
+        $result = [];
+        $errorItems = $this->notificationsModel->getItems('`error_chat_ids` IS NOT NULL AND `processed`= 1');
+        foreach ($errorItems as $item) {
+            $error_chat_ids = array_values(json_decode($item['error_chat_ids']));
+            $result = array_merge($result, $error_chat_ids);
+        }
+        return array_unique($result);
+    }
+
     public function runNotification($notification) {
 
         $chats_ids = $notification['chats_ids'] ? json_decode($notification['chats_ids'], true) : [];
         $sent_chat_ids = $notification['sent_chat_ids'] ? json_decode($notification['sent_chat_ids'], true) : [];
         $error_chat_ids = $notification['error_chat_ids'] ? json_decode($notification['error_chat_ids'], true) : [];
 
+        $last_chat_ids = $this->getLastErrorsIds();
+
         if ((count($chats_ids) > 0) && ($chats_ids[0] == '*'))
             $chats_ids = BaseModel::getListValues((new TGUserModel())->getItems(), 'id');
 
-        $chats_ids = array_values(array_diff($chats_ids, $sent_chat_ids, $error_chat_ids));
+        $chats_ids = array_values(array_diff($chats_ids, $sent_chat_ids, $error_chat_ids, $last_chat_ids));
 
         if (($presetName = $notification['preset_name']) && 
             ($preset = $this->getPreset($presetName)) && 
