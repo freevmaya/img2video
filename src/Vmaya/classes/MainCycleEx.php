@@ -72,10 +72,16 @@ class MainCycleEx extends SettingsManager {
         if ($this->user = (new TGUserModel())->getItem($task['user_id'])) {
             $this->initLang($this->user['language_code']);
             $this->readSession($task['chat_id']);
-        
+            
+            $idDo = false;
             foreach ($this->processors as $key=>$processor)
-                if ($key == $task['service'])
+                if ($key == $task['service']) {
                     $processor->doServiceAction($task);
+                    $idDo = true;
+                    break;
+                }
+
+            if (!$idDo) $this->finishTask($task, 'failure');
 
             if ($this->isSessionChanged()) $this->saveSession();
         }
