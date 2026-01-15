@@ -496,7 +496,7 @@ class Image2VideoBot extends YKassaBot {
 
         if ($photoOrText) {
 
-            $text .= "\n(".$this->getCurrentModelForText('imageToVideo').')';
+            $text .= "\n\n(".$this->getCurrentModelForText('imageToVideo').')';
 
             $this->Answer(null, $this->genContent($text, true, [
                 [['text'=>Lang('Create a video'), 'callback_data' => "imageToVideo.1.prompt"],
@@ -504,7 +504,7 @@ class Image2VideoBot extends YKassaBot {
             ]));
         } else if (!empty($text)) {
 
-            $text .= "\n(".$this->getCurrentModelForText('textToImage').')';
+            $text .= "\n\n(".$this->getCurrentModelForText('textToImage').')';
 
             $this->Answer(null, $this->genContent($text, true, [
                 [['text'=>Lang('Create an image'), 'callback_data' => "textToImage.1.prompt"],
@@ -674,7 +674,7 @@ class Image2VideoBot extends YKassaBot {
                 switch ($stage) {
                     case 0:
 
-                        $this->Answer(null, $this->genContent(Lang('Send you photo')));
+                        $this->Answer(null, $this->genContent(Lang('Send your photo')));
                         $this->setSession("expect", "runPreset('{$presetName}', 1, {$subIndex})");
                         $this->setSession('images', []);
 
@@ -773,7 +773,7 @@ class Image2VideoBot extends YKassaBot {
             'text' => Lang("Send a prompt")
         ];
 
-        $params['text'] .= "\n(".$this->getCurrentModelForText($genType).")";
+        $params['text'] .= "\n\n(".$this->getCurrentModelForText($genType).")";
 
         $promptList = Lang($genType.'Prompts');
         $menu = [];
@@ -816,9 +816,9 @@ class Image2VideoBot extends YKassaBot {
 
         switch ($stage) {
             case 0: 
-                    $text = Lang("Submit you image");
+                    $text = Lang("Submit your image");
                     if ($gen_model = $this->getCurrentModelName('imageToVideo'))
-                        $text .= "\n".Lang("Current model %s", $gen_model);
+                        $text .= "\n\n(".Lang("Current model %s", $gen_model).')';
 
                     $this->pushRecallMethod($this->messageIndex(), "imageToVideo({$stage})");
                     $this->Answer($this->getCurrentChatId(), $this->genContent($text, true, [
@@ -866,8 +866,8 @@ class Image2VideoBot extends YKassaBot {
 
             $countText = $count_images == 0 ? '' : ("\n".sprintf(Lang("Loaded %s of %s"), $count_images, $require_images));
 
-            $text = Lang("Submit your image").$countText."\n".
-                    Lang("Current model %s", $info['name']);
+            $text = Lang("Submit your image").$countText."\n\n(".
+                    Lang("Current model %s", $info['name']).')';
 
             $this->pushRecallMethod($this->messageIndex(), "imagesToImage(0)");
             $this->Answer(null, $this->genContent($text, true, [
