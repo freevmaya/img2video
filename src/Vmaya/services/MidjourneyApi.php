@@ -53,6 +53,10 @@ class MidjourneyApi extends BaseApi
         return $this->makeRequest('/midjourney/v2/imagine', $data);
     }
 
+    protected function preparePresetImages(&$presetOptions, $images) {
+        
+    }
+
     public function generateImageFromImage($imagePath, $prompt, $options = [])
     {
         $data = [

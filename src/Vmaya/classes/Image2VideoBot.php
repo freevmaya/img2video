@@ -690,20 +690,24 @@ class Image2VideoBot extends YKassaBot {
                         $images = [];
                         $n = 0;
 
-                        for ($i=0; $i<count($model_data['images']); $i++) {
-                            if (!$model_data['images'][$i]) {
+                        $full_images = array_merge([], $model_data['images']);
+
+                        for ($i=0; $i<count($full_images); $i++) {
+                            if (!$full_images[$i]['value']) {
+
                                 if ($n < count($images_url)) {
-                                    $images[$i] = $images_url[$n];
+                                    $full_images[$i]['value'] = $images_url[$n];
                                     $n++;
                                 } else {
                                     $this->Wrong("Отсутствует минимальное количество изображений");
                                     return false;
                                 }
-                            } else $images[$i] = $model_data['images'][$i];
+
+                            }
                         }
 
                         if ($this->isAllowType($type)) {
-                            if ($gen->GeneratePreset($info['name'], $model_data['options'], $images)) {
+                            if ($gen->GeneratePreset($info['name'], $model_data['options'], $full_images)) {
                                 $this->setSession('images', []);
                                 return true;
                             }

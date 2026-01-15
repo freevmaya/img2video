@@ -220,14 +220,17 @@ class LeonardoApi extends BaseApi
     private function setImageGuidance(&$options, $images)
     {
         $count = count($images);
-        switch ($count) {
-            case 2:
-                $options['controlnets'][0]['initImageId'] = $images[0];
-                $options['controlnets'][1]['initImageId'] = $images[1];
-                break;
-            default:
-                return false;
+        if ($count < 1)
+            return false;
+
+        $controlnets = $options['controlnets'];
+        for ($i=0; $i<$count; $i++) {
+            $controlnets[$i] = array_merge(isset($controlnets[$i]) ? $controlnets[$i] : $controlnets[count($controlnets) - 1], [
+                'initImageId'=>$images[$i]
+            ]);
         }
+
+        $options['controlnets'] = $controlnets;
         return true;
     }
 
@@ -249,6 +252,17 @@ class LeonardoApi extends BaseApi
         }
         $options['parameters']['guidances']['image_reference'] = $ref;
         return true;
+    }
+
+    protected function preparePresetImages(&$presetOptions, $images) {
+        if (!empty($images))
+            for ($i=0; $i<count($images); $i++)
+                if ($image_id = $this->validateImage($images[$i]['value']))
+                    setArrayValueByPath($presetOptions, $images[$i]['path'], $image_id);
+                else return false;
+
+        trace($presetOptions);
+        return $presetOptions;
     }
 
     protected function setImages($model_name, &$options, $images) {

@@ -28,6 +28,10 @@ class BaseKlingApi extends BaseApi
 	    return JWT::encode($payload, $this->secretKey, "HS256");
 	}
 
+    protected function preparePresetImages(&$presetOptions, $images) {
+        
+    }
+
     protected function requireTranslate($info) {
         return false;
     }

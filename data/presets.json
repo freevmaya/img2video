@@ -5,11 +5,19 @@
 		"subsequence": [
 			{
 				"model_index": "leo_Image Guidance",
-				"images": ["6f5db5ef-4242-4fc9-9836-3d8a7fbe71b9", null],
+				"images": [
+					{
+						"value": "6f5db5ef-4242-4fc9-9836-3d8a7fbe71b9",
+						"path": "controlnets/0/initImageId"
+					},{
+						"value": null,
+						"path": "controlnets/1/initImageId"
+					}
+				],
 				"options": {
 					"prompt": "A fantastic portrait. A soft, warm, golden glow emanates from the girl, as if she has a light source inside. The light softly highlights the contours of her face and armor. The look is kind and direct. Dark background.",
 				    "presetStyle": "CINEMATIC",
-				    "width": 1024,
+				    "width": 512,
 				    "height": 512,
 				    "photoReal": true,
 				    "photoRealVersion": "v2",
@@ -21,14 +29,14 @@
 				            "initImageType": "UPLOADED",
 				            "preprocessorId": 67,
 				            "strengthType": "High",
-				            "influence": 0.5
+				            "influence": 0.3
 				        },
 				        {
 				            "initImageId": "",
 				            "initImageType": "UPLOADED",
 				            "preprocessorId": 67,
 				            "strengthType": "High",
-				            "influence": 0.5
+				            "influence": 0.7
 				        }
 				    ]
 				}

@@ -58,3 +58,33 @@ function extractParenthesesContent($string) {
     
     return [false, false];
 }
+
+/**
+ * Устанавливает значение в многоуровневом массиве по пути
+ * 
+ * @param array &$array Исходный массив (передается по ссылке)
+ * @param string $path Путь в формате "field1/field2/field3"
+ * @param mixed $value Значение для установки
+ * @param string $delimiter Разделитель пути (по умолчанию "/")
+ * @return array Возвращает измененный массив
+ */
+function setArrayValueByPath(array &$array, string $path, $value, string $delimiter = '/'): array
+{
+    $keys = explode($delimiter, $path);
+    $current = &$array;
+    
+    foreach ($keys as $key) {
+        if (!is_array($current)) {
+            $current = [];
+        }
+        
+        if (!array_key_exists($key, $current)) {
+            $current[$key] = [];
+        }
+        
+        $current = &$current[$key];
+    }
+    
+    $current = $value;
+    return $array;
+}
