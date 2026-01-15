@@ -36,12 +36,41 @@ class BaseKlingApi extends BaseApi
         return false;
     }
 
-    protected function makeRequest($url, $data, $post = true)
+    protected function checkResponse($response) {
+        if (DEV)
+            echo json_encode($response, JSON_FLAGS)."\n";
+
+        if (isset($response['code']) && ($response['code'] > 0)) {
+            trace_error($response);
+            return false;
+        }
+        return true;
+    }
+
+    public function prepareVideoMultiElement($videoUrl, $points) {
+        $session_id = md5(time());
+        $response = $this->baseRequest($this->baseUrl.'v1/videos/multi-elements/init-selection', [
+            'video_url' => $videoUrl
+        ]);
+
+        if (!$this->checkResponse($response)) return false;
+
+        $session_id = $response['data']['session_id'];
+
+        for ($i=0; $i<count($points); $i++) {
+            $response = $this->baseRequest($this->baseUrl.'/v1/videos/multi-elements/add-selection', [
+                'session_id'    => $session_id,
+                'frame_index'   => $i,
+                'points'        => $points[$i]
+            ]);
+            if (!$this->checkResponse($response)) return false;
+        }
+    }
+
+    protected function baseRequest($url, $data, $post = true)
     {
         $ch = curl_init($url);
         $token = $this->generateToken();
-
-        //trace($data);
         
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
@@ -60,5 +89,10 @@ class BaseKlingApi extends BaseApi
         }
 
         return $response;
+    }
+
+    protected function makeRequest($url, $data, $post = true)
+    {
+        return $this->baseRequest($url, $data, $post);
     }
 }
