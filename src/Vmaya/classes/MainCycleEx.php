@@ -10,6 +10,7 @@ class MainCycleEx extends SettingsManager {
 
     private $lastMessageId;
     private $currentLanguage;
+    private $notificationsModel;
     protected $user;
     protected $modelTask;
     protected $api;
@@ -23,6 +24,7 @@ class MainCycleEx extends SettingsManager {
         $this->api          = $api;
         $this->modelTask    = new TaskModel();
         $this->transactionModel = new TransactionsModel();
+        $this->notificationsModel = new NotificationsModel();
 
         $this->processors 	= [
         	'mj' => new MjCycle($this, $this->modelTask, new MJModel()),
@@ -53,6 +55,12 @@ class MainCycleEx extends SettingsManager {
                     $this->updateTask($task);
                 }
             }
+
+            $notifications = $this->notificationsModel->getItems('`processed`= 0 AND `submit_time` < NOW()');
+
+            foreach ($notifications as $item)
+                $this->runNotification($item);
+
         } catch (Exception $e) {
             trace_error($e->getMessage());
         }
@@ -79,6 +87,57 @@ class MainCycleEx extends SettingsManager {
         ]);
 
         trace("finish task {$task['id']}: {$state}");
+    }
+
+    public function finishNotification($id, $code = 1) {
+        $this->notificationsModel->Update([
+            'id'=>$id,
+            'processed'=>$code
+        ]);
+    }
+
+    public function runNotification($notification) {
+
+        $chats_ids = $notification['chats_ids'] ? json_decode($notification['chats_ids'], true) : [];
+        $sent_chat_ids = $notification['sent_chat_ids'] ? json_decode($notification['sent_chat_ids'], true) : [];
+        $error_chat_ids = $notification['error_chat_ids'] ? json_decode($notification['error_chat_ids'], true) : [];
+
+        if ((count($chats_ids) > 0) && ($chats_ids[0] == '*'))
+            $chats_ids = BaseModel::getListValues((new TGUserModel())->getItems(), 'id');
+
+        $chats_ids = array_values(array_diff($chats_ids, $sent_chat_ids, $error_chat_ids));
+
+        if (($presetName = $notification['preset_name']) && 
+            ($preset = $this->getPreset($presetName)) && 
+            $preset['image']) {
+
+            $count = count($chats_ids);
+            if ($count > 0) {
+                $chat_id = $chats_ids[0];
+                $fileName = basename($preset['image']);
+
+                if ($this->sendPhoto($chat_id, BASEPATH.$preset['image'], $fileName, $preset['caption'], [
+                    [['text'=>Lang('Begin'), 'callback_data' => "runPreset.{$presetName}"],
+                    $this->closeMessageButton()]
+                ])) {
+
+                    $sent_chat_ids[] = $chat_id;
+                    $this->notificationsModel->Update([
+                        'id'=>$notification['id'],
+                        'sent_chat_ids' => json_encode($sent_chat_ids, JSON_FLAGS)
+                    ]);
+
+                } else {
+                    
+                    $error_chat_ids[] = $chat_id;
+                    $this->notificationsModel->Update([
+                        'id'=>$notification['id'],
+                        'error_chat_ids' => json_encode($error_chat_ids, JSON_FLAGS)
+                    ]);
+                }
+
+            } else $this->finishNotification($notification['id'], 1);
+        } else $this->finishNotification($notification['id'], 2);
     }
 
     public function sendMp4($task, $filePath, $filename, $message, $params=[]) {

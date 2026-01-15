@@ -243,10 +243,6 @@ abstract class BaseBot extends SettingsManager {
         return $this->afterSend($this->api->sendMessage($params));
     }
 
-    public function closeMessageButton($eng_caption = 'Cancel') {
-        return ['text'=>Lang($eng_caption), 'callback_data' => "deleteMessage.{$this->messageIndex()}"];
-    }
-
     public function createButton($eng_caption, $command) {
         return ['text'=>Lang($eng_caption), 'callback_data' => $command];
     }
@@ -372,6 +368,7 @@ abstract class BaseBot extends SettingsManager {
         } catch (Exception $e) {
             trace_error($e->getMessage());
             usleep(500000); // Пауза перед повторной попыткой
+            return;
         }
 
         //Обрабатываем каждое обновление

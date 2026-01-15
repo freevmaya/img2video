@@ -98,4 +98,13 @@ class SettingsManager extends SessionManager {
 
         return $sendResult;
     }
+
+    protected function getPreset($presetName) {
+        $presets = json_decode(file_get_contents(BASEPATH.'data/presets.json'), true);
+        return isset($presets[$presetName]) ? $presets[$presetName] : null;
+    }
+
+    public function closeMessageButton($eng_caption = 'Cancel') {
+        return ['text'=>Lang($eng_caption), 'callback_data' => "deleteMessage.{$this->messageIndex()}"];
+    }
 }

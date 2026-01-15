@@ -15,8 +15,6 @@ class KlingApi extends BaseKlingApi
         $this->modelTask = $modelTask;
     }
 
-
-
     public function AccountInfo() {
         return $this->makeRequest('/account/costs', [], false);
     }

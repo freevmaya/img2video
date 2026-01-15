@@ -271,11 +271,6 @@ class Image2VideoBot extends YKassaBot {
         }
     }
 
-    protected function getPreset($presetName) {
-        $presets = json_decode(file_get_contents(BASEPATH.'data/presets.json'), true);
-        return isset($presets[$presetName]) ? $presets[$presetName] : null;
-    }
-
     protected function preset($presetName) {
 
         if ($preset = $this->getPreset($presetName)) {
