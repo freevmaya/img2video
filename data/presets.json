@@ -9,9 +9,6 @@
 					{
 						"value": null,
 						"path": "controlnets/0/initImageId"
-					},{
-						"value": "6f5db5ef-4242-4fc9-9836-3d8a7fbe71b9",
-						"path": "controlnets/1/initImageId"
 					}
 				],
 				"options": {
@@ -29,14 +26,7 @@
 				            "initImageType": "UPLOADED",
 				            "preprocessorId": 67,
 				            "strengthType": "High",
-				            "influence": 0.3
-				        },
-				        {
-				            "initImageId": "",
-				            "initImageType": "UPLOADED",
-				            "preprocessorId": 67,
-				            "strengthType": "High",
-				            "influence": 0.7
+				            "influence": 0.8
 				        }
 				    ]
 				}
