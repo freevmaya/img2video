@@ -9,6 +9,9 @@ $dbp = new mySQLProvider(_dbhost, _dbname_default, _dbuser, _dbpassword);
 
 $api = new KlingApi(KL_ACCESS_KEY, KL_SECRET_KEY, new TaskModel());
 
+$videoURL = BASEURL.'/data/videos/Multi-Image-01.mp4';
+echo $videoURL."\n";
+
 $api->prepareVideoMultiElement(BASEURL.'data/videos/Multi-Image-01.mp4', [
 	[
 		[0.35, 0.17],
