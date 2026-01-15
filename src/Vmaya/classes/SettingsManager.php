@@ -100,8 +100,11 @@ class SettingsManager extends SessionManager {
     }
 
     protected function getPreset($presetName) {
-        $presets = json_decode(file_get_contents(BASEPATH.'data/presets.json'), true);
-        return isset($presets[$presetName]) ? $presets[$presetName] : null;
+        if ($presetName) {
+            $presets = json_decode(file_get_contents(BASEPATH.'data/presets.json'), true);
+            return isset($presets[$presetName]) ? $presets[$presetName] : null;
+        }
+        return null;
     }
 
     public function closeMessageButton($eng_caption = 'Cancel') {

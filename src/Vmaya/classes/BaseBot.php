@@ -145,12 +145,16 @@ abstract class BaseBot extends SettingsManager {
     }
 
     public function getCurrentChatId() {
-        try {
-            return $this->currentUpdate->getMessage()->getChat()->getId();
-        } catch (Exception $e) {
-            if ($this->chatId)
-                return $this->chatId;
-            else return $this->getUserId();
+        if ($this->chatId)
+            return $this->chatId;
+        else {
+            if ($this->currentUpdate && $this->currentUpdate->getMessage()) {
+                try {
+                    return $this->currentUpdate->getMessage()->getChat()->getId();
+                } catch (Exception $e) {
+                    return $this->getUserId();
+                }
+            } else return $this->getUserId();
         }
     }
 
