@@ -1,5 +1,6 @@
 {
 	"Fantastic portrait": {
+		"name": "Фантастический портрет",
 		"caption": "Просто загрузите свое фото и получите новый,✨ фантастический образ.\nПримерь на себя образ 👑принцессы из будущего!\n👇",
 		"image": "public/images/Fantastic portrait.jpg",
 		"gender": "female",
@@ -46,6 +47,7 @@
 	},
 
 	"Sorceress": {
+		"name": "Колдунья",
 		"caption": "Фэнтезийный образ девушки в красном, вечернем платье.\nПримерь на себя образ ✨волшебницы из сказок.\n👇",
 		"video": "public/videos/Sorceress-preview.mp4",
 		"gender": "female",

@@ -73,6 +73,7 @@ $lang = [
 	'Top up'=>'Пополнить',
 	'Account replenishment'=>'Пополнение счета',
 	'One-time payment'=>'Разовый платеж',
+	'Presets'=>'Пресеты',
 	'imageToVideoPrompts'=>[
 		'Человек смеётся',
 		'Легкая улыбка, моргание глазами',

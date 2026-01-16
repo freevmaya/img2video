@@ -87,11 +87,12 @@ class Image2VideoBot extends YKassaBot {
         $result = [
             [['text' => '🖼️ '.Lang('Create an image'), 'callback_data'  => 'create_image']],
             [['text' => '🎥 '.Lang('Bring a photo to life'), 'callback_data' => 'create_video']],
+            [['text' => '📂 '.Lang('Presets'), 'callback_data' => 'presets']],
             [['text' => '💰 '.Lang('Balance'), 'callback_data' => 'MySubscribe']],
             //[['text' => '📊 '.Lang('My generations'), 'callback_data' => 'my_generations']],
             [['text' => '⭐ '.Lang('Subscription'), 'callback_data' => 'subscribe']],
-            [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']],
             [['text' => '🤖 '.Lang('Models'), 'callback_data' => 'models']],
+            [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']],
             [['text' => '❕'.Lang('Agreement'), 'callback_data' => 'agreement']]
         ];
 
@@ -229,6 +230,8 @@ class Image2VideoBot extends YKassaBot {
                 return $this->DeleteMessage(null, $this->getMessageId($data[1]));
             case 'runPreset':
                 return $this->runPreset($data[1]);
+            case 'presets':
+                return $this->presets();
         }
         return false;
     }
@@ -693,6 +696,15 @@ class Image2VideoBot extends YKassaBot {
             if ($diff_time < 60 * 60) // Обрабатывать сохраненный expect только в течении часа
                 $this->processExpect($after_payment[1]);
         }
+    }
+
+    protected function presets() {
+        $presets = json_decode(file_get_contents(BASEPATH.'data/presets.json'), true);
+        $list = [];
+        foreach ($presets as $key=>$preset)
+            $list[] = [['text'=>$preset['name'], 'callback_data'=>"preset {$key}"]];
+
+        $this->Answer(null, $this->genContent(Lang('Presets'), 'Close', $list));
     }
 
 
