@@ -15,15 +15,20 @@ class SenderCycle extends TelegramClient {
 
     public function Update() {
 
+        $notifications = $this->notificationsModel->getItems('`processed`= 0 AND `submit_time` < NOW()');
+        if (count($notifications) == 0)
+        	return false;
+
         try {
 
-            $notifications = $this->notificationsModel->getItems('`processed`= 0 AND `submit_time` < NOW()');
             foreach ($notifications as $item)
                 $this->runNotification($item);
 
         } catch (Exception $e) {
             trace_error($e->getMessage());
         }
+
+        return true;
     }
 
     public function runNotification($notification) {

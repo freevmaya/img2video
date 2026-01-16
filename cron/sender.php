@@ -54,7 +54,9 @@ try {
 
     //Основной цикл
     while ($lock->isFile()) {
-        $cycle->Update();        
+        
+        if (!$cycle->Update())
+            break;        
         sleep(5);
     }
 
