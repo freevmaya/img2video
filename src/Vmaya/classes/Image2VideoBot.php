@@ -702,7 +702,7 @@ class Image2VideoBot extends YKassaBot {
         $presets = json_decode(file_get_contents(BASEPATH.'data/presets.json'), true);
         $list = [];
         foreach ($presets as $key=>$preset)
-            $list[] = [['text'=>$preset['name'], 'callback_data'=>"preset {$key}"]];
+            $list[] = [['text'=>'⭐ '.$preset['name'], 'callback_data'=>"preset {$key}"]];
 
         $this->Answer(null, $this->genContent(Lang('Presets'), 'Close', $list));
     }

@@ -12,6 +12,8 @@ class KlingCycle extends BaseCycle {
                 'hash'=>$task['hash']
             ]);
             $this->parent->finishTask($task);
+            $this->finishResponse($response);
+            
         } else $this->setResponseProcessed($response, 0);
 	}
 
