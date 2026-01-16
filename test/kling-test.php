@@ -10,17 +10,17 @@ $api = new KlingApi(KL_ACCESS_KEY, KL_SECRET_KEY, null);
 $videoURL = BASEURL.'/videos/Sorceress-full.mp4';
 echo $videoURL."\n";
 
-$session_id = '840991210515865601';
+$session_id = '841048603464040512';
 
-$result = $api->initSession($videoURL);
+//$result = $api->initSession($videoURL);
 
-/*
+
 $api->clearVideoSelection($session_id);
 
 $result = $api->addVideoSelection($session_id, 0, [
 	['x'=>0.41, 'y'=> 1 - 0.26]
 ]);
-
+/*
 $result = $api->deleteVideoSelection($session_id, 0, [
 	['x'=>0.5, 'y'=> 1 - 0.5]
 ]);
