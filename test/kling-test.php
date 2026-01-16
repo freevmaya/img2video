@@ -7,12 +7,12 @@ use App\Services\API\KlingApi;
 
 $api = new KlingApi(KL_ACCESS_KEY, KL_SECRET_KEY, null);
 
-$videoURL = BASEURL.'/public/videos/Multi-Image-01.mp4';
+$videoURL = BASEURL.'/videos/Sorceress-full.mp4';
 echo $videoURL."\n";
 
 $session_id = '840991210515865601';
 
-//$result = $api->initSession($videoURL);
+$result = $api->initSession($videoURL);
 
 /*
 $api->clearVideoSelection($session_id);
@@ -42,6 +42,7 @@ $api->addVideoSelectionArea($session_id, 0, [
 	['x'=>0.42, 'y'=>0.31]
 ]);*/
 
+/*
 $result = $api->baseRequest('https://api-singapore.klingai.com/v1/videos/multi-elements/', '{
 	"model_name": "kling-v1-6",
 	"session_id": "840792910093221947",
@@ -57,6 +58,7 @@ $result = $api->baseRequest('https://api-singapore.klingai.com/v1/videos/multi-e
 	"mode": "std",
 	"duration": 5
 }');
+*/
 
 print_r($result);
 
