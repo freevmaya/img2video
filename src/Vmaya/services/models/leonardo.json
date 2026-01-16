@@ -28,12 +28,14 @@
 		"FLUX.2 Pro": {
 			"enabled": false,
 			"url": "https://cloud.leonardo.ai/api/rest/v2/generations",
-			"dev": "Требуются какие то еще картинки, надо разобраться"
+			"dev": "Требуются какие то еще картинки, надо разобраться",
+			"type": "unknown"
 		},
 		"GPT1.5": {
 			"enabled": false,
 			"url": "https://cloud.leonardo.ai/api/rest/v2/generations",
-			"dev": "Требуются какие то еще картинки, надо разобраться"
+			"dev": "Требуются какие то еще картинки, надо разобраться",
+			"type": "unknown"
 		},
 		"Leonardo FLUX.1 Kontext": {
 			"enabled": true,
@@ -71,12 +73,14 @@
 		"Canvas Inpainting": {
 			"enabled": false,
 			"url": "https://cloud.leonardo.ai/api/rest/v1/generations",
-			"dev": "Требуются какие то еще картинки, надо разобраться"
+			"dev": "Требуются какие то еще картинки, надо разобраться",
+			"type": "unknown"
 		},
 		"Realtime Canvas": {
 			"enabled": false,
 			"url": "https://cloud.leonardo.ai/api/rest/v1/generations-lcm",
-			"dev": "Требуются какие то еще картинки, надо разобраться"
+			"dev": "Требуются какие то еще картинки, надо разобраться",
+			"type": "unknown"
 		},
 		"Kling O1": {
 			"enabled": true,

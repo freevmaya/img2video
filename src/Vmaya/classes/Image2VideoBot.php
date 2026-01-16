@@ -276,11 +276,18 @@ class Image2VideoBot extends YKassaBot {
 
         if ($preset = $this->getPreset($presetName)) {
 
-            trace("preset");
-            $this->SendPhoto($preset['caption'], BASEPATH.$preset['image'], [
-                [['text'=>Lang('Begin'), 'callback_data' => "runPreset.{$presetName}"],
-                $this->closeMessageButton()]
-            ]);
+            if (isset($preset['image'])) {
+                $this->SendPhoto($preset['caption'], BASEPATH.$preset['image'], [
+                    [['text'=>Lang('Begin'), 'callback_data' => "runPreset.{$presetName}"],
+                    $this->closeMessageButton()]
+                ]);
+            } else if (isset($preset['video'])) {
+
+                $this->SendVideo($preset['caption'], BASEPATH.$preset['video'], [
+                    [['text'=>Lang('Begin'), 'callback_data' => "runPreset.{$presetName}"],
+                    $this->closeMessageButton()]
+                ]);
+            }
         } else $this->Answer(null, $this->genContent(Lang('Preset "%s" not found', $presetName), true));
     }
 
@@ -307,8 +314,8 @@ class Image2VideoBot extends YKassaBot {
         }
     }
 
-    protected function getActualyModelInfo($model_index) {
-        $models_info = $this->getActualyModelsInfo();
+    protected function getActualyModelInfo($model_index, $enabledOnly = true) {
+        $models_info = $this->getActualyModelsInfo($enabledOnly);
         foreach ($models_info as $info)
             if ($info['index'] == $model_index)
                 return [$this->generators[$info['gen_index']], $info];
@@ -316,10 +323,10 @@ class Image2VideoBot extends YKassaBot {
         return [null, null];
     }
 
-    protected function getActualyModelsInfo() {
+    protected function getActualyModelsInfo($enabledOnly = true) {
         $infos = [];
         foreach ($this->generators as $gen_name=>$gen) {
-            $m_infos = $gen->getActualyModelsInfo();
+            $m_infos = $gen->getActualyModelsInfo($enabledOnly);
 
             foreach ($m_infos as $name=>$info) {
                 $infos[] = array_merge([
@@ -332,7 +339,9 @@ class Image2VideoBot extends YKassaBot {
 
         usort($infos, function ($a, $b)
         {
-            return strcmp($a["type"], $b["type"]);
+            if (isset($a["type"]) && isset($b["type"]))
+                return strcmp($a["type"], $b["type"]);
+            else return 0;
         });
         return $infos;
     }
@@ -462,16 +471,8 @@ class Image2VideoBot extends YKassaBot {
         $this->setSession('images', $images);
     }
 
-    protected function popImages() {
-        return $this->popSession('images');
-    }
-
-    protected function getImages() {
-        return $this->getSession('images');
-    }
-
     protected function getImagesUrl() {
-        $images = $this->getImages();
+        $images = array_reverse($this->getSession('images'));
         $images_url = [];
         if (!empty($images))
             foreach ($images as $image_id)
@@ -670,52 +671,47 @@ class Image2VideoBot extends YKassaBot {
     protected function runPreset($presetName, $stage = 0, $subIndex = 0) {
         if ($preset = $this->getPreset($presetName)) {
 
-            $model_data = $preset['subsequence'][$subIndex];
-            $model_index = $model_data['model_index'];
+            $model_data     = $preset['subsequence'][0];
+            [$gen, $info]   = $this->getActualyModelInfo($model_data['model_index'], false);
+            $type           = $info['type'];
 
-            [$gen, $info] = $this->getActualyModelInfo($model_index);
-            $type = $info['type'];
+            switch ($stage) {
+                case 0:
 
-            if ($type == 'imagesToImage') {
+                    $this->Answer(null, $this->genContent(Lang('Send your photo')));
+                    $this->setSession("expect", "imageToVideo_preset('{$presetName}', 1, {$subIndex})");
+                    $this->setSession('images', []);
 
-                switch ($stage) {
-                    case 0:
+                    break;
+                case 1:
 
-                        $this->Answer(null, $this->genContent(Lang('Send your photo')));
-                        $this->setSession("expect", "runPreset('{$presetName}', 1, {$subIndex})");
-                        $this->setSession('images', []);
+                    $images_url = $this->getImagesUrl();
+                    $images = [];
+                    $n = 0;
 
-                        break;
-                    case 1:
+                    $full_images = array_merge([], $model_data['images']);
 
-                        $images_url = $this->getImagesUrl();
-                        $images = [];
-                        $n = 0;
+                    for ($i=0; $i<count($full_images); $i++) {
+                        if (!$full_images[$i]['value']) {
 
-                        $full_images = array_merge([], $model_data['images']);
-
-                        for ($i=0; $i<count($full_images); $i++) {
-                            if (!$full_images[$i]['value']) {
-
-                                if ($n < count($images_url)) {
-                                    $full_images[$i]['value'] = $images_url[$n];
-                                    $n++;
-                                } else {
-                                    $this->Wrong("Отсутствует минимальное количество изображений");
-                                    return false;
-                                }
-
+                            if ($n < count($images_url)) {
+                                $full_images[$i]['value'] = $images_url[$n];
+                                $n++;
+                            } else {
+                                $this->Wrong("Отсутствует минимальное количество изображений");
+                                return false;
                             }
-                        }
 
-                        if ($this->isAllowType($type)) {
-                            if ($gen->GeneratePreset($info['name'], $model_data['options'], $full_images)) {
-                                $this->setSession('images', []);
-                                return true;
-                            }
                         }
-                        break;
-                }
+                    }
+
+                    if ($this->isAllowType($type)) {
+                        if ($gen->GeneratePreset($info['name'], $model_data['options'], $full_images)) {
+                            $this->setSession('images', []);
+                            return true;
+                        }
+                    }
+                    break;
             }
         }
     }

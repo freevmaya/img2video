@@ -62,7 +62,7 @@ abstract class BaseApi implements APIInterface
         if ($options = $this->preparePresetOptions($model_name, $presetOptions, $images)) {
             $info    = $this->getModelInfo($model_name);
 
-            if ($options && $info && $info['enabled']) {
+            if ($options && $info) {
                 $result = $this->makeRequest($info['url'], $options);
             }
         }
@@ -72,12 +72,25 @@ abstract class BaseApi implements APIInterface
     protected function preparePresetOptions($model_name, $presetOptions, $images) {
 
         $result = array_merge([], $this->defaultModel[$model_name], $presetOptions);
+
         if ($this->preparePresetImages($result, $images))
             return $result;
         else return false;
     }
 
-    protected abstract function preparePresetImages(&$presetOptions, $images);
+    protected function validateImage($value) {
+        return $value;
+    }
+
+    protected function preparePresetImages(&$presetOptions, $images) {
+        if (!empty($images))
+            for ($i=0; $i<count($images); $i++)
+                if ($image_id = $this->validateImage($images[$i]['value']))
+                    setArrayValueByPath($presetOptions, $images[$i]['path'], $image_id);
+                else return false;
+                
+        return $presetOptions;
+    }
 
     public function PrepareRequestData($type, $images, $prompt, $model_name = null) {
         $model_name = empty($model_name) ? $this->getDefaultModelName($type) : $model_name;
@@ -155,10 +168,10 @@ abstract class BaseApi implements APIInterface
         return $this->hasModel($model_name) ? $this->defaultModel[$model_name] : null;
     }
 
-    public function getActualyModelsInfo() {
-        return array_filter($this->modelList, function($model) {
+    public function getActualyModelsInfo($enabledOnly = true) {
+        return $enabledOnly ? array_filter($this->modelList, function($model) {
         	return $model['enabled'];
-        });
+        }) : array_merge([], $this->modelList);
     }
 
     public function getModelOptions($model_name) {

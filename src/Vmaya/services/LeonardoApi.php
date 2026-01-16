@@ -254,16 +254,6 @@ class LeonardoApi extends BaseApi
         return true;
     }
 
-    protected function preparePresetImages(&$presetOptions, $images) {
-        if (!empty($images))
-            for ($i=0; $i<count($images); $i++)
-                if ($image_id = $this->validateImage($images[$i]['value']))
-                    setArrayValueByPath($presetOptions, $images[$i]['path'], $image_id);
-                else return false;
-                
-        return $presetOptions;
-    }
-
     protected function setImages($model_name, &$options, $images) {
         if (!empty($images))
             for ($i=0; $i<count($images); $i++)

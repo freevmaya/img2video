@@ -88,3 +88,28 @@ function setArrayValueByPath(array &$array, string $path, $value, string $delimi
     $current = $value;
     return $array;
 }
+
+function getGenderFromAPI($name) {
+    $apis = [
+        // Genderize.io API
+        'https://api.genderize.io/?name=' . urlencode($name),
+        
+        // Agify.io (возраст + пол)
+        'https://api.agify.io/?name=' . urlencode($name),
+        
+        // Nationalize.io (национальность + пол)
+        'https://api.nationalize.io/?name=' . urlencode($name)
+    ];
+    
+    foreach ($apis as $apiUrl) {
+        $response = @file_get_contents($apiUrl);
+        if ($response) {
+            $data = json_decode($response, true);
+            if (isset($data['gender'])) {
+                return $data['gender'];
+            }
+        }
+    }
+    
+    return null;
+}

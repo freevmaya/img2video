@@ -28,55 +28,72 @@ class BaseKlingApi extends BaseApi
 	    return JWT::encode($payload, $this->secretKey, "HS256");
 	}
 
-    protected function preparePresetImages(&$presetOptions, $images) {
-        
-    }
-
     protected function requireTranslate($info) {
         return false;
     }
 
     protected function checkResponse($response) {
-        if (DEV)
-            echo json_encode($response, JSON_FLAGS)."\n";
+        /*
+        if (DEV) {
+            $msg = json_encode($response, JSON_FLAGS)."\n";
+            echo $msg;
+            trace($msg);
+        }*/
 
         if (isset($response['code']) && ($response['code'] > 0)) {
-            trace_error($response);
+            $msg = json_encode($response, JSON_FLAGS)."\n";
+            if (DEV)
+                echo $msg;
+            
+            trace_error($msg);
             return false;
         }
         return true;
     }
 
-    public function prepareVideoMultiElement($videoUrlOrSession, $points) {
+    public function initSession($videoUrl) {
+        $response = $this->baseRequest($this->baseUrl.'v1/videos/multi-elements/init-selection', [
+            'video_url' => $videoUrl
+        ]);
 
-        if (!is_string($videoUrlOrSession))
-            return false;
+        if (!$this->checkResponse($response)) return false;
 
-        if (isUrl($videoUrlOrSession)) {
-            $response = $this->baseRequest($this->baseUrl.'v1/videos/multi-elements/init-selection', [
-                'video_url' => $videoUrl
-            ]);
+        return $response['data']['session_id'];
+    }
 
-            if (!$this->checkResponse($response)) return false;
+    public function addVideoSelection($session_id, $index, $points) {
+        $params = [
+            'session_id'    => $session_id,
+            'frame_index'   => $index,
+            'points'        => $points
+        ];
 
-            $session_id = $response['data']['session_id'];
-        } else $session_id = $videoUrlOrSession;
+        $response = $this->baseRequest($this->baseUrl.'/v1/videos/multi-elements/add-selection', $params);
+        if (!$this->checkResponse($response)) return false;
 
-        for ($i=0; $i<count($points); $i++) {
-            $params = [
-                'session_id'    => $session_id,
-                'frame_index'   => $i,
-                'points'        => $points[$i]
-            ];
+        return $response;
+    }
 
-            if (DEV)
-                echo json_encode($params, JSON_FLAGS)."\n";
+    public function deleteVideoSelection($session_id, $index, $points) {
 
-            $response = $this->baseRequest($this->baseUrl.'/v1/videos/multi-elements/add-selection', $params);
-            if (!$this->checkResponse($response)) return false;
-        }
+        $response = $this->baseRequest($this->baseUrl.'/v1/videos/multi-elements/delete-selection', [
+            'session_id'    => $session_id,
+            'frame_index'   => $index,
+            'points'        => $points
+        ]);
+        if (!$this->checkResponse($response)) return false;
 
-        return $session_id;
+        return $response;
+    }
+
+    public function clearVideoSelection($session_id) {
+
+        $response = $this->baseRequest($this->baseUrl.'/v1/videos/multi-elements/clear-selection', [
+            'session_id'    => $session_id
+        ]);
+        if (!$this->checkResponse($response)) return false;
+
+        return $response;
     }
 
     public function baseRequest($url, $data, $post = true)
@@ -87,7 +104,7 @@ class BaseKlingApi extends BaseApi
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => $post,
-            CURLOPT_POSTFIELDS => json_encode($data),
+            CURLOPT_POSTFIELDS => is_string($data) ? $data : json_encode($data),
             CURLOPT_HTTPHEADER => [
                 "Authorization: Bearer {$token}",
                 'Content-Type: application/json'

@@ -1,7 +1,8 @@
 {
 	"Fantastic portrait": {
 		"caption": "Просто загрузите свое фото и получите новый,✨ фантастический образ.\nПримерь на себя образ 👑принцессы из будущего!\n👇",
-		"image": "data/images/Fantastic portrait.jpg",
+		"image": "public/images/Fantastic portrait.jpg",
+		"gender": "female",
 		"subsequence": [
 			{
 				"model_index": "leo_Image Guidance",
@@ -45,8 +46,9 @@
 	},
 
 	"Sorceress": {
-		"caption": "Просто загрузите свое фото и получите новый,✨ фантастический образ.\nПримерь на себя образ 👑принцессы из будущего!\n👇",
-		"video": "public/videos/Multi-Image-01.mp4",
+		"caption": "Фэнтезийный образ девушки в красном, вечернем платье.\nПримерь на себя образ ✨волшебницы из сказок.\n👇",
+		"video": "public/videos/Sorceress-preview.mp4",
+		"gender": "female",
 		"subsequence": [
 			{
 				"model_index": "kling_Multi-Elements",
@@ -58,14 +60,14 @@
 				],
 				"options":{
 					"model_name": "kling-v1-6",
-					"session_id": "",
+					"session_id": "840792910093221947",
 					"edit_mode": "swap",
 					"image_list": [
 						{
-							"image":"image_url"
+							"image":""
 						}
 					],
-					"prompt": "",
+					"prompt": "Swap [face] from <<<image_1>>> for [face] from <<<video_1>>>",
 					"negative_prompt": "",
 					"mode": "std",
 					"duration": 5

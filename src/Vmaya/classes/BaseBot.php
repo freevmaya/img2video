@@ -205,6 +205,27 @@ abstract class BaseBot extends SettingsManager {
         return $this->afterSend($this->api->sendPhoto($params));
     }
 
+    public function SendVideo($caption, $videoPath, $buttons = null, $parse_mode = 'Markdown') {
+        $chatId = $this->getCurrentChatId();
+
+        if (file_exists($videoPath)) {
+            $params = array_merge([
+                'chat_id' => $chatId,
+                'video' => InputFile::create($videoPath),
+                'caption' => $caption,
+                'supports_streaming' => true
+            ], is_string($caption) ? ['caption' => $caption] : $caption);
+
+            if ($buttons && is_array($buttons) && (count($buttons) > 0))
+                $params['reply_markup'] = json_encode(['inline_keyboard' => $buttons]);
+
+            return $this->afterSend($this->api->sendVideo($params));
+        } else {
+            trace_error("File {$videoPath} not found");
+            return false;
+        }
+    }
+
     public function getMessageId($messageIndex) {
         if (($history = $this->getSession('history')) &&
             isset($history[$messageIndex])) {
