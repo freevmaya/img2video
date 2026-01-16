@@ -61,8 +61,7 @@ abstract class BaseApi implements APIInterface
 
         if ($options = $this->preparePresetOptions($model_name, $presetOptions, $images)) {
             $info    = $this->getModelInfo($model_name);
-
-            if ($options && $info) {
+            if ($info) {
                 $result = $this->makeRequest($info['url'], $options);
             }
         }
