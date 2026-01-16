@@ -261,15 +261,22 @@ class Image2VideoBot extends YKassaBot {
                 if (!empty($text))
                     $this->setSession('prompt', $text);
 
-            if ($expect = $this->expect) {
-                if (DEV) echo "Expect: $expect\n";
-
-                [$before, $inside] = extractParenthesesContent($this->expect);
-                $method = $before ? $before : $expect;
-
-                $this->callMethod($method, $inside);
-            } else $this->whatDo($photo);
+            if (!$this->processExpect($this->expect))
+                $this->whatDo($photo);
         }
+    }
+
+    protected function processExpect($expect) {
+        if ($expect) {
+            if (DEV) echo "Expect: $expect\n";
+
+            [$before, $inside] = extractParenthesesContent($expect);
+            $method = $before ? $before : $expect;
+
+            $this->callMethod($method, $inside);
+            return true;
+        }
+        return false;
     }
 
     protected function preset($presetName) {
@@ -646,25 +653,46 @@ class Image2VideoBot extends YKassaBot {
     protected function isAllowType($type) {
         switch ($type) {
             case 'textToImage': 
-                    if ($this->isAllowedImage())
-                        return true;
-                    else $this->notEnough($this->getCurrentChatId());
+                    $diff = $this->isAllowedImage();
+                break;
+            case 'imagesToImage':
+                    $diff = $this->isAllowedImage();
                 break;
             case 'imageToVideo': 
-                    if ($this->isAllowedVideo())
-                        return true;
-                    else $this->notEnough($this->getCurrentChatId());
-                break;
-            case 'imagesToImage': 
-                    if ($this->isAllowedImage())
-                        return true;
-                    else $this->notEnough($this->getCurrentChatId());
+                    $diff = $this->isAllowedVideo();
                 break;
             default:
-                $this->Answer(null, Lang('Unknown type: %s', $type));
+                $msg = Lang('Unknown type: %s', $type);
+                trace_error($msg);
+                $this->Answer(null, $msg);
                 break;
         }
+
+        if ($diff >= 0)
+            return true;
+        else {
+            $this->setSession('after_payment', time().' '.$this->expect);
+            $this->notEnough(-$diff);
+        }
         return false;
+    }
+
+    protected function handleSuccessfulPayment($chat_id, $payment) {
+        parent::handleSuccessfulPayment($chat_id, $payment);
+
+        echo "handleSuccessfulPayment\n";
+        echo 'getSession: '.$this->getSession('after_payment')."\n";
+
+        if ($after_payment = $this->popSession('after_payment')) {
+
+            $after_payment = explode(' ', $after_payment, 2);
+
+            $diff_time = time() - intval($after_payment[0]);
+            echo "Diff: $diff_time, Call {$after_payment[1]}\n";
+
+            if ($diff_time < 60 * 60) // Обрабатывать сохраненный expect только в течении часа
+                $this->processExpect($after_payment[1]);
+        }
     }
 
 
@@ -819,7 +847,7 @@ class Image2VideoBot extends YKassaBot {
 
         switch ($stage) {
             case 0: 
-                    $text = Lang("Submit your image");
+                    $text = Lang("Send your photo");
                     if ($gen_model = $this->getCurrentModelName('imageToVideo'))
                         $text .= "\n\n(".Lang("Current model %s", $gen_model).')';
 
@@ -869,7 +897,7 @@ class Image2VideoBot extends YKassaBot {
 
             $countText = $count_images == 0 ? '' : ("\n".sprintf(Lang("Loaded %s of %s"), $count_images, $require_images));
 
-            $text = Lang("Submit your image").$countText."\n\n(".
+            $text = Lang("Send your photo").$countText."\n\n(".
                     Lang("Current model %s", $info['name']).')';
 
             $this->pushRecallMethod($this->messageIndex(), "imagesToImage(0)");

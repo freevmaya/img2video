@@ -102,7 +102,7 @@ abstract class BaseBot extends SettingsManager {
         if ($this->currentUpdate)
             $result = parent::popSession($name);
 
-        return null;
+        return $result;
     }
 
     public function DeleteMessageByIndex($message_index=null) {

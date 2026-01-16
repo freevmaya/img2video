@@ -28,6 +28,9 @@ abstract class YKassaBot extends BaseBot {
             case 'MySubscribe':
                 $this->MySubscribe($chatId);
                 return true;
+            case 'free_invoce':
+                $this->FreeInvoce($pref[1]);
+                return true;
             default: return false;
         }
     }
@@ -130,65 +133,81 @@ abstract class YKassaBot extends BaseBot {
         }
     }
 
+    protected function CreateInvoice($amount, $currency, $type_id, $productId, $product, $productDesc) {
+                
+        try {
+
+            $chatId = $this->getCurrentChatId();
+
+            if (PaymentHelper::validateCurrencyAmount($currency, $amount)) {
+
+                $prices = [
+                    [
+                        'label' => $product,
+                        'amount' => $amount * 100
+                    ]
+                ];
+
+                $payload = PaymentHelper::createPayload($chatId, $productId, [
+                    'currency' => $currency
+                ]);
+
+                $data = [
+                    'type_id'=>$type_id
+                ];
+
+                $transaction_id = (new TransactionsModel())->Add($this->getUser()['id'], $payload, $amount, 'prepare', $data);
+
+                $params = [
+                    'chat_id' => $chatId,
+                    'title' => $product,                            // Название товара (1-32 символа)
+                    'description' => $productDesc,                  // Описание (1-255 символов)
+                    'payload' => $payload,                          // Уникальный идентификатор (1-128 байт)
+                    'provider_token' => YKASSA_TOKEN,               // Токен платежного провайдера
+                    'currency' => $currency,                        // Код валюты (USD, RUB, EUR и т.д.)
+                    'prices' => $prices,                            // Массив с ценами
+                    'start_parameter' => 'test',                    // Параметр для deep linking
+                ];
+
+                $response = $this->api->sendInvoice($params);
+        
+                $result = [
+                    'success' => true,
+                    'message_id' => $response->getMessageId(),
+                    'invoice_payload' => $response->getInvoicePayload(),
+                    'response' => $response
+                ];
+
+                trace('Payment: '.json_encode($params, JSON_FLAGS).
+                        "\n\nResult: ".json_encode($result, JSON_FLAGS));
+            }
+            
+        } catch (\Exception $e) {
+            $result = [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+            $this->Wrong();
+            trace_error($e->getMessage());
+        }
+
+    }
+
+    protected function FreeInvoce($amount, $description="") {
+        if (empty($description))
+            $description = Lang('One-time payment');
+
+        $this->CreateInvoice($amount, "RUB", 0, 0, Lang("Account replenishment"), $description);
+    }
+
     protected function SubscribeAction($chatId, $subscribe_type_id) {
         if ($subscribe_type_id > 0) {
             if ($stype = (new SubscribeOptions())->getItem($subscribe_type_id)) {
 
                 $this->stat($chatId, 'payment-attempt', $subscribe_type_id);
-                try {
-                    $currency = "RUB";
-                    $amount = intval($stype['price']);
-
-                    if (PaymentHelper::validateCurrencyAmount($currency, $amount)) {
-
-                        $prices = [
-                            [
-                                'label' => $stype['name'],
-                                'amount' => $amount * 100
-                            ]
-                        ];
-
-                        $payload = PaymentHelper::createPayload($chatId, $stype['id'], [
-                            'currency' => $currency
-                        ]);
-
-                        $data = [
-                            'type_id'=>$subscribe_type_id
-                        ];
-
-                        $transaction_id = (new TransactionsModel())->Add($this->getUser()['id'], $payload, $amount, 'prepare', $data);
-
-                        $params = [
-                            'chat_id' => $chatId,
-                            'title' => $stype['name'],                      // Название товара (1-32 символа)
-                            'description' => $stype['description'],         // Описание (1-255 символов)
-                            'payload' => $payload,                          // Уникальный идентификатор (1-128 байт)
-                            'provider_token' => YKASSA_TOKEN,               // Токен платежного провайдера
-                            'currency' => $currency,                        // Код валюты (USD, RUB, EUR и т.д.)
-                            'prices' => $prices,                            // Массив с ценами
-                            'start_parameter' => 'test',                    // Параметр для deep linking
-                        ];
-
-                        trace($params);
-
-                        $response = $this->api->sendInvoice($params);
-                
-                        $result = [
-                            'success' => true,
-                            'message_id' => $response->getMessageId(),
-                            'invoice_payload' => $response->getInvoicePayload(),
-                            'response' => $response
-                        ];
-                    }
-                    
-                } catch (\Exception $e) {
-                    $result = [
-                        'success' => false,
-                        'error' => $e->getMessage()
-                    ];
-                }
-
-                trace($result);
+                $currency = "RUB";
+                $amount = intval($stype['price']);
+                $this->CreateInvoice($amount, $currency, $subscribe_type_id, $stype['id'], $stype['name'], $stype['description']);
             }
         }
     }
@@ -203,20 +222,20 @@ abstract class YKassaBot extends BaseBot {
     }
 
     protected function isAllowedImage() {
-        return $this->Balance() >= (new TransactionsModel)->GetPrice($this->getUserId(), 'image_limit');
+        $price = (new TransactionsModel)->GetPrice($this->getUserId(), 'image_limit');
+        return $this->Balance() - $price;
     }
 
     protected function isAllowedVideo() {
         $price = (new TransactionsModel)->GetPrice($this->getUserId(), 'video_limit');
-        trace($this->Balance().' '.$price);
-        return $this->Balance() >= $price;
+        return $this->Balance() - $price;
     }
 
-    protected function notEnough($chatId) {
+    protected function notEnough($amount) {
         $keyboard[] = [
-            ['text' => "💰 ".Lang("Purchase a subscription"), 'callback_data' => 'subscribe']
+            ['text' => "💰 ".Lang("Top up"), 'callback_data' => "free_invoce-{$amount}"]
         ];
-        $this->Answer($chatId, $this->genContent(Lang("Insufficient balance"), true, $keyboard));
+        $this->Answer(null, $this->genContent(Lang("There is not enough on your balance $%s", $amount), true, $keyboard));
     }
 
     protected function subscribeTypeList() {
