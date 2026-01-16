@@ -26,24 +26,30 @@ abstract class BaseBot extends SettingsManager {
     public function setSettingsAll($settings) {
         parent::setSettingsAll($settings);
 
-        if ($client_timeout = $this->getSetting('client_timeout', 10)) {
+        if ($client_timeout = $this->getSetting('client_timeout', 10))
+            $this->setTimeout($client_timeout);
+    }
 
-            $connect_timeout = round($client_timeout + $client_timeout * 0.1);
-            $guzzleClient = new Client([
-                'timeout' => $client_timeout,
-                'connect_timeout' => $connect_timeout,
-                'read_timeout' => $client_timeout,
-                'curl' => [
-                    CURLOPT_TIMEOUT => $client_timeout,
-                    CURLOPT_CONNECTTIMEOUT => $connect_timeout,
-                    CURLOPT_LOW_SPEED_LIMIT => 1024,
-                    CURLOPT_LOW_SPEED_TIME => 300,
-                ],
-            ]);
+    protected function setTimeout($client_timeout = 10) {
 
-            $httpClient = new GuzzleHttpClient($guzzleClient);
-            $this->api->setHttpClientHandler($httpClient);
-        }
+        if (DEV)
+            echo "setTimeout {$client_timeout}\n";
+
+        $connect_timeout = round($client_timeout + $client_timeout * 0.1);
+        $guzzleClient = new Client([
+            'timeout' => $client_timeout,
+            'connect_timeout' => $connect_timeout,
+            'read_timeout' => $client_timeout,
+            'curl' => [
+                CURLOPT_TIMEOUT => $client_timeout,
+                CURLOPT_CONNECTTIMEOUT => $connect_timeout/*,
+                CURLOPT_LOW_SPEED_LIMIT => 1024,
+                CURLOPT_LOW_SPEED_TIME => 300,*/
+            ],
+        ]);
+
+        $httpClient = new GuzzleHttpClient($guzzleClient);
+        $this->api->setHttpClientHandler($httpClient);
     }
 
     public function Api() {
