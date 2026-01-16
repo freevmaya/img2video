@@ -55,7 +55,7 @@ try {
     //Основной цикл
     while ($lock->isFile()) {
         $cycle->Update();        
-        sleep(1);
+        sleep(5);
     }
 
     $dbp->Close();
