@@ -110,12 +110,6 @@ class LeoCycle extends BaseCycle {
 
                 $this->parent->finishTask($task, 'finished');
 
-                if ($photos = $result->getPhoto()) {
-                    $images = $this->parent->getSession('images');
-                    $images[$message_index] = $photos->last()->getFileId();
-                    $this->parent->setSession('images', $images);
-                }
-
             } else {
                 /*
                 $this->parent->Message($task['chat_id'], Lang('Something wrong'));

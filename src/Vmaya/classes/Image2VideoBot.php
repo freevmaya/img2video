@@ -158,8 +158,7 @@ class Image2VideoBot extends YKassaBot {
         
         $this->stat($chatId, $command, $chatId);
 
-        if (DEV)
-            echo("Command: {$command}\n".json_encode($data, JSON_FLAGS)."\n");
+        if (DEV) echo("Command: {$command}\n".json_encode($data, JSON_FLAGS)."\n");
 
         $commandParts = explode(' ', $command, 2);
 
@@ -477,6 +476,8 @@ class Image2VideoBot extends YKassaBot {
         if (method_exists($this, $method)) {
             if ($data) {
                 $execute = "\$this->{$method}({$data});";
+                if (DEV) echo "Execute: $execute\n";
+
                 eval($execute);
             }
             else $this->$method($this->getCurrentChatId(), $data);
@@ -745,6 +746,8 @@ class Image2VideoBot extends YKassaBot {
             [$gen, $info] = $this->getCurrentGenModel($type);
             if ($gen) {
 
+                $images_url = array_filter($images_url);
+
                 $min_max_images = null;
 
                 if (isset($info['require_images']))
@@ -794,7 +797,7 @@ class Image2VideoBot extends YKassaBot {
         }
     }
 
-    protected function askSendPrompt($genType, $stage) {
+    protected function askSendPrompt($genType, $stage, $ext = null) {
 
         $params = [
             'text' => Lang("Send a prompt")
@@ -807,16 +810,20 @@ class Image2VideoBot extends YKassaBot {
 
         if (is_array($promptList)) {
             $user_prompt = $this->getSession('prompt');
+            $extaddstr = ($ext ? '.'.$ext: '');
 
             if (!empty($user_prompt))
-                $menu[] = [['text' => $user_prompt, 'callback_data' => "{$genType}.{$stage}.prompt"]];
+                $menu[] = [['text' => $user_prompt, 'callback_data' => "{$genType}.{$stage}.prompt".$extaddstr]];
 
             foreach ($promptList as $i=>$prompt)
-                $menu[] = [['text' => Lang($prompt), 'callback_data' => "{$genType}.{$stage}.{$i}"]];
+                $menu[] = [['text' => Lang($prompt), 'callback_data' => "{$genType}.{$stage}.{$i}".$extaddstr]];
         }
 
         $menu[] = [$this->createButton('Select model', "selectModelType.{$genType}.{$this->messageIndex()}"), $this->closeMessageButton()];
-        $this->pushRecallMethod($this->messageIndex(), "askSendPrompt('{$genType}', {$stage})");
+
+        $callstr = $ext ? "askSendPrompt('{$genType}', {$stage}, {$ext})" : "askSendPrompt('{$genType}', {$stage})";
+
+        $this->pushRecallMethod($this->messageIndex(), $callstr);
 
         $params['reply_markup'] = json_encode(['inline_keyboard' => $menu]);
 
@@ -838,8 +845,12 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function imageToVideo($data) {
+
+        //if (DEV) echo "imageToVideo: ".json_encode($data)."\n";
+
         if (is_array($data))
             [$stage, $prompt] = $this->parseCommandData('imageToVideo', $data);
+        else $stage = $data;
 
         switch ($stage) {
             case 0: 
@@ -855,20 +866,29 @@ class Image2VideoBot extends YKassaBot {
                     $this->setSession('images', []);
                 break;
             case 1: 
-                    $this->askSendPrompt('imageToVideo', 2);
-                    if (isset($data[2]) && is_numeric($data[2])) {
-                        $images = $this->getSession('images');
-                        if (isset($images[$data[2]])) {
-                            $file_id = $images[$data[2]];
-                            $this->setSession("expect", "imageToVideo([2,'', {$file_id}])");
-                            break;
-                        }
+
+                    $ext_data = isset($data[2]) ? $data[2] : false;
+
+                    if ($ext_data) {
+                        $this->askSendPrompt('imageToVideo', 2, $ext_data);
+                        $this->setSession("expect", "imageToVideo(['imageToVideo', 2, 'prompt', {$ext_data}])");
+                    } else {
+                        $this->askSendPrompt('imageToVideo', 2);
+                        $this->setSession("expect", "imageToVideo(2)");
                     }
-                    $this->setSession("expect", "imageToVideo(2)");
                 break;
             case 2: 
                     $prompt = isset($prompt) ? $prompt : $this->popSession('prompt');
-                    return $this->Generate('imageToVideo', $this->getImagesUrl(), $prompt);
+                    $message_index = isset($data[3]) && is_numeric($data[3]) ? intval($data[3]) : false;
+
+                    // Если есть номер сообщения, то считываем изображения от туда
+                    if ($message_index) 
+                        $images = [$this->getMessageImageUrl($message_index)];
+                    else $images = $this->getImagesUrl();
+
+                    //if (DEV) print_r($images);
+
+                    return $this->Generate('imageToVideo', $images, $prompt);
                 break;
         }
     }

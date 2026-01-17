@@ -67,6 +67,26 @@ class SettingsManager extends SessionManager {
         return $this->getSetting('messageIndex', 0);
     }
 
+    public function pushMessageImage($message_id, $image_id) {
+        if (!($images = $this->getSession('messageImages'))) $images = [];
+
+        array_add_limit($images, $message_id, $image_id, 10);
+        $this->setSession('messageImages', $images);
+    }
+
+    public function getMessageImageUrl($message_id) {
+        $images = $this->getSession('messageImages');
+        if (DEV) {
+            echo $message_id."\n";
+        }
+
+        if (isset($images[$message_id])) {
+
+            return $this->GetFileUrl($images[$message_id]);
+        }
+        return null;
+    }
+
     protected function afterSend($sendResult, $saveSessionImmediately = false) {
 
         if (isset($sendResult['message_id'])) {
@@ -86,8 +106,10 @@ class SettingsManager extends SessionManager {
 	            if (DEV) 
 	                echo "Index: {$messageIndex}, MessageID: {$sendResult['message_id']}\n";
 
-	            $this->setSession('history', $history);
+                if ($photos = $sendResult->getPhoto()) 
+                    $this->pushMessageImage($messageIndex, $photos->last()->getFileId());
 
+	            $this->setSession('history', $history);
 	            $this->setSetting('messageIndex', $messageIndex + 1);
 
 	            if ($saveSessionImmediately) 

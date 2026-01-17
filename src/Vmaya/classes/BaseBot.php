@@ -144,7 +144,10 @@ abstract class BaseBot extends SettingsManager {
 
         $this->Answer($chatIdOrMessage, ['text' => $text, 'reply_markup'=> json_encode([
                 'inline_keyboard' => [
-                    [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']]
+                    [
+                        ['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support'],
+                        $this->closeMessageButton()
+                    ]
                 ]
             ])
         ], $messageId);
