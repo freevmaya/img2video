@@ -11,10 +11,10 @@
 				"model_index": "leo_Image Guidance",
 				"images": [
 					{
-						"value": "c14d59fe-571a-4209-a0f0-decfd1bfcd42",
+						"value": null,
 						"path": "controlnets/0/initImageId"
 					},{
-						"value": null,
+						"value": "c14d59fe-571a-4209-a0f0-decfd1bfcd42",
 						"path": "controlnets/1/initImageId"
 					}
 				],
@@ -33,14 +33,14 @@
 				            "initImageType": "UPLOADED",
 				            "preprocessorId": 67,
 				            "strengthType": "High",
-				            "influence": 0.3
+				            "influence": 0.7
 				        },
 				        {
 				            "initImageId": "",
 				            "initImageType": "UPLOADED",
 				            "preprocessorId": 67,
 				            "strengthType": "High",
-				            "influence": 0.7
+				            "influence": 0.3
 				        }
 				    ]
 				}
