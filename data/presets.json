@@ -11,10 +11,10 @@
 				"model_index": "leo_Image Guidance",
 				"images": [
 					{
-						"value": null,
+						"value": "e2e9f34b-1fc3-42ab-a02c-59ab92151f7e",
 						"path": "controlnets/0/initImageId"
 					},{
-						"value": "e2e9f34b-1fc3-42ab-a02c-59ab92151f7e",
+						"value": null,
 						"path": "controlnets/1/initImageId"
 					}
 				],
