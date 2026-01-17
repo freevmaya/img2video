@@ -12,6 +12,12 @@
 	define('PROCESS_URL', DOWNLOADS_URL.'progress'.DS);
 	define('USER_URL', DOWNLOADS_URL.'users'.DS);
 
+	define('IMAGES_PATH', BASEPATH.'public'.DS.'images'.DS);
+	define('IMAGES_URL', BASEURL.'public'.DS.'images'.DS);
+
+	define('VIDEOS_PATH', BASEPATH.'public'.DS.'videos'.DS);
+	define('VIDEOS_URL', BASEURL.'public'.DS.'videos'.DS);
+
 	define('ADMIN_USERID', 1573356581);
 	define('SUPPORT_USERID', 1573356581);
 	define("NUMBER_DOWNLOAD_ATTEMPTS", 8);
