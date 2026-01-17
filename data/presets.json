@@ -22,7 +22,7 @@
 					"prompt": "A girl in an old Russian winter outfit (fur coat, sarafan, kokoshnik). She is half-turned toward the viewer and looks at them with a slight smile, as if sharing the joy of the holiday. A light snow is falling. A realistic photo, a winter morning. Leave the caption at the bottom. Change only the face to the first photo.",
 				    "presetStyle": "CINEMATIC",
 				    "width": 512,
-				    "height": 1288,
+				    "height": 512,
 				    "photoReal": true,
 				    "photoRealVersion": "v2",
 				    "alchemy": true,
