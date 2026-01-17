@@ -197,7 +197,7 @@ abstract class YKassaBot extends BaseBot {
         if (empty($description))
             $description = Lang('One-time payment');
 
-        $this->CreateInvoice($amount, "RUB", 0, 0, Lang("Account replenishment"), $description);
+        $this->CreateInvoice(max($amount, 50), "RUB", 0, 0, Lang("Account replenishment"), $description);
     }
 
     protected function SubscribeAction($chatId, $subscribe_type_id) {
