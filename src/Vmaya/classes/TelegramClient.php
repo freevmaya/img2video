@@ -96,9 +96,8 @@ class TelegramClient extends SettingsManager {
 
                     sleep(round(pow($attempt_count, 1.5) * 3));
                     $photoMessage = $this->afterSend($this->api->sendPhoto($params), true);
-                    if ($photoMessage->getMessageId()) {
-                        return true;
-                    }
+                    if ($photoMessage->getMessageId())
+                        return $photoMessage;
 
                 } catch (Exception $e) {
                     $error_message = $e->getMessage();
@@ -107,7 +106,7 @@ class TelegramClient extends SettingsManager {
             }
         } else {
             trace_error("File ({$file_path}) is not exists");
-            return true;
+            return false;
         }
 
         trace_error("Failed to send image to chatId: {$chat_id}\n\nError: {$error_message}");

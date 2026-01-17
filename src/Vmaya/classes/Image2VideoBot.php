@@ -96,12 +96,10 @@ class Image2VideoBot extends YKassaBot {
             [['text' => '❕'.Lang('Agreement'), 'callback_data' => 'agreement']]
         ];
 
+        /*
         if ($this->getOriginUserId() == ADMIN_USERID) {
             $result[] = [['text' => 'Остановить', 'callback_data' => 'stopBot'], ['text' => 'Сменить ID', 'callback_data' => 'changeId']];
-
-            //$result[] = [['text' => 'Lonardo Image', 'callback_data' => 'create_image']];
-            //$result[] = [['text' => '🖼️ '.Lang('Create an image'), 'callback_data' => 'create_image']];
-        }
+        }*/
 
         return $result;
     }
@@ -475,21 +473,6 @@ class Image2VideoBot extends YKassaBot {
         return false;
     }
 
-    protected function pushImage($image_id) {
-        if (!($images = $this->getSession('images'))) $images = [];
-        $images[] = $image_id;
-        $this->setSession('images', $images);
-    }
-
-    protected function getImagesUrl() {
-        $images = array_reverse($this->getSession('images'));
-        $images_url = [];
-        if (!empty($images))
-            foreach ($images as $image_id)
-                $images_url[] = $this->GetFileUrl($image_id);
-        return $images_url;
-    }
-
     protected function callMethod($method, $data) {
         if (method_exists($this, $method)) {
             if ($data) {
@@ -846,7 +829,7 @@ class Image2VideoBot extends YKassaBot {
         if (is_numeric($second)) {
             $offerPrompts = Lang($genType.'Prompts');
 
-            if (is_array($offerPrompts))
+            if (is_array($offerPrompts) && ($second < count($offerPrompts)))
                 $second = $offerPrompts[$second];
         } else if ($second) 
             $second = $this->popSession($second);
@@ -854,9 +837,9 @@ class Image2VideoBot extends YKassaBot {
         return [$data[1], $second];
     }
 
-    protected function imageToVideo($stage) {
-        if (is_array($stage))
-            [$stage, $prompt] = $this->parseCommandData('imageToVideo', $stage);
+    protected function imageToVideo($data) {
+        if (is_array($data))
+            [$stage, $prompt] = $this->parseCommandData('imageToVideo', $data);
 
         switch ($stage) {
             case 0: 
@@ -873,7 +856,15 @@ class Image2VideoBot extends YKassaBot {
                 break;
             case 1: 
                     $this->askSendPrompt('imageToVideo', 2);
-                    $this->setSession("expect", 'imageToVideo(2)');
+                    if (isset($data[2]) && is_numeric($data[2])) {
+                        $images = $this->getSession('images');
+                        if (isset($images[$data[2]])) {
+                            $file_id = $images[$data[2]];
+                            $this->setSession("expect", "imageToVideo([2,'', {$file_id}])");
+                            break;
+                        }
+                    }
+                    $this->setSession("expect", "imageToVideo(2)");
                 break;
             case 2: 
                     $prompt = isset($prompt) ? $prompt : $this->popSession('prompt');

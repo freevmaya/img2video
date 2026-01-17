@@ -91,12 +91,12 @@ abstract class BaseBot extends SettingsManager {
         return $this->currentUpdate;
     }
 
-    protected function unsetSessions($names) {
+    public function unsetSessions($names) {
         if ($this->currentUpdate) 
             parent::unsetSessions($names);
     }
 
-    protected function popSession($name) {
+    public function popSession($name) {
 
         $result = null;
         if ($this->currentUpdate)

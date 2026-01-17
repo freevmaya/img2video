@@ -85,8 +85,6 @@ class LeoCycle extends BaseCycle {
         $response   = $data['response'];
         $hash       = $task['hash'];
         $dl_state   = $record['state'];
-        $_this      = $data['this'];
-        $parent     = $_this->parent;
 
         trace("Attempt send photo {$data['file_path']}");
 
@@ -96,27 +94,38 @@ class LeoCycle extends BaseCycle {
 
             if ($task['preset'])
                 $this->parent->applyPreset($data['file_path'], $task['preset']);
-            
-            $result = $parent->sendPhoto($task['chat_id'], $data['file_path'], $data['file_name'], Lang('Your photo is ready'));
+
+            $message_index = $this->parent->messageIndex();
+
+            $result = $this->parent->sendPhoto($task['chat_id'], $data['file_path'], $data['file_name'], Lang('Your photo is ready'), [
+                [['text'=>Lang('Animate an image'), 'callback_data'=>"imageToVideo.1.{$message_index}"]]
+            ]);
 
             if ($result) {
 
-                $parent->PayUpscale($task['user_id'], [
+                $this->parent->PayUpscale($task['user_id'], [
                     'response_id'=>$response['id'],
                     'hash'=>$hash
                 ]);
 
-                $parent->finishTask($task, 'finished');
+                $this->parent->finishTask($task, 'finished');
+
+                if ($photos = $result->getPhoto()) {
+                    $images = $this->parent->getSession('images');
+                    $images[$message_index] = $photos->last()->getFileId();
+                    $this->parent->setSession('images', $images);
+                }
+
             } else {
                 /*
-                $parent->Message($task['chat_id'], Lang('Something wrong'));
-                $parent->finishTask($task, 'failure');
+                $this->parent->Message($task['chat_id'], Lang('Something wrong'));
+                $this->parent->finishTask($task, 'failure');
                 */
-                $_this->setResponseProcessed($response, 0);
+                $this->setResponseProcessed($response, 0);
             }
         } else {
-            $parent->Message($task['chat_id'], Lang('Fail download image'));
-            $parent->finishTask($task, 'failure');
+            $this->parent->Message($task['chat_id'], Lang('Fail download image'));
+            $this->parent->finishTask($task, 'failure');
         }
     }
 
