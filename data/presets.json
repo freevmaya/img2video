@@ -11,7 +11,7 @@
 				"model_index": "leo_Image Guidance",
 				"images": [
 					{
-						"value": "e2e9f34b-1fc3-42ab-a02c-59ab92151f7e",
+						"value": "c14d59fe-571a-4209-a0f0-decfd1bfcd42",
 						"path": "controlnets/0/initImageId"
 					},{
 						"value": null,
@@ -33,14 +33,14 @@
 				            "initImageType": "UPLOADED",
 				            "preprocessorId": 67,
 				            "strengthType": "High",
-				            "influence": 0.5
+				            "influence": 0.3
 				        },
 				        {
 				            "initImageId": "",
 				            "initImageType": "UPLOADED",
 				            "preprocessorId": 67,
 				            "strengthType": "High",
-				            "influence": 0.5
+				            "influence": 0.7
 				        }
 				    ]
 				}
