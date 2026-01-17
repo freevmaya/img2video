@@ -88,7 +88,7 @@ function downloadFile($url, $savePath)
                 'size' => filesize($savePath)
             ];
         } else {
-            $msg = "Failed to save file ({$url}->{$savePath})";
+            $msg = "Failure to save file ({$url}->{$savePath})";
             trace_error($msg);
             return [
                 'success' => false,
@@ -173,7 +173,7 @@ function ConvertWebPToMP4($webpPath) {
     exec($command, $output, $returnCode);
     
     if ($returnCode !== 0 || !file_exists($mp4Path)) {
-        error_log("FFmpeg conversion failed: " . implode("\n", $output));
+        error_log("FFmpeg conversion Failure: " . implode("\n", $output));
         return false;
     }
     
@@ -544,6 +544,254 @@ function array_add_limit(&$array, $key, $value, $maxSize = 10) {
         for ($i = 0; $i < count($array) - $maxSize; $i++) {
             unset($array[$keys[$i]]);
         }
+    }
+}
+
+function overlayImage(
+    string $backgroundUrl,
+    string $overlayPath,
+    string $outputPath,
+    array $options = []
+): bool {
+
+    if (!extension_loaded('gd')) {
+        die("Требуется расширение GD для работы с изображениями");
+    }
+
+    // Проверка поддержки форматов
+    $gdInfo = gd_info();
+    if (!isset($gdInfo['JPEG Support']) || !$gdInfo['JPEG Support']) {
+        die("GD не поддерживает JPEG");
+    }
+    if (!isset($gdInfo['PNG Support']) || !$gdInfo['PNG Support']) {
+        die("GD не поддерживает PNG");
+    }
+
+    // Параметры по умолчанию
+    $defaultOptions = [
+        'overlay_width' => null,
+        'overlay_height' => null,
+        'scale_factor' => 0.3,
+        'position' => 'center', // 'center', 'top-left', 'top-right', 'bottom-left', 'bottom-right'
+        'margin' => 0, // Отступ от краев в пикселях
+        'output_quality' => 90,
+        'background_type' => 'auto', // 'auto', 'jpg', 'png', 'gif'
+        'allow_url_fopen' => true, // Разрешить загрузку по URL
+    ];
+    
+    $options = array_merge($defaultOptions, $options);
+    
+    // Проверяем доступность GD
+    if (!extension_loaded('gd')) {
+        error_log("Расширение GD не загружено");
+        return false;
+    }
+    
+    // Загружаем фоновое изображение
+    $background = loadImageFromUrl($backgroundUrl, $options['background_type']);
+    
+    if (!$background) {
+        trace_error("Failure download background image {$backgroundUrl}");
+        return false;
+    }
+    
+    // Загружаем PNG для наложения
+    $overlay = imagecreatefrompng($overlayPath);
+    if (!$overlay) {
+        trace_error("Failure open overlay image {$overlayPath}");
+
+        if (version_compare(PHP_VERSION, '8.0.0', '<'))
+            imagedestroy($background);
+        return false;
+    }
+    
+    // Сохраняем прозрачность PNG
+    imagesavealpha($overlay, true);
+    
+    // Получаем размеры
+    $bgWidth = imagesx($background);
+    $bgHeight = imagesy($background);
+    $overlayWidth = imagesx($overlay);
+    $overlayHeight = imagesy($overlay);
+    
+    // Рассчитываем размеры наложения
+    list($newWidth, $newHeight) = calculateOverlaySize(
+        $overlayWidth,
+        $overlayHeight,
+        $bgWidth,
+        $bgHeight,
+        $options
+    );
+    
+    // Рассчитываем позицию
+    list($posX, $posY) = calculatePosition(
+        $bgWidth,
+        $bgHeight,
+        $newWidth,
+        $newHeight,
+        $options['position'],
+        $options['margin']
+    );
+    
+    // Создаем ресурс для масштабированного изображения
+    $scaledOverlay = imagescale($overlay, $newWidth, $newHeight);
+    
+    if (version_compare(PHP_VERSION, '8.0.0', '<'))
+        imagedestroy($overlay);
+    
+    if (!$scaledOverlay) {
+        trace_error("Failure scale image");
+
+        if (version_compare(PHP_VERSION, '8.0.0', '<'))
+            imagedestroy($background);
+        return false;
+    }
+    
+    // Накладываем изображение
+    imagecopy($background, $scaledOverlay, $posX, $posY, 0, 0, $newWidth, $newHeight);
+    
+    // Сохраняем результат
+    $result = imagejpeg($background, $outputPath, $options['output_quality']);
+    
+    // Очищаем память
+
+    if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+
+        imagedestroy($background);
+        imagedestroy($scaledOverlay);
+    }
+    
+    return $result !== false;
+}
+
+/**
+ * Вспомогательная функция для загрузки изображения из URL
+ */
+function loadImageFromUrl(string $url, string $type = 'auto') {
+    if (!ini_get('allow_url_fopen')) {
+        throw new Exception("allow_url_fopen отключен в php.ini");
+    }
+    
+    $imageData = @file_get_contents($url);
+    if ($imageData === false) {
+        return false;
+    }
+    
+    // Определяем тип изображения
+    if ($type === 'auto') {
+        $type = getImageTypeFromData($imageData);
+    }
+    
+    switch ($type) {
+        case 'jpg':
+        case 'jpeg':
+            return imagecreatefromjpeg($url);
+        case 'png':
+            return imagecreatefrompng($url);
+        case 'gif':
+            return imagecreatefromgif($url);
+        case 'webp':
+            return imagecreatefromwebp($url);
+        default:
+            // Пытаемся определить автоматически
+            return imagecreatefromstring($imageData);
+    }
+}
+
+/**
+ * Определяет тип изображения по данным
+ */
+function getImageTypeFromData(string $data): string {
+    $signatures = [
+        'jpg' => "\xFF\xD8\xFF",
+        'png' => "\x89PNG\r\n\x1A\n",
+        'gif' => 'GIF',
+        'webp' => 'RIFF',
+    ];
+    
+    foreach ($signatures as $type => $signature) {
+        if (strpos($data, $signature) === 0) {
+            return $type;
+        }
+    }
+    
+    return 'unknown';
+}
+
+/**
+ * Рассчитывает размер накладываемого изображения
+ */
+function calculateOverlaySize(
+    int $origWidth,
+    int $origHeight,
+    int $bgWidth,
+    int $bgHeight,
+    array $options
+): array {
+    $targetWidth = $options['overlay_width'];
+    $targetHeight = $options['overlay_height'];
+    $scaleFactor = $options['scale_factor'];
+    
+    // Если заданы оба размера
+    if ($targetWidth !== null && $targetHeight !== null) {
+        return [$targetWidth, $targetHeight];
+    }
+    
+    // Если задан только один размер
+    if ($targetWidth !== null) {
+        $aspectRatio = $origHeight / $origWidth;
+        return [$targetWidth, (int)($targetWidth * $aspectRatio)];
+    }
+    
+    if ($targetHeight !== null) {
+        $aspectRatio = $origWidth / $origHeight;
+        return [(int)($targetHeight * $aspectRatio), $targetHeight];
+    }
+    
+    // Автоматический расчет по scaleFactor
+    $maxDimension = min($bgWidth, $bgHeight) * $scaleFactor;
+    $aspectRatio = $origWidth / $origHeight;
+    
+    if ($origWidth > $origHeight) {
+        $newWidth = $maxDimension;
+        $newHeight = $maxDimension / $aspectRatio;
+    } else {
+        $newHeight = $maxDimension;
+        $newWidth = $maxDimension * $aspectRatio;
+    }
+    
+    return [(int)$newWidth, (int)$newHeight];
+}
+
+/**
+ * Рассчитывает позицию наложения
+ */
+function calculatePosition(
+    int $bgWidth,
+    int $bgHeight,
+    int $overlayWidth,
+    int $overlayHeight,
+    string $position,
+    int $margin
+): array {
+    switch ($position) {
+        case 'top-left':
+            return [$margin, $margin];
+            
+        case 'top-right':
+            return [$bgWidth - $overlayWidth - $margin, $margin];
+            
+        case 'bottom-left':
+            return [$margin, $bgHeight - $overlayHeight - $margin];
+            
+        case 'bottom-right':
+            return [$bgWidth - $overlayWidth - $margin, $bgHeight - $overlayHeight - $margin];
+            
+        case 'center':
+        default:
+            $posX = (int)(($bgWidth - $overlayWidth) / 2);
+            $posY = (int)(($bgHeight - $overlayHeight) / 2);
+            return [$posX, $posY];
     }
 }
 ?>

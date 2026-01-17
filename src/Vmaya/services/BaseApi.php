@@ -33,7 +33,7 @@ abstract class BaseApi implements APIInterface
         return [];
     }
 
-    protected function makeRequest($url, $data) {
+    protected function makeRequest($url, $data, $preset_name=null) {
         return null;
     }
 
@@ -55,14 +55,15 @@ abstract class BaseApi implements APIInterface
         return $result;
     }
 
-    public function GeneratePreset($model_name, $presetOptions, $images)
+    public function GeneratePreset($model_name, $preset_name, $presetOptions, $images)
     {
         $result     = false;
 
         if ($options = $this->preparePresetOptions($model_name, $presetOptions, $images)) {
             $info    = $this->getModelInfo($model_name);
             if ($info) {
-                $result = $this->makeRequest($info['url'], $options);
+                
+                $result = $this->makeRequest($info['url'], $options, $preset_name);
             }
         }
         return $result;

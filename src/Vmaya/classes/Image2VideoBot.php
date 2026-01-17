@@ -747,7 +747,7 @@ class Image2VideoBot extends YKassaBot {
                     }
 
                     if ($this->isAllowType($type)) {
-                        if ($gen->GeneratePreset($info['name'], $model_data['options'], $full_images)) {
+                        if ($gen->GeneratePreset($info['name'], $presetName, $model_data['options'], $full_images)) {
                             $this->setSession('images', []);
                             return true;
                         }

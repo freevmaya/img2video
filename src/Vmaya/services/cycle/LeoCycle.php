@@ -93,6 +93,10 @@ class LeoCycle extends BaseCycle {
         resizeImageIfTooLarge($data['file_path']);
 
         if ($dl_state == 'finished') {
+
+            if ($task['preset'])
+                $this->parent->applyPreset($data['file_path'], $task['preset']);
+            
             $result = $parent->sendPhoto($task['chat_id'], $data['file_path'], $data['file_name'], Lang('Your photo is ready'));
 
             if ($result) {

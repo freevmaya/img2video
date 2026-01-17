@@ -34,10 +34,14 @@ class TransactionsModel extends BaseModel {
 		return $dbp->line("SELECT * FROM {$this->getTable()} WHERE `user_id`={$userId} AND `type` IN ('subscribe', 'present') ORDER BY `id` DESC");
 	}
 
+	protected function defaultData() {
+		return ['type_id'=>9];
+	}
+
 	public function GetPrice($userId, $limitName='image_limit') {
 		if ($subcribe = $this->LastSubscribe($userId)) {
 			try {
-				$data = json_decode($subcribe['data'], true);
+				$data = empty($subcribe['data']) ? $this->defaultData() : json_decode($subcribe['data'], true);
 				$soption = (new SubscribeOptions())->getItem($data['type_id']);
 
 				return $soption['price'] / $soption[$limitName];

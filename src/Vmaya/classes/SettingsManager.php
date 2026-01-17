@@ -99,6 +99,27 @@ class SettingsManager extends SessionManager {
         return $sendResult;
     }
 
+    public function applyPreset($pathImage, $preset_name) {
+        $result = true;
+        $preset = $this->getPreset($preset_name);
+        if ($preset && isset($preset['overlays'])) {
+            foreach ($preset['overlays'] as $overlayRelPath) {
+                $result = $result &&
+                    overlayImage(
+                        $pathImage,
+                        BASEPATH.$overlayRelPath,
+                        $pathImage,
+                        [
+                            'scale_factor' => 1,
+                            'position' => 'center',
+                            'output_quality' => 95,
+                        ]
+                    );
+            }
+        }
+        return $result;
+    }
+
     protected function getPreset(&$presetName) {
         $presets = json_decode(file_get_contents(BASEPATH.'data/presets.json'), true);
         if (!empty($presetName))

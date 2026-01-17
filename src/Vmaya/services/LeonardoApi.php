@@ -277,7 +277,7 @@ class LeonardoApi extends BaseApi
         return false;
     }
 
-    protected function makeRequest($url, $data)
+    protected function makeRequest($url, $data, $preset_name=null)
     {
 
         if (PRODUCTION) {
@@ -327,6 +327,7 @@ class LeonardoApi extends BaseApi
                         'user_id'=> $this->bot ? $this->bot->getUserId() : ADMIN_USERID,
                         'chat_id'=> $this->bot ? $this->bot->getCurrentChatId() : ADMIN_USERID,
                         'service'=>'leo',
+                        'preset'=>$preset_name,
                         'hash'=>$response['hash'] = $hash,
                         'request_data'=> json_encode(array_merge($data, ['url'=>$url]), JSON_FLAGS),
                         'response_data'=> json_encode($response, JSON_FLAGS)

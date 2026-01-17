@@ -152,7 +152,7 @@ class MidjourneyApi extends BaseApi
         return $this->makeRequest('/midjourney/v2/describe', $data);
     }
 
-    protected function makeRequest($endpoint, $data)
+    protected function makeRequest($endpoint, $data, $preset_name=null)
     {
         $ch = curl_init($this->baseUrl . $endpoint);
         
@@ -195,6 +195,7 @@ class MidjourneyApi extends BaseApi
                 $this->modelTask->Update([
                     'user_id'=>$this->bot->getUserId(),
                     'chat_id'=>$this->bot->getCurrentChatId(),
+                    'preset'=>$preset_name,
                     'hash'=>$response['hash'] = $hash,
                     'request_data'=> json_encode(array_merge($data, ['endpoint'=>$endpoint]), JSON_FLAGS),
                     'response_data'=> json_encode($response, JSON_FLAGS)

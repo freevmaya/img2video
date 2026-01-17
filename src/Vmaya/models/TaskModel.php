@@ -15,8 +15,12 @@ class TaskModel extends BaseModel {
 				'type' => 'service ',
 				'dbtype' => 's'
 			],
+			'preset' => [
+				'type' => 'preset ',
+				'dbtype' => 's'
+			],
 			'date' => [
-				'type' => 'chat_id ',
+				'type' => 'date ',
 				'dbtype' => 's'
 			],
 			'chat_id' => [
