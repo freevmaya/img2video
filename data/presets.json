@@ -32,14 +32,14 @@
 				            "initImageType": "UPLOADED",
 				            "preprocessorId": 67,
 				            "strengthType": "High",
-				            "influence": 0.9
+				            "influence": 0.5
 				        },
 				        {
 				            "initImageId": "",
 				            "initImageType": "UPLOADED",
 				            "preprocessorId": 67,
 				            "strengthType": "High",
-				            "influence": 0.1
+				            "influence": 0.5
 				        }
 				    ]
 				}
