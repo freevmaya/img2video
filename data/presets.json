@@ -25,7 +25,7 @@
 				    "height": 512,
 				    "photoReal": true,
 				    "photoRealVersion": "v2",
-				    "alchemy": false,
+				    "alchemy": true,
 				    "controlnets":
 				    [
 				        {
