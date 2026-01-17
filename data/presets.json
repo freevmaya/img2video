@@ -1,52 +1,4 @@
 {
-	
-	"Baptism": {
-		"test": 1,
-		"name": "Крещение Господне",
-		"caption": "Просто загрузите свое фото и получите,✨ открытку к празднику.\n Теперь вы можете поздравить близких оригинальной открыткой!\n👇",
-		"image": "public/images/Baptism-preview.jpg",
-		"gender": "female",
-		"subsequence": [
-			{
-				"model_index": "leo_Image Guidance",
-				"images": [
-					{
-						"value": null,
-						"path": "controlnets/0/initImageId"
-					},{
-						"value": "c14d59fe-571a-4209-a0f0-decfd1bfcd42",
-						"path": "controlnets/1/initImageId"
-					}
-				],
-				"options": {
-					"prompt": "A girl in an old Russian winter outfit (fur coat, sarafan, kokoshnik). She is half-turned toward the viewer and looks at them with a slight smile, as if sharing the joy of the holiday. A light snow is falling. A realistic photo, a winter morning. Leave the caption at the bottom. Change only the face to the first photo.",
-				    "presetStyle": "CINEMATIC",
-				    "width": 512,
-				    "height": 512,
-				    "photoReal": true,
-				    "photoRealVersion": "v2",
-				    "alchemy": true,
-				    "controlnets":
-				    [
-				        {
-				            "initImageId": "",
-				            "initImageType": "UPLOADED",
-				            "preprocessorId": 67,
-				            "strengthType": "High",
-				            "influence": 0.7
-				        },
-				        {
-				            "initImageId": "",
-				            "initImageType": "UPLOADED",
-				            "preprocessorId": 67,
-				            "strengthType": "High",
-				            "influence": 0.3
-				        }
-				    ]
-				}
-			}
-		]
-	},
 	"Fantastic portrait": {
 		"name": "Фантастический портрет",
 		"caption": "Просто загрузите свое фото и получите новый,✨ фантастический образ.\nПримерь на себя образ 👑принцессы из будущего!\n👇",
@@ -87,6 +39,53 @@
 				            "preprocessorId": 67,
 				            "strengthType": "High",
 				            "influence": 0.1
+				        }
+				    ]
+				}
+			}
+		]
+	},
+	"Baptism": {
+		"test": 1,
+		"name": "Крещение Господне",
+		"caption": "Просто загрузите свое фото и получите,✨ открытку к празднику.\n Теперь вы можете поздравить близких оригинальной открыткой!\n\nВнимание! Этот шаблон не гарантирует 100%-й схожести, он просто как бы объеденяет стиль вашего фото с эталоным.👇",
+		"image": "public/images/Baptism-preview.jpg",
+		"gender": "female",
+		"subsequence": [
+			{
+				"model_index": "leo_Image Guidance",
+				"images": [
+					{
+						"value": null,
+						"path": "controlnets/0/initImageId"
+					},{
+						"value": "c14d59fe-571a-4209-a0f0-decfd1bfcd42",
+						"path": "controlnets/1/initImageId"
+					}
+				],
+				"options": {
+					"prompt": "A girl in an old Russian winter outfit (fur coat, sarafan, kokoshnik). She is half-turned toward the viewer and looks at them with a slight smile, as if sharing the joy of the holiday. It's snowing. A realistic photo, a winter morning. Leave the caption at the bottom. Change only the face to the first photo.",
+				    "presetStyle": "CINEMATIC",
+				    "width": 512,
+				    "height": 512,
+				    "photoReal": true,
+				    "photoRealVersion": "v2",
+				    "alchemy": true,
+				    "controlnets":
+				    [
+				        {
+				            "initImageId": "",
+				            "initImageType": "UPLOADED",
+				            "preprocessorId": 67,
+				            "strengthType": "High",
+				            "influence": 0.7
+				        },
+				        {
+				            "initImageId": "",
+				            "initImageType": "UPLOADED",
+				            "preprocessorId": 67,
+				            "strengthType": "High",
+				            "influence": 0.3
 				        }
 				    ]
 				}
