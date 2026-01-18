@@ -205,8 +205,8 @@ class Image2VideoBot extends YKassaBot {
             case 'set_model':
                 $this->setModel($chatId, $data);
                 return true;
-            case 'set_model_finish':
-                $this->set_model_finish($data);
+            case 'set_mfnsh':
+                $this->set_mfnsh($data);
                 return true;
             case 'info':
                 $this->getModelInfo($chatId, $data);
@@ -353,7 +353,7 @@ class Image2VideoBot extends YKassaBot {
         return $infos;
     }
 
-    protected function set_model_finish($data) {
+    protected function set_mfnsh($data) {
         $this->setSession($data[1], $data[2]);
 
         $this->DeleteMessageByIndex(@$data[3]);
@@ -370,7 +370,7 @@ class Image2VideoBot extends YKassaBot {
             foreach ($models as $info)
                 if ($type == $info['type'])
                     $list[] = [['text' => $info['name'], 
-                'callback_data' => "set_model_finish.{$type}.{$info['index']}.{$this->messageIndex()}.{$backMessageIndex}"]];
+                'callback_data' => "set_mfnsh.{$type}.{$info['index']}.{$this->messageIndex()}.{$backMessageIndex}"]];
 
             $this->Answer(null, $this->genContent(Lang('Models'), true, $list));
         }
