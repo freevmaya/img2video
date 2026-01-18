@@ -760,7 +760,7 @@ class Image2VideoBot extends YKassaBot {
 
                 if ($this->isAllowType($type)) {
                     if ($gen->Generate($type, $images_url, $prompt, $info['name'])) {
-                        $this->setSession('images', []);
+                        $this->unsetSessions(['images', 'prompt']);
                         return true;
                     }
                 }
@@ -839,7 +839,7 @@ class Image2VideoBot extends YKassaBot {
             if (is_array($offerPrompts) && ($second < count($offerPrompts)))
                 $second = $offerPrompts[$second];
         } else if ($second) 
-            $second = $this->popSession($second);
+            $second = $this->getSession($second);
 
         return [$data[1], $second];
     }
@@ -878,7 +878,7 @@ class Image2VideoBot extends YKassaBot {
                     }
                 break;
             case 2: 
-                    $prompt = isset($prompt) ? $prompt : $this->popSession('prompt');
+                    $prompt = isset($prompt) ? $prompt : $this->getSession('prompt');
                     $message_index = isset($data[3]) && is_numeric($data[3]) ? intval($data[3]) : false;
 
                     // Если есть номер сообщения, то считываем изображения от туда
@@ -903,7 +903,7 @@ class Image2VideoBot extends YKassaBot {
                     $this->setSession("expect", 'textToImage(1)');
                 break;
             case 1:
-                    $prompt = isset($prompt) ? $prompt : $this->popSession('prompt');
+                    $prompt = isset($prompt) ? $prompt : $this->getSession('prompt');
                     return $this->Generate('textToImage', [], $prompt);
                 break;
         }
@@ -931,7 +931,7 @@ class Image2VideoBot extends YKassaBot {
 
             $this->setSession("expect", "imagesToImage(0)");
         } else {
-            $prompt = isset($prompt) ? $prompt : $this->popSession('prompt');
+            $prompt = isset($prompt) ? $prompt : $this->getSession('prompt');
             if (empty($prompt)) {
 
                 $this->askSendPrompt('imagesToImage', 2);
