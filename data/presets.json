@@ -65,7 +65,7 @@
 						"value": null,
 						"path": "controlnets/0/initImageId"
 					},{
-						"value": "a8d38ba0-0d0d-4fe0-8501-b5552a3948ba",
+						"value": "f170edec-560f-44ab-b857-ca3f07248437",
 						"path": "controlnets/1/initImageId"
 					}
 				],
@@ -84,14 +84,14 @@
 				            "initImageType": "UPLOADED",
 				            "preprocessorId": 67,
 				            "strengthType": "High",
-				            "influence": 0.7
+				            "influence": 0.5
 				        },
 				        {
 				            "initImageId": "",
 				            "initImageType": "UPLOADED",
 				            "preprocessorId": 67,
 				            "strengthType": "High",
-				            "influence": 0.3
+				            "influence": 0.5
 				        }
 				    ]
 				}
