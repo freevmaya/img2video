@@ -25,6 +25,11 @@
 
 	define('MJ_BASE_URL', 'https://cdn.midjourney.com/');
 
+	define('CURRENCY_LIST', [
+		'ru'=>'RUB',
+		'en'=>'USD'
+	]);
+
 	include(INCLUDE_PATH.DS."_edbu2.php");
 	include(INCLUDE_PATH.DS."console.php");
 	include(INCLUDE_PATH.DS."fdbg.php");

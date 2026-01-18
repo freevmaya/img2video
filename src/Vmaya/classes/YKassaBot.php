@@ -38,6 +38,13 @@ abstract class YKassaBot extends BaseBot {
     protected function MySubscribe($chatId) {
     }
 
+    protected function currency() {
+
+        if ($this->currentLanguage && isset(CURRENCY_LIST[$this->currentLanguage])) 
+            return CURRENCY_LIST[$this->currentLanguage];
+        else return reset(array_values(CURRENCY_LIST));
+    }
+
     protected function runUpdate($update) {
         if (isset($update['pre_checkout_query'])) {
 
@@ -133,7 +140,7 @@ abstract class YKassaBot extends BaseBot {
         }
     }
 
-    protected function CreateInvoice($amount, $currency, $type_id, $productId, $product, $productDesc) {
+    protected function CreateInvoice($amount, $type_id, $productId, $product, $productDesc) {
                 
         try {
 
@@ -141,48 +148,51 @@ abstract class YKassaBot extends BaseBot {
             $response = null;
             $params = null;
 
-            if (PaymentHelper::validateCurrencyAmount($currency, $amount)) {
+            $currency = $this->currency();
 
-                $prices = [
-                    [
-                        'label' => $product,
-                        'amount' => $amount * 100
-                    ]
-                ];
+            if (DEV) echo $currency."\n";
 
-                $payload = PaymentHelper::createPayload($chatId, $productId, [
-                    'currency' => $currency
-                ]);
+            $amount = PaymentHelper::validateCurrencyAmount($currency, $amount);
 
-                $data = [
-                    'type_id'=>$type_id
-                ];
+            $prices = [
+                [
+                    'label' => $product,
+                    'amount' => $amount * 100
+                ]
+            ];
 
-                $transaction_id = (new TransactionsModel())->Add($this->getUser()['id'], $payload, $amount, 'prepare', $data);
+            $payload = PaymentHelper::createPayload($chatId, $productId, [
+                'currency' => $currency
+            ]);
 
-                $params = [
-                    'chat_id' => $chatId,
-                    'title' => $product,                            // Название товара (1-32 символа)
-                    'description' => $productDesc,                  // Описание (1-255 символов)
-                    'payload' => $payload,                          // Уникальный идентификатор (1-128 байт)
-                    'provider_token' => YKASSA_TOKEN,               // Токен платежного провайдера
-                    'currency' => $currency,                        // Код валюты (USD, RUB, EUR и т.д.)
-                    'prices' => $prices,                            // Массив с ценами
-                    'start_parameter' => 'test',                    // Параметр для deep linking
-                ];
+            $data = [
+                'type_id'=>$type_id
+            ];
 
-                $response = $this->api->sendInvoice($params);
-        
-                $result = [
-                    'success' => true,
-                    'message_id' => $response->getMessageId(),
-                    'invoice_payload' => $response->getInvoicePayload(),
-                    'response' => $response
-                ];
+            $transaction_id = (new TransactionsModel())->Add($this->getUser()['id'], $payload, $amount, 'prepare', $data);
 
-                trace('Payment params: '.json_encode($params, JSON_FLAGS).
-                        "\nResult: ".json_encode($result, JSON_FLAGS));
-            }
+            $params = [
+                'chat_id' => $chatId,
+                'title' => $product,                            // Название товара (1-32 символа)
+                'description' => $productDesc,                  // Описание (1-255 символов)
+                'payload' => $payload,                          // Уникальный идентификатор (1-128 байт)
+                'provider_token' => YKASSA_TOKEN,               // Токен платежного провайдера
+                'currency' => $currency,                        // Код валюты (USD, RUB, EUR и т.д.)
+                'prices' => $prices,                            // Массив с ценами
+                'start_parameter' => DEV ? 'test' : null,       // Параметр для deep linking
+            ];
+
+            $response = $this->api->sendInvoice($params);
+    
+            $result = [
+                'success' => true,
+                'message_id' => $response->getMessageId(),
+                'invoice_payload' => $response->getInvoicePayload(),
+                'response' => $response
+            ];
+
+            trace('Payment params: '.json_encode($params, JSON_FLAGS).
+                    "\nResult: ".json_encode($result, JSON_FLAGS));
             
         } catch (\Exception $e) {
             $this->Wrong();
@@ -197,7 +207,7 @@ abstract class YKassaBot extends BaseBot {
         if (empty($description))
             $description = Lang('One-time payment');
 
-        $this->CreateInvoice(max($amount, 50), "RUB", 0, 0, Lang("Account replenishment"), $description);
+        $this->CreateInvoice($amount, 0, 0, Lang("Account replenishment"), $description);
     }
 
     protected function SubscribeAction($chatId, $subscribe_type_id) {
@@ -205,9 +215,8 @@ abstract class YKassaBot extends BaseBot {
             if ($stype = (new SubscribeOptions())->getItem($subscribe_type_id)) {
 
                 $this->stat($chatId, 'payment-attempt', $subscribe_type_id);
-                $currency = "RUB";
                 $amount = intval($stype['price']);
-                $this->CreateInvoice($amount, $currency, $subscribe_type_id, $stype['id'], $stype['name'], $stype['description']);
+                $this->CreateInvoice($amount, $subscribe_type_id, $stype['id'], $stype['name'], $stype['description']);
             }
         }
     }
@@ -323,37 +332,25 @@ class PaymentHelper {
 
     public static function getCurrencyLimits($currency) {
         $limits = [
-            'USD' => ['min' => 0.50,   'max' => 10000.00],   // $0.50 - $10,000
-            'EUR' => ['min' => 0.45,   'max' => 9000.00],    // €0.45 - €9,000
-            'RUB' => ['min' => 50.00,  'max' => 750000.00],  // 50₽ - 750,000₽
-            'UAH' => ['min' => 13.00,  'max' => 270000.00],  // 13₴ - 270,000₴
-            'KZT' => ['min' => 220.00, 'max' => 4500000.00], // 220₸ - 4,500,000₸
-            'BYN' => ['min' => 1.30,   'max' => 26000.00],   // 1.3Br - 26,000Br
-            'GBP' => ['min' => 0.40,   'max' => 8000.00],    // £0.40 - £8,000
-            'JPY' => ['min' => 50,     'max' => 1000000],    // 50¥ - 1,000,000¥
-            'CNY' => ['min' => 3.50,   'max' => 70000.00],   // 3.5¥ - 70,000¥
+            'RUB' => ['min' => 88,      'max' => 877271.00],
+            'USD' => ['min' => 1,       'max' => 10000.00],
+            'EUR' => ['min' => 0.88,    'max' => 8817],
+            'UAH' => ['min' => 13.00,   'max' => 270000.00], 
+            'KZT' => ['min' => 220.00,  'max' => 4500000.00],
+            'BYN' => ['min' => 1.30,    'max' => 26000.00],
+            'GBP' => ['min' => 0.40,    'max' => 8000.00],
+            'JPY' => ['min' => 50,      'max' => 1000000],
+            'CNY' => ['min' => 3.50,    'max' => 70000.00]
         ];
         
-        return $limits[$currency] ?? $limits['USD'];
+        return $limits[$currency] ?? $limits['RUB'];
     }
 
     public static function validateCurrencyAmount($currency, $amount) {
         
         $limits = PaymentHelper::getCurrencyLimits($currency);
-        
-        if ($amount < $limits['min']) {
-            throw new Exception(
-                "Сумма слишком мала. Минимум для {$currency}: {$limits['min']}"
-            );
-        }
-        
-        if ($amount > $limits['max']) {
-            throw new Exception(
-                "Сумма слишком велика. Максимум для {$currency}: {$limits['max']}"
-            );
-        }
-        
-        return true;
+
+        return min(max($amount, $limits['min']), $limits['max']);
     }
 }
 ?>

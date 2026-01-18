@@ -6,12 +6,12 @@ use \Telegram\Bot\FileUpload\InputFile;
 abstract class BaseBot extends SettingsManager {
     private $origin_user_id;
     private $reply_to_message;
-    private $currentLanguage;
     private $chatId;
 
     protected $user;
     protected $api;
     protected $currentUpdate = null;
+    protected $currentLanguage;
 
     public function getUser() { return $this->user; }
     public function getUserId() { return $this->user ? $this->user['id'] : null; }
