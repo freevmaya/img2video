@@ -749,7 +749,7 @@ function calculateOverlaySize(
     }
     
     // Автоматический расчет по scaleFactor
-    $maxDimension = min($bgWidth, $bgHeight) * $scaleFactor;
+    $maxDimension = max($bgWidth, $bgHeight) * $scaleFactor;
     $aspectRatio = $origWidth / $origHeight;
     
     if ($origWidth > $origHeight) {
