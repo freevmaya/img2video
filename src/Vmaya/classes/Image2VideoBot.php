@@ -914,7 +914,7 @@ class Image2VideoBot extends YKassaBot {
             [$stage, $prompt] = $this->parseCommandData('imagesToImage', $stage);
 
         [$gen, $info] = $this->getCurrentGenModel('imagesToImage');
-        $count_images = count($this->getSession('images'));
+        $count_images = count($this->getSession('images', []));
         $require_images = isset($info['require_images']) ? $info['require_images'][0] : 1;
 
         if ($count_images < $require_images) {
