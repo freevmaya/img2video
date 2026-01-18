@@ -849,7 +849,7 @@ function encodeTelegramParams(array $params, bool $forceEncode = false): array
         }
         
         // Если строка уже короткая, и не форсируем кодирование
-        if (!$forceEncode && $originalLength <= 45)
+        if (!$forceEncode && $originalLength <= 64)
             return $callbackData;
         
         // Кодируем в base64
