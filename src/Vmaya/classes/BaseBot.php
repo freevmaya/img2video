@@ -416,6 +416,10 @@ abstract class BaseBot extends SettingsManager {
 
         //Обрабатываем каждое обновление
         foreach ($updates as $update) {
+
+            if (DEV || $this->getSetting('log'))
+                trace($update);
+            
             try {
                 if ($this->initUser($update)) 
                     $this->_runUpdate($update);
@@ -466,8 +470,6 @@ abstract class BaseBot extends SettingsManager {
     private function _runUpdate($update) {
 
         $this->currentUpdate = $update;
-        if (DEV || $this->getSetting('log'))
-            trace($update);
 
         $chatId = $this->getCurrentChatId();
         $this->readSession($chatId);

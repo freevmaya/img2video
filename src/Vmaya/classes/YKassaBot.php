@@ -12,6 +12,14 @@ abstract class YKassaBot extends BaseBot {
         return (new TransactionsModel())->Balance($this->getUserId());
     }
 
+    protected function commandProcess($command, $chatId, $messageId, $text) {
+        switch ($command) {
+            case '/subscribe':
+                $this->subscribe($chatId);
+                return true;
+        }
+    }
+
     protected function callbackProcess($callback, $chatId, $messageId, $data) {
 
         $user_id = $this->getUser()['id'];
@@ -215,15 +223,6 @@ abstract class YKassaBot extends BaseBot {
                 $amount = intval($stype['price']);
                 $this->CreateInvoice($amount, $subscribe_type_id, $stype['id'], $stype['name'], $stype['description']);
             }
-        }
-    }
-
-    protected function commandProcess($command, $chatId, $messageId, $text) {
-        switch ($command) {
-            case '/subscribe':
-                //$this->DeleteMessage($chatId, $messageId);
-                $this->subscribe($chatId);
-                return true;
         }
     }
 
