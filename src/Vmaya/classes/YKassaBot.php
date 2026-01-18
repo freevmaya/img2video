@@ -142,7 +142,7 @@ abstract class YKassaBot extends BaseBot {
                 
         try {
 
-            $this->stat($this->getCurrentChatId(), 'payment-attempt', $product);
+            $this->stat($this->getCurrentChatId(), 'payment-attempt', $productId);
 
             $chatId = $this->getCurrentChatId();
             $response = null;
