@@ -52,10 +52,12 @@ class TelegramClient extends SettingsManager {
                 ];
 
 	            if ($inline_keyboard)
-	                $params['reply_markup'] = json_encode([
+	                $params['reply_markup'] = [
 	                    'inline_keyboard' => $inline_keyboard
-	                ]);
+	                ];
 
+
+                $params = encodeTelegramParams($params);
                 $message = $this->afterSend($this->api->sendVideo($params), true);
                 if ($message->getMessageId()) 
                     return true;
@@ -84,13 +86,14 @@ class TelegramClient extends SettingsManager {
             ];
 
             if ($inline_keyboard)
-                $params['reply_markup'] = json_encode([
+                $params['reply_markup'] = [
                     'inline_keyboard' => $inline_keyboard
-                ]);
+                ];
 
             $max_atempt = 3;
             $attempt_count = 0;
 
+            $params = encodeTelegramParams($params);
             while ($attempt_count < $max_atempt) {
                 try {
 
@@ -125,6 +128,7 @@ class TelegramClient extends SettingsManager {
         $attempt_count = 0;
         $error_message = '';
 
+        $params = encodeTelegramParams($params);
         while ($attempt_count < $max_atempt) {
 
             sleep(round(pow($attempt_count, 1.5) * 3));

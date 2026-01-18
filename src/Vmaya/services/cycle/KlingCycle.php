@@ -30,11 +30,11 @@ class KlingCycle extends BaseCycle {
 
         if ($state == 'failure') {
 
-            if ($this->parent->Message($task['chat_id'], ['text' => sprintf(Lang("DownloadFailure"), $task['id']), 'reply_markup'=> json_encode([
+            if ($this->parent->Message($task['chat_id'], ['text' => sprintf(Lang("DownloadFailure"), $task['id']), 'reply_markup'=> [
                     'inline_keyboard' => [
                         [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']]
                     ]
-                ])
+                ]
             ])) {
                 $this->parent->finishTask($task, $state);
             } else $this->setResponseProcessed($response, 0);

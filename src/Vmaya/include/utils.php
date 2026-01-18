@@ -794,4 +794,107 @@ function calculatePosition(
             return [$posX, $posY];
     }
 }
+
+function cnvBase64(string $string): string
+{
+    // Проверяем, что строка не пустая
+    if (empty($string) || !is_string($string)) {
+        return $string;
+    }
+    
+    // Убираем возможные пробелы и переносы
+    $string = trim($string);
+    
+    // Проверяем длину (должна быть кратна 4 для base64)
+    if (strlen($string) % 4 !== 0) {
+        return $string;
+    }
+    
+    // Проверяем допустимые символы
+    if (!preg_match('/^[a-zA-Z0-9\/\+=]*$/', $string)) {
+        return $string;
+    }
+    
+    // Пробуем декодировать
+    $decoded = base64_decode($string, true);
+    
+    // Если декодирование успешно и результат не пустой
+    return ($decoded !== false && base64_encode($decoded) === $string) ? $decoded : $string;
+}
+
+/**
+ * Безопасно преобразует callback_data в base64 с проверкой длины
+ */
+function encodeTelegramParams(array $params, bool $forceEncode = false): array
+{
+    // Функция для обработки callback_data
+    $processCallbackData = function($callbackData) use ($forceEncode) {
+        if (!is_string($callbackData)) {
+            return $callbackData;
+        }
+        
+        $originalLength = strlen($callbackData);
+        
+        // Если callback_data уже в base64, проверяем его
+        if (preg_match('/^[a-zA-Z0-9\/\+=]+$/', $callbackData) && 
+            base64_decode($callbackData, true) !== false) {
+            // Уже base64, проверяем длину
+            if (strlen($callbackData) > 64) {
+                throw new Exception(
+                    "Callback data already base64 but too long: " . 
+                    strlen($callbackData) . " bytes"
+                );
+            }
+            return $callbackData;
+        }
+        
+        // Если строка уже короткая, и не форсируем кодирование
+        if (!$forceEncode && $originalLength <= 45)
+            return $callbackData;
+        
+        // Кодируем в base64
+        $encoded = base64_encode($callbackData);
+        
+        // Проверяем длину
+        if (strlen($encoded) > 64) {
+
+            // Пробуем сжать JSON если это JSON
+            $decodedJson = json_decode($callbackData, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                // Сжимаем JSON
+                $compressedJson = json_encode($decodedJson, JSON_UNESCAPED_UNICODE);
+                if (strlen($compressedJson) < strlen($callbackData)) {
+                    $encoded = base64_encode($compressedJson);
+                }
+            }
+            
+            // Если все еще слишком длинный, выбрасываем исключение
+            if (strlen($encoded) > 64) {
+                throw new Exception(
+                    "Callback data too long after encoding: " . 
+                    strlen($encoded) . " bytes. Original: $callbackData"
+                );
+            }
+        }
+        
+        return $encoded;
+    };
+    
+    // Рекурсивная функция для обхода массива
+    $processArray = function(&$item, $key) use (&$processArray, $processCallbackData) {
+        if (is_array($item)) {
+
+            array_walk($item, $processArray);
+        } elseif ($key === 'callback_data' && is_string($item)) {
+            $item = $processCallbackData($item);
+        }
+    };
+
+    if (isset($params['reply_markup']) && !is_string($params['reply_markup'])) {
+        //array_walk($params['reply_markup'], $processArray);
+        $params['reply_markup'] = json_encode($params['reply_markup'], JSON_FLAGS);
+    }
+    
+    return $params;
+}
 ?>

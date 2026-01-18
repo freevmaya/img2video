@@ -110,7 +110,7 @@ class Image2VideoBot extends YKassaBot {
             $result = $this->sendMessage([
                 'chat_id' => $chatId,
                 'text' => $text,
-                'reply_markup' => json_encode([
+                'reply_markup' => [
                     'keyboard' => [ 
                         [
                             ['text' => $this->pmenuMap['/create_image'].' '.Lang('Image')],
@@ -123,7 +123,7 @@ class Image2VideoBot extends YKassaBot {
                     'resize_keyboard' => true,
                     'one_time_keyboard' => false,
                     'selective' => false
-                ], JSON_FLAGS)
+                ]
             ]);
 
             if (isset($result['message_id'])) {
@@ -139,10 +139,10 @@ class Image2VideoBot extends YKassaBot {
             $result = $this->sendMessage([
                 'chat_id' => $chatId,
                 'text' => $text,
-                'reply_markup' => json_encode([
+                'reply_markup' => [
                     'remove_keyboard' => true,
                     'selective' => false
-                ], JSON_FLAGS)
+                ]
             ]);
 
             if (isset($result['message_id'])) {
@@ -518,8 +518,8 @@ class Image2VideoBot extends YKassaBot {
 
         $result = $this->Answer($chatId, [
             'text' => Lang('Menu'),
-            'reply_markup' => json_encode([
-                'inline_keyboard' => $this->startMenuList()])
+            'reply_markup' => [
+                'inline_keyboard' => $this->startMenuList()]
         ]);
     }
 
@@ -532,7 +532,7 @@ class Image2VideoBot extends YKassaBot {
         $this->showPMenu($chatId, '----');
         $this->Answer($chatId, [
             'text' => Lang("BotDescription"), 
-            'reply_markup'=> json_encode(['inline_keyboard' => $this->startMenuList()])
+            'reply_markup'=> ['inline_keyboard' => $this->startMenuList()]
         ]);
         $this->submitFirstPreset();
     }
@@ -825,7 +825,7 @@ class Image2VideoBot extends YKassaBot {
 
         $this->pushRecallMethod($this->messageIndex(), $callstr);
 
-        $params['reply_markup'] = json_encode(['inline_keyboard' => $menu]);
+        $params['reply_markup'] = ['inline_keyboard' => $menu];
 
         return $this->Answer($this->getCurrentChatId(), $params);
     }

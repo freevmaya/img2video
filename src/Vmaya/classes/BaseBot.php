@@ -66,7 +66,7 @@ abstract class BaseBot extends SettingsManager {
         $callback = $this->currentUpdate['callback_query'];
         $chatId = $callback['message']['chat']['id'];
         $messageId = $callback['message']['message_id'];
-        $callback_data = $callback['data']; // Здесь содержится ваш callback_data
+        $callback_data = cnvBase64($callback['data']); // Здесь содержится ваш callback_data
         
         // 1. Ответим на callback (убирает "часики" у кнопки)
         $this->api->answerCallbackQuery([
@@ -142,14 +142,14 @@ abstract class BaseBot extends SettingsManager {
             $chatIdOrMessage = null;
         } else $text = Lang("Something wrong");
 
-        $this->Answer($chatIdOrMessage, ['text' => $text, 'reply_markup'=> json_encode([
+        $this->Answer($chatIdOrMessage, ['text' => $text, 'reply_markup'=> [
                 'inline_keyboard' => [
                     [
                         ['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support'],
                         $this->closeMessageButton()
                     ]
                 ]
-            ])
+            ]
         ], $messageId);
     }
 
@@ -190,8 +190,11 @@ abstract class BaseBot extends SettingsManager {
             else $params['message_thread_id'] = $message['message_thread_id'];
         }
 
+        $params = encodeTelegramParams($params);
+
         if ($messageEditId) {
             $params['message_id'] = $messageEditId;
+            $params = encodeTelegramParams($params);
             $result = $this->afterSend($this->api->editMessageText($params));
         } else $result = $this->sendMessage($params);
 
@@ -209,8 +212,10 @@ abstract class BaseBot extends SettingsManager {
         ], is_string($caption) ? ['caption' => $caption] : $caption);
 
         if ($buttons && is_array($buttons) && (count($buttons) > 0))
-            $params['reply_markup'] = json_encode(['inline_keyboard' => $buttons]);
+            $params['reply_markup'] = ['inline_keyboard' => $buttons];
 
+
+        $params = encodeTelegramParams($params);
         return $this->afterSend($this->api->sendPhoto($params));
     }
 
@@ -226,8 +231,10 @@ abstract class BaseBot extends SettingsManager {
             ], is_string($caption) ? ['caption' => $caption] : $caption);
 
             if ($buttons && is_array($buttons) && (count($buttons) > 0))
-                $params['reply_markup'] = json_encode(['inline_keyboard' => $buttons]);
+                $params['reply_markup'] = ['inline_keyboard' => $buttons];
 
+
+            $params = encodeTelegramParams($params);
             return $this->afterSend($this->api->sendVideo($params));
         } else {
             trace_error("File {$videoPath} not found");
@@ -274,6 +281,8 @@ abstract class BaseBot extends SettingsManager {
     }
 
     public function sendMessage($params) {
+
+        $params = encodeTelegramParams($params);
         return $this->afterSend($this->api->sendMessage($params));
     }
 
@@ -584,7 +593,7 @@ abstract class BaseBot extends SettingsManager {
         if ($backToMenu) $btList[] = [$this->closeMessageButton(is_string($backToMenu) ? $backToMenu : 'Cancel')];
 
         if ($btList && is_array($btList) && (count($btList) > 0))
-            $result['reply_markup'] = json_encode(['inline_keyboard' => $btList]);
+            $result['reply_markup'] = ['inline_keyboard' => $btList];
 
         return $result;
     }

@@ -19,7 +19,9 @@ class fdbg {
         $stackStr = '';
 
         while ($i < $stackMax) {
-            $stackStr .= $stack[$i]['file'].':'.$stack[$i]['line']."\n";
+            if (isset($stack[$i]))
+                $stackStr .= $stack[$i]['file'].':'.$stack[$i]['line']."\n";
+            else echo "Key {$i} is wrong, count = ".count($stack)."\n";
             $i++;
         }
 
