@@ -187,16 +187,9 @@ abstract class YKassaBot extends BaseBot {
                 */
 
             $response = $this->api->sendInvoice($params);
-    
-            $result = [
-                'success' => true,
-                'message_id' => $response->getMessageId(),
-                'invoice_payload' => $response->getInvoicePayload(),
-                'response' => $response
-            ];
-
-            trace('Payment params: '.json_encode($params, JSON_FLAGS).
-                    "\nResult: ".json_encode($result, JSON_FLAGS));
+            
+            trace("sendInvoice\nParams: ".json_encode($params, JSON_FLAGS).
+                    "\nResponse: ".json_encode($response, JSON_FLAGS));
             
         } catch (\Exception $e) {
             $this->Wrong();
