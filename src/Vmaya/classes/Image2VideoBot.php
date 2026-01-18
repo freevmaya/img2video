@@ -217,8 +217,8 @@ class Image2VideoBot extends YKassaBot {
                 return $this->textToImage($data);
             case 'imagesToImage':
                 return $this->imagesToImage($data);
-            case 'selectModelType':
-                return $this->selectModelType($data[1], $data[2]);
+            case 'selModel':
+                return $this->selModel($data[1], $data[2]);
             case 'selectedModel':
                 return $this->setModel($data[1]);
             case 'closeLast':
@@ -361,7 +361,7 @@ class Image2VideoBot extends YKassaBot {
         $this->recall(@$data[4]);
     }
 
-    protected function selectModelType($type, $backMessageIndex) {
+    protected function selModel($type, $backMessageIndex) {
 
         $list = [];
 
@@ -497,7 +497,7 @@ class Image2VideoBot extends YKassaBot {
 
             $this->Answer(null, $this->genContent($text, true, [
                 [['text'=>Lang('Create a video'), 'callback_data' => "imageToVideo.1.prompt"],
-                 ['text'=>Lang('Select model'), 'callback_data' => "selectModelType.imageToVideo.{$this->messageIndex()}"]]
+                 ['text'=>Lang('Select model'), 'callback_data' => "selModel.imageToVideo.{$this->messageIndex()}"]]
             ]));
         } else if (!empty($text)) {
 
@@ -505,7 +505,7 @@ class Image2VideoBot extends YKassaBot {
 
             $this->Answer(null, $this->genContent($text, true, [
                 [['text'=>Lang('Create an image'), 'callback_data' => "textToImage.1.prompt"],
-                 ['text'=>Lang('Select model'), 'callback_data' => "selectModelType.textToImage.{$this->messageIndex()}"]]
+                 ['text'=>Lang('Select model'), 'callback_data' => "selModel.textToImage.{$this->messageIndex()}"]]
             ]));
         }
     }
@@ -819,7 +819,7 @@ class Image2VideoBot extends YKassaBot {
                 $menu[] = [['text' => Lang($prompt), 'callback_data' => "{$genType}.{$stage}.{$i}".$extaddstr]];
         }
 
-        $menu[] = [$this->createButton('Select model', "selectModelType.{$genType}.{$this->messageIndex()}"), $this->closeMessageButton()];
+        $menu[] = [$this->createButton('Select model', "selModel.{$genType}.{$this->messageIndex()}"), $this->closeMessageButton()];
 
         $callstr = $ext ? "askSendPrompt('{$genType}', {$stage}, {$ext})" : "askSendPrompt('{$genType}', {$stage})";
 
@@ -860,7 +860,7 @@ class Image2VideoBot extends YKassaBot {
 
                     $this->pushRecallMethod($this->messageIndex(), "imageToVideo({$stage})");
                     $this->Answer($this->getCurrentChatId(), $this->genContent($text, true, [
-                        [$this->createButton('Select model', "selectModelType.imageToVideo.{$this->messageIndex()}")]
+                        [$this->createButton('Select model', "selModel.imageToVideo.{$this->messageIndex()}")]
                     ]));
                     $this->setSession("expect", 'imageToVideo(1)');
                     $this->setSession('images', []);
@@ -926,7 +926,7 @@ class Image2VideoBot extends YKassaBot {
 
             $this->pushRecallMethod($this->messageIndex(), "imagesToImage(0)");
             $this->Answer(null, $this->genContent($text, true, [
-                [$this->createButton('Select model', "selectModelType.imagesToImage.{$this->messageIndex()}")]
+                [$this->createButton('Select model', "selModel.imagesToImage.{$this->messageIndex()}")]
             ]));
 
             $this->setSession("expect", "imagesToImage(0)");
