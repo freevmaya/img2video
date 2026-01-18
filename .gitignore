@@ -8,6 +8,7 @@ config/*
 sessions/*
 /sessions
 /test
+/data
 /tmp
 test*.*
 config*.php

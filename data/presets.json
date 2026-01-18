@@ -1,5 +1,54 @@
 {
 	"Baptism": {
+		"name": "Зимняя красавица",
+		"caption": "Просто загрузите свое фото и получите,✨ открытку к празднику.\n Теперь вы можете поздравить близких оригинальной открыткой!\n\nВнимание! Этот шаблон не гарантирует 100%-й схожести, он просто как бы объединяет ваше фото с эталонным стилем. Схожесть лица будет на 50-80%.\n\n👇Больше шаблонов ищите в главном меню.",
+		"image": "public/images/Winter-beauty-preview.jpg",
+		"overlays": [
+			"public/images/Winter-beauty.png"	
+		],
+		"gender": "female",
+		"subsequence": [
+			{
+				"model_index": "leo_Image Guidance",
+				"images": [
+					{
+						"value": null,
+						"path": "controlnets/0/initImageId"
+					},{
+						"value": "a8d38ba0-0d0d-4fe0-8501-b5552a3948ba",
+						"path": "controlnets/1/initImageId"
+					}
+				],
+				"options": {
+					"prompt": "A girl in a Russian winter outfit (fur coat, fur hat). She is half-turned toward the viewer and looks at them with a slight smile, as if sharing in the joy of the holiday. It is snowing. A realistic photograph, winter. A soft, bright atmosphere.",
+				    "presetStyle": "CINEMATIC",
+				    "width": 512,
+				    "height": 896,
+				    "photoReal": true,
+				    "photoRealVersion": "v2",
+				    "alchemy": true,
+				    "controlnets":
+				    [
+				        {
+				            "initImageId": "",
+				            "initImageType": "UPLOADED",
+				            "preprocessorId": 67,
+				            "strengthType": "High",
+				            "influence": 0.7
+				        },
+				        {
+				            "initImageId": "",
+				            "initImageType": "UPLOADED",
+				            "preprocessorId": 67,
+				            "strengthType": "High",
+				            "influence": 0.3
+				        }
+				    ]
+				}
+			}
+		]
+	},
+	"Baptism": {
 		"name": "Крещение Господне",
 		"caption": "Просто загрузите свое фото и получите,✨ открытку к празднику.\n Теперь вы можете поздравить близких оригинальной открыткой!\n\nВнимание! Этот шаблон не гарантирует 100%-й схожести, он просто как бы объединяет ваше фото с эталонным стилем. Схожесть лица будет на 50-80%.\n\n👇Больше шаблонов ищите в главном меню.",
 		"image": "public/images/Baptism-preview.jpg",
