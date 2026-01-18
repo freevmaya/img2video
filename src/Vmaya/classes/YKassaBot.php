@@ -178,7 +178,8 @@ abstract class YKassaBot extends BaseBot {
                 'payload' => $payload,                          // Уникальный идентификатор (1-128 байт)
                 'provider_token' => YKASSA_TOKEN,               // Токен платежного провайдера
                 'currency' => $currency,                        // Код валюты (USD, RUB, EUR и т.д.)
-                'prices' => $prices                             // Параметр для deep linking
+                'prices' => $prices,
+                'start_parameter' => 'test'                     // Параметр для deep linking
             ];
 
             /*
@@ -187,7 +188,7 @@ abstract class YKassaBot extends BaseBot {
                 */
 
             $response = $this->api->sendInvoice($params);
-            
+
             trace("sendInvoice\nParams: ".json_encode($params, JSON_FLAGS).
                     "\nResponse: ".json_encode($response, JSON_FLAGS));
             
