@@ -155,12 +155,12 @@ class Image2VideoBot extends YKassaBot {
     }
 
     private function _commandProcessor($command, $chatId, $data = null) {
-        
-        $this->stat($chatId, $command, $chatId);
 
         if (DEV) echo("Command: {$command}\n".json_encode($data, JSON_FLAGS)."\n");
 
         $commandParts = explode(' ', $command, 2);
+        
+        $this->stat($chatId, $commandParts[0], $chatId);
 
         switch ($commandParts[0]) {
             case 'show_menu': 

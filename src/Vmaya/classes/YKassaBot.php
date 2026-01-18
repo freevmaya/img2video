@@ -17,8 +17,6 @@ abstract class YKassaBot extends BaseBot {
         $user_id = $this->getUser()['id'];
         $pref = explode('-', $data);
 
-        $this->stat($chatId, $pref[0], $chatId);
-
         switch ($pref[0]) {
             case 'subscribe':
                 if (isset($pref[1]))
@@ -144,6 +142,8 @@ abstract class YKassaBot extends BaseBot {
                 
         try {
 
+            $this->stat($this->getCurrentChatId(), 'payment-attempt', $product);
+
             $chatId = $this->getCurrentChatId();
             $response = null;
             $params = null;
@@ -214,7 +214,6 @@ abstract class YKassaBot extends BaseBot {
         if ($subscribe_type_id > 0) {
             if ($stype = (new SubscribeOptions())->getItem($subscribe_type_id)) {
 
-                $this->stat($chatId, 'payment-attempt', $subscribe_type_id);
                 $amount = intval($stype['price']);
                 $this->CreateInvoice($amount, $subscribe_type_id, $stype['id'], $stype['name'], $stype['description']);
             }
