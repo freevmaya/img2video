@@ -138,6 +138,7 @@ abstract class YKassaBot extends BaseBot {
         try {
 
             $chatId = $this->getCurrentChatId();
+            $response = null;
 
             if (PaymentHelper::validateCurrencyAmount($currency, $amount)) {
 
@@ -188,7 +189,7 @@ abstract class YKassaBot extends BaseBot {
                 'error' => $e->getMessage()
             ];
             $this->Wrong();
-            trace_error($e->getMessage());
+            trace_error($e->getMessage()."\n\nResponse: ".json_encode($response, JSON_FLAGS));
         }
 
     }
