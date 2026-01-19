@@ -198,7 +198,7 @@ abstract class YKassaBot extends BaseBot {
                 'provider_token' => $this->pay_token,           // Токен платежного провайдера
                 'currency' => $currency,                        // Код валюты (USD, RUB, EUR и т.д.)
                 'prices' => $prices,
-                'start_parameter' => 'test',                    // Параметр для deep linking
+                //'start_parameter' => 'test',                    // Параметр для deep linking
                 'need_email' => true,
                 'send_email_to_provider' => true,
                 "provider_data" => [
