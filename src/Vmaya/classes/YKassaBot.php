@@ -140,12 +140,16 @@ abstract class YKassaBot extends BaseBot {
         
         if ($this->checkProductAvailability($payload)) {
             // Подтверждаем оплату
+
+            trace("answerPreCheckoutQuery OK: ".$payload);
             
             $this->api->answerPreCheckoutQuery([
                 'pre_checkout_query_id' => $query_id,
                 'ok' => true
             ]);
         } else {
+
+            trace("answerPreCheckoutQuery REJECT: ".$payload);
             // Отказываем в оплате
             $this->api->answerPreCheckoutQuery([
                 'pre_checkout_query_id' => $query_id,
