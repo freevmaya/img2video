@@ -638,6 +638,12 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function isAllowType($type) {
+        if (empty($type)) {
+            $msg = Lang('Type can\'t be null');
+            trace_error($msg);
+            $this->Answer(null, $msg);
+        }
+
         switch ($type) {
             case 'textToImage': 
                     $diff = $this->isAllowedImage();
@@ -652,7 +658,7 @@ class Image2VideoBot extends YKassaBot {
                 $msg = Lang('Unknown type: %s', $type);
                 trace_error($msg);
                 $this->Answer(null, $msg);
-                break;
+                return false;
         }
 
         if ($diff >= 0)
@@ -698,6 +704,12 @@ class Image2VideoBot extends YKassaBot {
 
             $model_data     = $preset['subsequence'][0];
             [$gen, $info]   = $this->getActualyModelInfo($model_data['model_index'], false);
+            
+            if (empty($info)) {
+                trace_error("Not found preset name: {$presetName}");
+                return;
+            }
+
             $type           = $info['type'];
 
             switch ($stage) {
