@@ -198,16 +198,14 @@ abstract class YKassaBot extends BaseBot {
                 'provider_token' => $this->pay_token,           // Токен платежного провайдера
                 'currency' => $currency,                        // Код валюты (USD, RUB, EUR и т.д.)
                 'prices' => $prices,
-                //'start_parameter' => 'test',                    // Параметр для deep linking
+                //'start_parameter' => 'test',                  // Параметр для deep linking
                 'need_email' => true,
                 'send_email_to_provider' => true,
                 "provider_data" => [
                     "receipt" => [
                         "customer" => [
                             "full_name" => "Frolov Vadim Valerievich",
-                            "email" => "fwadim@mail.ru",
-                            "phone" => "79227540997",
-                            "inn" => "745004166339"
+                            "email" => "fwadim@mail.ru"
                         ],
                         "items" => [
                             [
@@ -221,7 +219,8 @@ abstract class YKassaBot extends BaseBot {
                                 "payment_mode" => "full_payment",
                                 "payment_subject" => "commodity"
                             ]
-                        ]
+                        ],
+                        "tax_system_code" => 1
                     ]
                 ]
             ];
