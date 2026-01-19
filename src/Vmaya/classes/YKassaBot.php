@@ -136,27 +136,25 @@ abstract class YKassaBot extends BaseBot {
         $total_amount   = $query['total_amount'];
         $currency       = $query['currency'];
         
-        // Проверяем возможность оплаты
-        
+        // Проверяем возможность оплаты        
         if ($this->checkProductAvailability($payload)) {
             // Подтверждаем оплату
-
-            trace("answerPreCheckoutQuery OK: ".$payload);
-            
-            $this->api->answerPreCheckoutQuery([
+            $params = [
                 'pre_checkout_query_id' => $query_id,
                 'ok' => true
-            ]);
+            ];
         } else {
-
-            trace("answerPreCheckoutQuery REJECT: ".$payload);
-            // Отказываем в оплате
-            $this->api->answerPreCheckoutQuery([
+            $params = [
                 'pre_checkout_query_id' => $query_id,
                 'ok' => false,
                 'error_message' => Lang("This subscription is temporarily unavailable")
-            ]);
+            ];
         }
+
+        trace("handlePreCheckout\nQuery: ".json_encode($query, JSON_FLAGS).
+                "\nanswerPreCheckoutQuery params:".json_encode($params, JSON_FLAGS));
+            
+        $this->api->answerPreCheckoutQuery($params);
     }
 
     protected function CreateInvoice($amount, $type_id, $productId, $product, $productDesc) {
