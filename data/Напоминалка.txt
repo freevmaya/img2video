@@ -5,3 +5,5 @@ YKassa
 
 PayMaster
 4100 0000 0000 0001
+
+curl https://api.telegram.org/bot<BOTTOKEN>/getMe
