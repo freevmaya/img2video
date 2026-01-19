@@ -5,6 +5,7 @@ $user;
 class Page {
 	protected $title = "";
 	protected $model;
+	protected $userModel;
 	private $haveActiveOrder = -1;
 
 	public static $current;
@@ -12,7 +13,52 @@ class Page {
 	public static $request;
 	public static $subpage;
 
-	public static function Run($request) {
+	public function __construct($userModel = null) {
+		GLOBAL $lang, $dbp, $_GET, $user;
+
+		$this->userModel = $userModel ? $userModel : new UserModel();
+
+		Page::$current = $this;
+		$dbp = new mySQLProvider('localhost', _dbname_default, _dbuser, _dbpassword);
+
+		$user = Page::getSession('user');
+		if ($user) {
+			//$this->setUser(null); exit;
+			/*
+			if (!isset($user['id'])) {
+				if (DEVUSER)
+					$this->setUser($user = array_merge(json_decode(DEVUSER, true), $user));
+			}
+			if (!is_array($db_user = (new UserModel())->getItem($user['id']))) {
+				$this->setUser($user);
+				//trace($user['id']);
+			}*/
+		}
+		else if (DEVUSER) {
+			if ($user = $this->userModel->getItem(DEVUSER))
+				$this->setUser($user);
+		}
+		
+		if ($user) {
+
+			if ($userDB = $this->userModel->getItem($user['id']))
+				$user = array_merge($user, $userDB);
+			$language = $user['language_code'];
+		} else die("There isn't authorize");
+		
+		include_once(LANGUAGE_PATH.$language.'.php');
+
+		$this->model = $this->initModel();
+
+		if ($this->model && $this->isReciveData()) {
+			if ($this->requiestIdModel(Page::$request['form-request-id']) == get_class($this->model)) {
+				$this->requiestRemove(Page::$request['form-request-id']);
+				$this->model->Update(Page::$request);
+			}
+		}
+	}
+
+	public static function Run($userModel, $request) {
 		Page::$request = $request;
 
 		$className = 'Page';
@@ -49,52 +95,9 @@ class Page {
 		Page::$page = $page;
 		Page::$subpage = $subpage;
 
-		$page = new $className();
+		$page = new $className($userModel);
 		$page->Render(Page::$page.(Page::$subpage ? ('/'.Page::$subpage) : ''));
 		$page->Close();
-	}
-
-	public function __construct() {
-		GLOBAL $lang, $dbp, $_GET, $user;
-
-		Page::$current = $this;
-		$dbp = new mySQLProvider('localhost', _dbname_default, _dbuser, _dbpassword);
-
-		$user = Page::getSession('user');
-		if ($user) {
-			//$this->setUser(null); exit;
-			/*
-			if (!isset($user['id'])) {
-				if (DEVUSER)
-					$this->setUser($user = array_merge(json_decode(DEVUSER, true), $user));
-			}
-			if (!is_array($db_user = (new UserModel())->getItem($user['id']))) {
-				$this->setUser($user);
-				//trace($user['id']);
-			}*/
-		}
-		else if (DEVUSER) {
-			$user = json_decode(DEVUSER, true);
-			$this->setUser($user);
-		}
-		
-		if ($user) {
-
-			if ($userDB = (new UserModel())->getItem($user['id']))
-				$user = array_merge($user, $userDB);
-			$language = $user['language_code'];
-		} else die("There isn't authorize");
-		
-		include_once(BASEDIR.'/languages/'.$language.'.php');
-
-		$this->model = $this->initModel();
-
-		if ($this->model && $this->isReciveData()) {
-			if ($this->requiestIdModel(Page::$request['form-request-id']) == get_class($this->model)) {
-				$this->requiestRemove(Page::$request['form-request-id']);
-				$this->model->Update(Page::$request);
-			}
-		}
 	}
 
 	protected function isReciveData() {
@@ -164,8 +167,7 @@ class Page {
 		Page::setSession('user', $user = $data);
 
 		if ($set = isset($user['id'])) {
-			$userModel = new UserModel();
-			$item = $userModel->getItem($user['id']);
+			$item = $this->userModel->getItem($user['id']);
 			
 			if ($item) {
 				$dbp->query("UPDATE users SET last_time = NOW() WHERE id = {$user['id']}");
