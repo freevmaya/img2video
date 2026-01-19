@@ -36,7 +36,7 @@ class LeoCycle extends BaseCycle {
 
             if ($result) {
 
-                $this->parent->PayUpscale($task['user_id'], [
+                $this->parent->PayVideo($task['user_id'], [
                     'response_id'=>$response['id'],
                     'hash'=>$hash
                 ]);
