@@ -8,6 +8,15 @@ subscribe - подписка
 
 abstract class YKassaBot extends BaseBot {
 
+    protected $pay_token;
+
+    function __construct($api, $pay_token, $file_settings = null) {
+        if (!($this->pay_token = $pay_token)) {
+            throw new Exception("Pay token require");
+        }
+        parent::__construct($api, $file_settings);
+    }
+
     public function Balance() {
         return (new TransactionsModel())->Balance($this->getUserId());
     }
@@ -184,7 +193,7 @@ abstract class YKassaBot extends BaseBot {
                 'title' => $product,                            // Название товара (1-32 символа)
                 'description' => $productDesc,                  // Описание (1-255 символов)
                 'payload' => $payload,                          // Уникальный идентификатор (1-128 байт)
-                'provider_token' => YKASSA_TOKEN,               // Токен платежного провайдера
+                'provider_token' => $this->pay_token,           // Токен платежного провайдера
                 'currency' => $currency,                        // Код валюты (USD, RUB, EUR и т.д.)
                 'prices' => $prices,
                 'start_parameter' => 'test'                     // Параметр для deep linking

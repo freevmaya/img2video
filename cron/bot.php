@@ -36,7 +36,7 @@ try {
     $telegram = new Api(BOTTOKEN);
 
     $dbp = new mySQLProvider(_dbhost, _dbname_default, _dbuser, _dbpassword);
-    $bot = new Image2VideoBot($telegram, __FILE__.'.cfg');
+    $bot = new Image2VideoBot($telegram, YKASSA_TOKEN, __FILE__.'.cfg');
 
     // 1. Удаляем вебхук, если он был установлен
     $telegram->deleteWebhook(['drop_pending_updates' => true]);
