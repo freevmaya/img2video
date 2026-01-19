@@ -203,6 +203,12 @@ abstract class YKassaBot extends BaseBot {
                 'send_email_to_provider' => true,
                 "provider_data" => [
                     "receipt" => [
+                        "customer" => [
+                            "full_name" => "Frolov Vadim Valerievich",
+                            "email" => "fwadim@mail.ru",
+                            "phone" => "79227540997",
+                            "inn" => "745004166339"
+                        ],
                         "items" => [
                             [
                                 "description" => $product,
