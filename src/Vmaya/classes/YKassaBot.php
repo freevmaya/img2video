@@ -201,7 +201,7 @@ abstract class YKassaBot extends BaseBot {
                 //'start_parameter' => 'test',                  // Параметр для deep linking
                 'need_email' => true,
                 'send_email_to_provider' => true,
-                "provider_data" => [
+                "provider_data" => json_encode([
                     "receipt" => [
                         "customer" => [
                             "full_name" => "Frolov Vadim Valerievich",
@@ -222,7 +222,7 @@ abstract class YKassaBot extends BaseBot {
                         ],
                         "tax_system_code" => 1
                     ]
-                ]
+                ], JSON_FLAGS)
             ];
 
             /*
