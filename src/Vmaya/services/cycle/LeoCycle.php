@@ -103,12 +103,17 @@ class LeoCycle extends BaseCycle {
 
             if ($result) {
 
-                $this->parent->PayUpscale($task['user_id'], [
-                    'response_id'=>$response['id'],
-                    'hash'=>$hash
-                ]);
+                $task = $this->parent->ModelTask()->getItem($task['id']);
 
-                $this->parent->finishTask($task, 'finished');
+                if ($task['state'] != 'finished') {
+
+                    $this->parent->PayUpscale($task['user_id'], [
+                        'response_id'=>$response['id'],
+                        'hash'=>$hash
+                    ]);
+
+                    $this->parent->finishTask($task, 'finished');
+                }
 
             } else {
                 /*

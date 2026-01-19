@@ -30,6 +30,10 @@ class MainCycleEx extends TelegramClient {
         $this->downloadClient = new DownloadClient();
     }
 
+    public function ModelTask() {
+        return $this->modelTask;
+    }
+
     public function Update() {
 
         try {
