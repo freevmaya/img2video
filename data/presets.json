@@ -2,7 +2,10 @@
 	"Fairy": {
 		"name": "Фея",
 		"caption": "Просто загрузите свое фото и получите ✨волшебный портрет!\n\n👇Больше шаблонов ищите в главном меню.",
-		"image": "public/images/Fairy-preview.jpg",
+		"image_id": {
+			"DEV": "AgACAgIAAxkBAAIX9Glvk4lWfRMX8wmQM-zyc3cPU3kcAAJHD2sbRBKBS_mL5IjstcKMAQADAgADeAADOAQ",
+			"LIVE": "AgACAgIAAxkBAAIfrWlvnAwx8x5asL9i2ptfezTNjX00AAJHD2sbRBKBS9tsWgV9uCWPAQADAgADeAADOAQ"
+		},
 		"gender": "female",
 		"subsequence": [
 			{
