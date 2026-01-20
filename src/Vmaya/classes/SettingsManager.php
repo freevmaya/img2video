@@ -74,6 +74,13 @@ class SettingsManager extends SessionManager {
         $this->setSession('messageImages', $images);
     }
 
+    public function pushMessageVideo($message_id, $file_id) {
+        if (!($list = $this->getSession('messageVideos'))) $list = [];
+
+        array_add_limit($list, $message_id, $file_id, 10);
+        $this->setSession('messageVideos', $list);
+    }
+
     public function getMessageImageUrl($message_id) {
         $images = $this->getSession('messageImages');
         if (DEV) {
@@ -108,6 +115,9 @@ class SettingsManager extends SessionManager {
 
                 if ($photos = $sendResult->getPhoto()) 
                     $this->pushMessageImage($messageIndex, $photos->last()->getFileId());
+
+                if ($video = $sendResult->getVideo()) 
+                    $this->pushMessageVideo($messageIndex, $video->getFileId());
 
 	            $this->setSession('history', $history);
 	            $this->setSetting('messageIndex', $messageIndex + 1);

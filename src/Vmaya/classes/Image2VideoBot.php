@@ -866,14 +866,23 @@ class Image2VideoBot extends YKassaBot {
 
         switch ($stage) {
             case 0: 
-                    $text = Lang("Send your photo");
+                    $text = Lang("Send your photo for video");
                     if ($gen_model = $this->getCurrentModelName('imageToVideo'))
                         $text .= "\n\n(".Lang("Current model %s", $gen_model).')';
 
                     $this->pushRecallMethod($this->messageIndex(), "imageToVideo({$stage})");
+
+                    /*
                     $this->Answer($this->getCurrentChatId(), $this->genContent($text, true, [
                         [$this->createButton('Select model', "selModel.imageToVideo.{$this->messageIndex()}")]
                     ]));
+                    */
+
+                    $this->SendVideo($text, 'BAACAgIAAxkDAAIX22lvfNwizGwwlhhU_AoXYYG6uHctAAKbkwACRBKBS7tZqH2PTJpcOAQ', [
+                        [$this->createButton('Select model', "selModel.imageToVideo.{$this->messageIndex()}")],
+                         [$this->closeMessageButton()]
+                    ], 'Markdown', true);
+
                     $this->setSession("expect", 'imageToVideo(1)');
                     $this->setSession('images', []);
                 break;

@@ -219,13 +219,13 @@ abstract class BaseBot extends SettingsManager {
         return $this->afterSend($this->api->sendPhoto($params));
     }
 
-    public function SendVideo($caption, $videoPath, $buttons = null, $parse_mode = 'Markdown') {
+    public function SendVideo($caption, $videoPathOrId, $buttons = null, $parse_mode = 'Markdown', $asFileId = false) {
         $chatId = $this->getCurrentChatId();
 
-        if (file_exists($videoPath)) {
+        if ($asFileId || file_exists($videoPath)) {
             $params = array_merge([
                 'chat_id' => $chatId,
-                'video' => InputFile::create($videoPath),
+                'video' => $asFileId ? $videoPathOrId : InputFile::create($videoPathOrId),
                 'caption' => $caption,
                 'supports_streaming' => true
             ], is_string($caption) ? ['caption' => $caption] : $caption);
@@ -237,7 +237,7 @@ abstract class BaseBot extends SettingsManager {
             $params = encodeTelegramParams($params);
             return $this->afterSend($this->api->sendVideo($params));
         } else {
-            trace_error("File {$videoPath} not found");
+            trace_error("File {$videoPathOrId} not found");
             return false;
         }
     }

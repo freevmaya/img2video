@@ -7,3 +7,103 @@ PayMaster
 4100 0000 0000 0001
 
 curl https://api.telegram.org/bot<BOTTOKEN>/getMe
+
+
+
+Ошибка возникает из-за того, что в настройках вашего ShopID подключена автоотправка чеков, но в вашем запросе sendInvoice отсутствуют данные для формирования чека или запрос сформирован некорректно.
+
+Если вы используете какой-либо конструктор ботов, то включите передачу данных для чеков в настройках фискализации в админ. панели конструктора. Если найти не удастся, обратитесь в поддержку конструктора по этому вопросу.
+
+Если ваш бот самописный, то разработчику бота нужно добавить в запрос sendInvoice параметр provider_data (или исправить его).
+
+Пример запроса sendinvoice с параметрами для чека есть в документации в разделе «Если вы настраивали фискализацию через ЮKassa»: https://yookassa.ru/docs/support/payments/onboarding/integration/cms-module/telegram#telegram__03
+Также для ознакомления, наша страница с рекомендациями по интеграции ЮKassa и Telegram: https://git.yoomoney.ru/projects/SUP/repos/other/browse/telegram_integration.md
+
+При фискализации чеков через ЮKassa помимо основных параметров чека также нужно обязательно передавать почту или телефон клиента для отправки чека. Без этого платеж не создастся. Для этого есть два способа:
+
+Способ 1: Вы можете самостоятельно собирать почту/телефон клиента в диалоге с ботом и передавать её в provider_data.receipt.customer.email / provider_data.receipt.customer.phone, тогда provider_data будет выглядеть следующим образом:
+
+"provider_data" : {
+        "receipt" : {
+            "customer" : {
+                "email" : "example@example.com",
+                "phone" : "79211234567"
+            },
+            "items" : [
+                {
+                    "description" : "Наименование товара",
+                    "quantity" : 1,
+                    "amount" : {
+                        "value" : 100,
+                        "currency" : "RUB"
+                    },
+                    "vat_code" : 1,
+                    "payment_mode" : "full_payment",
+                    "payment_subject" : "commodity"
+                }
+            ]
+        }
+    }
+}
+
+Способ 2: Либо вы можете на уровне метода sendInvoice указать параметры:
+
+- need_email = true и send_email_to_provider = true (эти параметры работают только в паре) - тогда email для отправки чека плательщик укажет на форме оплаты.
+- Либо: need_phone_number = true и send_phone_number_to_provider = true (эти параметры работают только в паре) - тогда номер телефона для отправки чека плательщик укажет на форме оплаты.
+
+В этом случае вам не нужно самостоятельно запрашивать почту/телефон у клиента и не нужно передавать объект provider_data.receipt.customer. Но обязательно нужно передавать остальные параметры о товаре для чека в массиве items. Пример запроса:
+
+need_email = true,
+send_email_to_provider = true,
+"provider_data" : {
+        "receipt" : {
+            "items" : [
+                {
+                    "description" : "Наименование товара",
+                    "quantity" : 1,
+                    "amount" : {
+                        "value" : 100,
+                        "currency" : "RUB"
+                    },
+                    "vat_code" : 1,
+                    "payment_mode" : "full_payment",
+                    "payment_subject" : "commodity"
+                }
+            ]
+        }
+    }
+}
+
+"need_email": true,
+"send_email_to_provider": true,
+"provider_data": {
+    "receipt": {
+        "customer": {
+            "full_name": "Frolov Vadim Valerievich",
+            "email": "fwadim@mail.ru",
+            "phone": 79227540997,
+            "inn": 745004166339
+        },
+        "items": [
+            {
+                "description": "8 Ð¸Ð·Ð¾Ð±Ñ€Ð°Ð¶ÐµÐ½Ð¸Ð¹ 1 Ð²Ð¸Ð´ÐµÐ¾",
+                "quantity": 1,
+                "amount": {
+                    "value": 90,
+                    "currency": "RUB"
+                },
+                "vat_code": 1,
+                "payment_mode": "full_payment",
+                "payment_subject": "commodity"
+            }
+        ]
+    }
+}
+
+Дополнительные нюансы:
+1) Сумма платежа в самом счёте (sendInvoice) передаётся в копейках, а в данных для чека (provider_data.receipt.items.amount.value) — в рублях.
+2) Если передавать контакты для отправки чека сразу двумя способами, то чек отправится на контакт, переданный в provider_data.receipt.customer (из способа №1).
+3) Вы можете отключить автоматическое формирование чеков через ЮKassa. В этом случае ЮKassa будет только проводить платежи, а чеки по ним вы будете формировать самостоятельно.
+4) В «чеках от ЮKassa» есть только один способ доставки чека пользователю — на электронную почту. Отправка чека в смс недоступна, поэтому нужно всегда передавать email клиента.
+
+
