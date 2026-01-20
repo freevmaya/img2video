@@ -96,10 +96,9 @@ class Image2VideoBot extends YKassaBot {
             [['text' => '❕'.Lang('Agreement'), 'callback_data' => 'agreement']]
         ];
 
-        /*
         if ($this->getOriginUserId() == ADMIN_USERID) {
-            $result[] = [['text' => 'Остановить', 'callback_data' => 'stopBot'], ['text' => 'Сменить ID', 'callback_data' => 'changeId']];
-        }*/
+            $result[] = [['text' => 'Получить ID', 'callback_data' => 'getFileId']];
+        }
 
         return $result;
     }
@@ -229,6 +228,8 @@ class Image2VideoBot extends YKassaBot {
                 return $this->runPreset($data[1]);
             case 'presets':
                 return $this->presets();
+            case 'getFileId':
+                return $this->getFileId();
         }
         return false;
     }
@@ -285,19 +286,36 @@ class Image2VideoBot extends YKassaBot {
         return false;
     }
 
+    protected function get_file_id() {
+        if ($video = $this->getMessageVideo())
+            $this->Answer(null, $video['file_id'], false, false, 'HTML');
+        else if ($photo = $this->getMessagePhoto())
+            $this->Answer(null, $photo['file_id'], false, false, 'HTML');
+        else $this->Answer(null, "Не могу получить file_id");
+    }
+
+    protected function getFileId() {
+        $this->Answer(null, "Send file");
+        $this->setSession('expect', 'get_file_id()');
+    }
+
     protected function preset($presetName) {
 
         if ($preset = $this->getPreset($presetName)) {
 
             if (isset($preset['image_id'])) {
 
-                $this->SendPhoto($preset['caption'], $preset['image_id'], [
+                $file_id = DEV ? $preset['image_id']['DEV'] : $preset['image_id']['LIVE'];
+
+                $this->SendPhoto($preset['caption'], $file_id, [
                     [['text'=>Lang('Begin'), 'callback_data' => "runPreset.{$presetName}"],
                     $this->closeMessageButton()]
                 ], 'Markdown', true);
             } else if (isset($preset['video_id'])) {
 
-                $this->SendVideo($preset['caption'], $preset['video_id'], [
+                $file_id = DEV ? $preset['video_id']['DEV'] : $preset['video_id']['LIVE'];
+
+                $this->SendVideo($preset['caption'], $file_id, [
                     [['text'=>Lang('Begin'), 'callback_data' => "runPreset.{$presetName}"],
                     $this->closeMessageButton()]
                 ], 'Markdown', true);
