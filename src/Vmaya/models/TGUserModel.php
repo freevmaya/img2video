@@ -31,7 +31,7 @@ class TGUserModel extends BaseModel {
 				$first_name = toUTF(@$record['first_name']);
 				$last_name 	= toUTF(@$record['last_name']);
 
-				$language_code = isset($record['language_code']) ? $record['language_code'] : 'ru';
+				$language_code = (isset($record['language_code']) && $record['language_code']) ? $record['language_code'] : 'ru';
 
 				$area = (new AreasModel())->ByLanguage($language_code);
 
