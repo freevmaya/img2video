@@ -97,7 +97,7 @@ class Image2VideoBot extends YKassaBot {
         ];
 
         if ($this->getOriginUserId() == ADMIN_USERID) {
-            $result[] = [['text' => 'Получить ID', 'callback_data' => 'getFileId']];
+            $result[] = [['text' => 'Загрузить файл', 'callback_data' => 'getFileId']];
         }
 
         return $result;
@@ -295,7 +295,7 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function getFileId() {
-        $this->Answer(null, "Send file");
+        $this->Answer(null, "Отправьте файл");
         $this->setSession('expect', 'get_file_id()');
     }
 

@@ -31,11 +31,13 @@ class TGUserModel extends BaseModel {
 				$first_name = toUTF(@$record['first_name']);
 				$last_name 	= toUTF(@$record['last_name']);
 
-				$area = (new AreasModel())->ByLanguage($record['language_code']);
+				$language_code = isset($record['language_code']) ? $record['language_code'] : 'ru';
+
+				$area = (new AreasModel())->ByLanguage($language_code);
 
 				$query = "INSERT INTO {$this->getTable()} (`id`, `area_id`, `username`, `first_name`, `last_name`, `language_code`) VALUES (?,?,?,?,?,?)";
 
-				$values = [$record['id'], $area['id'], $username, $first_name, $last_name, $record['language_code']];
+				$values = [$record['id'], $area['id'], $username, $first_name, $last_name, $language_code];
 
 				if ($dbp->bquery($query, 'iissss', $values))
 					$user['area_id'] = $area['id'];
