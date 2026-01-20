@@ -251,7 +251,13 @@ class Image2VideoBot extends YKassaBot {
 
         if (!$this->pMenuProcess($chatId, $text)) {
 
-            if ($photo = $this->getMessagePhoto()) {
+            if ($video = $this->getMessageVideo()) {
+                $this->pushMessageVideo($messageId, $video['file_id']);
+
+
+                if ($caption = $this->currentUpdate->getMessage()->get('caption'))               
+                    $this->setSession('prompt', $caption);
+            } else if ($photo = $this->getMessagePhoto()) {
                 $this->pushImage($photo['file_id']);
 
 

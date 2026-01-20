@@ -607,5 +607,13 @@ abstract class BaseBot extends SettingsManager {
             return $onlyLastPhoto ? $photos[count($photos) - 1] : $photos;
         return null;
     }
+
+    protected function getMessageVideo() {
+        $message = $this->currentUpdate['message'];
+
+        if ($video = @$message['video'])
+            return $video;
+        return null;
+    }
 }
 ?>
