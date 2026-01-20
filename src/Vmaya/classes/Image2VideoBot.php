@@ -289,7 +289,20 @@ class Image2VideoBot extends YKassaBot {
 
         if ($preset = $this->getPreset($presetName)) {
 
-            if (isset($preset['image'])) {
+            if (isset($preset['image_id'])) {
+
+                $this->SendPhoto($preset['caption'], $preset['image_id'], [
+                    [['text'=>Lang('Begin'), 'callback_data' => "runPreset.{$presetName}"],
+                    $this->closeMessageButton()]
+                ], 'Markdown', true);
+            } else if (isset($preset['video_id'])) {
+
+                $this->SendVideo($preset['caption'], $preset['video_id'], [
+                    [['text'=>Lang('Begin'), 'callback_data' => "runPreset.{$presetName}"],
+                    $this->closeMessageButton()]
+                ], 'Markdown', true);
+            } else if (isset($preset['image'])) {
+
                 $this->SendPhoto($preset['caption'], BASEPATH.$preset['image'], [
                     [['text'=>Lang('Begin'), 'callback_data' => "runPreset.{$presetName}"],
                     $this->closeMessageButton()]
@@ -300,7 +313,7 @@ class Image2VideoBot extends YKassaBot {
                     [['text'=>Lang('Begin'), 'callback_data' => "runPreset.{$presetName}"],
                     $this->closeMessageButton()]
                 ]);
-            }
+            } 
         } else $this->Answer(null, $this->genContent(Lang('Preset "%s" not found', $presetName), true));
     }
 

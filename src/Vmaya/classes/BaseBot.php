@@ -201,12 +201,12 @@ abstract class BaseBot extends SettingsManager {
         return $result;
     }
 
-    public function SendPhoto($caption, $photoPathOrUrl, $buttons = null, $parse_mode = 'Markdown') {
+    public function SendPhoto($caption, $photoPathOrUrl, $buttons = null, $parse_mode = 'Markdown', $asFileId = false) {
         $chatId = $this->getCurrentChatId();
 
         $params = array_merge([
             'chat_id' => $chatId,
-            'photo' => isUrl($photoPathOrUrl) ? $photoPathOrUrl : InputFile::create($photoPathOrUrl),
+            'photo' => $asFileId || isUrl($photoPathOrUrl) ? $photoPathOrUrl : InputFile::create($photoPathOrUrl),
             'caption' => $caption,
             'parse_mode' => $parse_mode
         ], is_string($caption) ? ['caption' => $caption] : $caption);
@@ -222,7 +222,7 @@ abstract class BaseBot extends SettingsManager {
     public function SendVideo($caption, $videoPathOrId, $buttons = null, $parse_mode = 'Markdown', $asFileId = false) {
         $chatId = $this->getCurrentChatId();
 
-        if ($asFileId || file_exists($videoPath)) {
+        if ($asFileId || file_exists($videoPathOrId)) {
             $params = array_merge([
                 'chat_id' => $chatId,
                 'video' => $asFileId ? $videoPathOrId : InputFile::create($videoPathOrId),
