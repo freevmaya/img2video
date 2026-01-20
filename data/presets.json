@@ -1,4 +1,24 @@
-{	
+{		
+	"Fairy": {
+		"name": "Фея",
+		"caption": "Просто загрузите свое фото и получите ✨волшебный портрет!\n\n👇Больше шаблонов ищите в главном меню.",
+		"image": "public/images/Fairy-preview.jpg",
+		"gender": "female",
+		"subsequence": [
+			{
+				"model_index": "leo_Seedream",
+				"images": [
+					{
+						"value": null,
+						"path": "parameters/guidances/image_reference/0/image/id"
+					}
+				],
+				"options": {
+					"prompt": "A portrait of a forest fairy, hyperrealistic. A girl with delicate features and light hair braided in an intricate hairstyle with fresh flowers and twigs looks straight at the viewer with a mysterious half-smile, half-turned. She has graceful pointed ears and a light pattern of glowing pollen on her cheek. She is dressed in a dress made of living ferns and rose petals. Magical lights float around. Soft sunlight filtering through the foliage, the atmosphere of a mysterious forest, and detailed textures of her skin and wings. --ar 2:3 --style raw"
+				}
+			}
+		]
+	},
 	"Winter-beauty": {
 		"name": "С Крещением!",
 		"caption": "Просто загрузите свое фото и получите,✨ открытку к празднику.\n Теперь вы можете поздравить близких оригинальной открыткой!\n\nВнимание! Этот шаблон не гарантирует 100%-й схожести, он просто как бы объединяет ваше фото с эталонным стилем. Схожесть лица будет на 50-80%.\n\n👇Больше шаблонов ищите в главном меню.",
@@ -44,26 +64,6 @@
 				            "influence": 0.5
 				        }
 				    ]
-				}
-			}
-		]
-	},
-	"Fairy": {
-		"name": "Фея",
-		"caption": "Просто загрузите свое фото и получите ✨волшебный портрет!\n\n👇Больше шаблонов ищите в главном меню.",
-		"image": "public/images/Fairy-preview.jpg",
-		"gender": "female",
-		"subsequence": [
-			{
-				"model_index": "leo_Seedream",
-				"images": [
-					{
-						"value": null,
-						"path": "parameters/guidances/image_reference/0/image/id"
-					}
-				],
-				"options": {
-					"prompt": "A portrait of a forest fairy, hyperrealistic. A girl with delicate features and light hair braided in an intricate hairstyle with fresh flowers and twigs looks straight at the viewer with a mysterious half-smile, half-turned. She has graceful pointed ears and a light pattern of glowing pollen on her cheek. She is dressed in a dress made of living ferns and rose petals. Magical lights float around. Soft sunlight filtering through the foliage, the atmosphere of a mysterious forest, and detailed textures of her skin and wings. --ar 2:3 --style raw"
 				}
 			}
 		]
