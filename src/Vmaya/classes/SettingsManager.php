@@ -38,8 +38,10 @@ class SettingsManager extends SessionManager {
     }
 
     public function getSetting($param_name, $default_value = null) {
-        if (isset($this->settings[$param_name]))
+
+        if (isset($this->settings[$param_name])) {
             return $this->settings[$param_name];
+        }
         return $default_value;
     }
 
