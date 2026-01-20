@@ -25,7 +25,10 @@
 	"Winter-beauty": {
 		"name": "С Крещением!",
 		"caption": "Просто загрузите свое фото и получите,✨ открытку к празднику.\n Теперь вы можете поздравить близких оригинальной открыткой!\n\nВнимание! Этот шаблон не гарантирует 100%-й схожести, он просто как бы объединяет ваше фото с эталонным стилем. Схожесть лица будет на 50-80%.\n\n👇Больше шаблонов ищите в главном меню.",
-		"image": "public/images/Winter-beauty-preview.jpg",
+		"image_id": {
+			"DEV": "AgACAgIAAxkBAAIYHmlvnKr5mTZQxFNows4coumgDwXVAAIgEWsbMgSBS2-T_Nbbkn85AQADAgADeQADOAQ",
+			"LIVE": "AgACAgIAAxkBAAIfuWlvnH2MpKft6tOYMRukKNXo-SBbAAIgEWsbMgSBS5oSjDLnRs_5AQADAgADeQADOAQ"
+		},
 		"overlays": [
 			"public/images/Winter-beauty.png"	
 		],
@@ -74,7 +77,10 @@
 	"Baptism": {
 		"name": "Крещение Господне",
 		"caption": "Просто загрузите свое фото и получите,✨ открытку к празднику.\n Теперь вы можете поздравить близких оригинальной открыткой!\n\nВнимание! Этот шаблон не гарантирует 100%-й схожести, он просто как бы объединяет ваше фото с эталонным стилем. Схожесть лица будет на 50-80%.\n\n👇Больше шаблонов ищите в главном меню.",
-		"image": "public/images/Baptism-preview.jpg",
+		"image_id": {
+			"DEV": "AgACAgIAAxkBAAIYKWlvnNH0o6hIZ7j8pGaIQ5fqqi0YAALfD2sbRBKBS2pfzR5mBVmxAQADAgADeAADOAQ",
+			"LIVE": "AgACAgIAAxkBAAIfvmlvnO5eK-kIep01tIA09OKoqLy2AALfD2sbRBKBSyNoAyEKUExSAQADAgADeAADOAQ"
+		},
 		"overlays": [
 			"public/images/Baptism.png"	
 		],
@@ -123,7 +129,10 @@
 	"Fantastic portrait": {
 		"name": "Фантастический портрет",
 		"caption": "Просто загрузите свое фото и получите новый,✨ фантастический образ.\nПримерь на себя образ 👑принцессы из будущего!\n\nВнимание! Этот шаблон не гарантирует 100%-й схожести, он просто как бы объединяет ваше фото с эталонным стилем. Схожесть лица будет на 50-80%.\n\n👇Больше шаблонов ищите в главном меню.",
-		"image": "public/images/Fantastic portrait.jpg",
+		"image_id": {
+			"DEV": "AgACAgIAAxkBAAIYMGlvnRmbP-0MVYuqGjoZ0ut4dwKUAALhD2sbRBKBS5OMTEdpJgaSAQADAgADeQADOAQ",
+			"LIVE": "AgACAgIAAxkBAAIfwWlvnUTqXYeAJVJy3IOqJbW343RSAALhD2sbRBKBSyAZ2a2AA45-AQADAgADeQADOAQ"
+		},
 		"gender": "female",
 		"subsequence": [
 			{
@@ -170,7 +179,10 @@
 	"Sorceress": {
 		"name": "Колдунья",
 		"caption": "Фэнтезийный образ девушки в красном, вечернем платье.\nПримерь на себя образ ✨волшебницы из сказок.\n\nЭтот шаблон переносит ваше лицо, с фото, на видео. Вероятная схожесть гаранируется от 80%\n\n👇Больше шаблонов ищите в главном меню.",
-		"video": "public/videos/Sorceress-preview.mp4",
+		"video_id": {
+			"DEV": "BAACAgIAAxkBAAIYNmlvnaTEGejTeaFgBCD9WJTWIrmZAAJFlgACRBKBS6lYr5b_5fouOAQ",
+			"LIVE": "BAACAgIAAxkBAAIfxmlvnd1JDVlFHDSsK9eXEwxzJTwgAAJ2mAACMgSBSwfJjKGvedBjOAQ"
+		},
 		"gender": "female",
 		"subsequence": [
 			{
