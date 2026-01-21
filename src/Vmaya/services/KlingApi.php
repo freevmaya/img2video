@@ -38,7 +38,7 @@ class KlingApi extends BaseKlingApi
 
     public function prepareImage($url) {
 
-        $file_name = $this->bot->getUserId().'_'.basename($url);
+        $file_name = $this->bot->getUserId().'_'.time().'_'.basename($url);
         $filePath = USER_PATH.$file_name;
         $newUrl = USER_URL.$file_name;
 
@@ -48,7 +48,7 @@ class KlingApi extends BaseKlingApi
         $result = downloadFile($url, $filePath);
 
         if ($result['success']) {
-            
+
             resizeImageIfTooLarge($filePath, null, [
                 'max_width' => 640,
                 'max_height' => 640,
