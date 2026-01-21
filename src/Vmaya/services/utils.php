@@ -113,3 +113,106 @@ function getGenderFromAPI($name) {
     
     return null;
 }
+
+/**
+ * Определяет тип файла Telegram по его file_id
+ * Основано на префиксах, которые использует Telegram
+ * 
+ * @param string $fileId file_id из Telegram
+ * @return string Тип файла или 'unknown'
+ */
+function detectFileTypeByFileId(string $fileId): string
+{
+    // Приводим к строке и обрезаем пробелы
+    $fileId = trim($fileId);
+    
+    if (empty($fileId)) {
+        return 'unknown';
+    }
+    
+    // Telegram использует определенные префиксы для разных типов файлов
+    // Префиксы основаны на анализе реальных file_id
+    
+    $prefixPatterns = [
+        // Видео файлы
+        'video' => [
+            '/^BAACAg[Q|I]/',           // Обычные видео
+            '/^CgACAg[Q|I]/',           // Видео-сообщения (видео-кружочки)
+            '/^DQACAg[Q|I]/',           // Видео с эффектами
+        ],
+        
+        // Фотографии
+        'photo' => [
+            '/^AgACAg[Q|I]/',           // Обычные фото (AgACAg...)
+            '/^CAACAg[Q|I]/',           // Стикеры, которые могут быть фото
+        ],
+        
+        // Документы
+        'document' => [
+            '/^BQACAg[Q|I]/',           // Обычные документы (PDF, DOC, etc.)
+            '/^AwACAg[Q|I]/',           // Документы из каналов
+        ],
+        
+        // Аудио файлы
+        'audio' => [
+            '/^CQACAg[Q|I]/',           // Аудио файлы
+        ],
+        
+        // Голосовые сообщения
+        'voice' => [
+            '/^AQACAg[Q|I]/',           // Голосовые сообщения
+        ],
+        
+        // Видео-заметки (кружочки)
+        'video_note' => [
+            '/^CgACAg[Q|I]/',           // Видео-заметки
+        ],
+        
+        // Анимации (GIF)
+        'animation' => [
+            '/^DgACAg[Q|I]/',           // Анимации/GIF
+        ],
+        
+        // Стикеры
+        'sticker' => [
+            '/^CAACAg[Q|I]/',           // Стикеры
+        ],
+    ];
+    
+    // Проверяем каждый тип
+    foreach ($prefixPatterns as $type => $patterns) {
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $fileId)) {
+                return $type;
+            }
+        }
+    }
+    
+    // Дополнительные проверки по длине и структуре
+    return detectByLengthAndStructure($fileId);
+}
+
+function detectByLengthAndStructure(string $fileId): string
+{
+    $length = strlen($fileId);
+    
+    // Примерные диапазоны длин для разных типов файлов
+    $lengthPatterns = [
+        ['type' => 'photo', 'min' => 40, 'max' => 60],
+        ['type' => 'video', 'min' => 40, 'max' => 70],
+        ['type' => 'document', 'min' => 40, 'max' => 80],
+        ['type' => 'audio', 'min' => 40, 'max' => 60],
+        ['type' => 'voice', 'min' => 40, 'max' => 55],
+        ['type' => 'video_note', 'min' => 40, 'max' => 60],
+        ['type' => 'animation', 'min' => 40, 'max' => 65],
+        ['type' => 'sticker', 'min' => 40, 'max' => 60],
+    ];
+    
+    foreach ($lengthPatterns as $pattern) {
+        if ($length >= $pattern['min'] && $length <= $pattern['max']) {
+            return $pattern['type'];
+        }
+    }
+    
+    return 'unknown';
+}

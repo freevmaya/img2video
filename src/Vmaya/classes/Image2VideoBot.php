@@ -303,35 +303,29 @@ class Image2VideoBot extends YKassaBot {
 
         if ($preset = $this->getPreset($presetName)) {
 
-            if (isset($preset['image_id'])) {
+            $buttons = [['text'=>Lang('Begin'), 'callback_data' => "runPreset.{$presetName}"],
+                    $this->closeMessageButton()];
 
-                $file_id = DEV ? $preset['image_id']['DEV'] : $preset['image_id']['LIVE'];
+            if (!$this->ShowWithPreview($preset['caption'], $buttons, $presetName.'_preview', false)) {
 
-                $this->SendPhoto($preset['caption'], $file_id, [
-                    [['text'=>Lang('Begin'), 'callback_data' => "runPreset.{$presetName}"],
-                    $this->closeMessageButton()]
-                ], 'Markdown', true);
-            } else if (isset($preset['video_id'])) {
+                if (isset($preset['image_id'])) {
 
-                $file_id = DEV ? $preset['video_id']['DEV'] : $preset['video_id']['LIVE'];
+                    $file_id = DEV ? $preset['image_id']['DEV'] : $preset['image_id']['LIVE'];
 
-                $this->SendVideo($preset['caption'], $file_id, [
-                    [['text'=>Lang('Begin'), 'callback_data' => "runPreset.{$presetName}"],
-                    $this->closeMessageButton()]
-                ], 'Markdown', true);
-            } else if (isset($preset['image'])) {
+                    $this->SendPhoto($preset['caption'], $file_id, [$buttons], 'Markdown', true);
+                } else if (isset($preset['video_id'])) {
 
-                $this->SendPhoto($preset['caption'], BASEPATH.$preset['image'], [
-                    [['text'=>Lang('Begin'), 'callback_data' => "runPreset.{$presetName}"],
-                    $this->closeMessageButton()]
-                ]);
-            } else if (isset($preset['video'])) {
+                    $file_id = DEV ? $preset['video_id']['DEV'] : $preset['video_id']['LIVE'];
 
-                $this->SendVideo($preset['caption'], BASEPATH.$preset['video'], [
-                    [['text'=>Lang('Begin'), 'callback_data' => "runPreset.{$presetName}"],
-                    $this->closeMessageButton()]
-                ]);
-            } 
+                    $this->SendVideo($preset['caption'], $file_id, [$buttons], 'Markdown', true);
+                } else if (isset($preset['image'])) {
+
+                    $this->SendPhoto($preset['caption'], BASEPATH.$preset['image'], [$buttons]);
+                } else if (isset($preset['video'])) {
+
+                    $this->SendVideo($preset['caption'], BASEPATH.$preset['video'], [$buttons]);
+                } 
+            }
         } else $this->Answer(null, $this->genContent(Lang('Preset "%s" not found', $presetName), true));
     }
 
@@ -994,18 +988,36 @@ class Image2VideoBot extends YKassaBot {
         }
     }
 
-    protected function ShowWithPreview($text, $buttons, $setting_name) {
+    protected function ShowWithPreview($text, $buttons, $setting_name, $showSimpleMessage = true) {
 
-        if ($preview = $this->getSetting($setting_name, false)) {
-            $this->SendVideo($text, $preview, [
-                $buttons,
-                [$this->closeMessageButton()]
-            ], 'Markdown', true);
-        } else {
+        if ($preview_id = $this->getSetting($setting_name, false)) {
+
+            $type = detectFileTypeByFileId($preview_id);
+            
+            switch ($type) {
+                case 'video':
+                        $this->SendVideo($text, $preview_id, [
+                            $buttons,
+                            [$this->closeMessageButton()]
+                        ], 'Markdown', true);
+                    break;
+                case 'photo':
+                        $this->SendPhoto($text, $preview_id, [
+                            $buttons,
+                            [$this->closeMessageButton()]
+                        ], 'Markdown', true);
+                    break;
+                default:
+                    return false;
+            }
+
+            return true;
+        } else if ($showSimpleMessage)
             $this->Answer($this->getCurrentChatId(), $this->genContent($text, true, [
                 $buttons
             ]));
-        }
+
+        return false;
     }
 
     protected function create_image() {

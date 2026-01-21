@@ -30,7 +30,7 @@ class SettingsModel extends BaseModel {
 		return $value;
 	}
 
-	public function getValue($name, $default) {
+	public function getValue($name, $default = null) {
 		if ($item = $this->getItem($name, 'name')) {
 			return $item['value'];
 		} else {
