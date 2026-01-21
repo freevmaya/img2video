@@ -509,12 +509,12 @@ abstract class BaseBot extends SettingsManager {
         
         $date = $chatMember['date'];
 
-        $this->SendToOwner($chat, $from, $oldStatus, $newStatus);
+        $this->SendToOwnerChangeStatus($chat, $from, $oldStatus, $newStatus);
 
         return true;
     }
 
-    public function SendToOwner($chat, $from, $oldStatus, $newStatus) {
+    public function SendToOwnerChangeStatus($chat, $from, $oldStatus, $newStatus) {
         
         $chatType = $chat['type']; // private, group, supergroup, channel
         $chatName = $chat['title'] ?? $chat['username'] ?? 'Личные сообщения';
@@ -580,9 +580,6 @@ abstract class BaseBot extends SettingsManager {
         if ($chatType !== 'private') {
             $message .= "\n👥 *Участников:* " . ($chat['members_count'] ?? 'неизвестно');
         }
-
-        if (DEV)
-            echo "$message\n";
         
         try {
             $this->api->sendMessage([
