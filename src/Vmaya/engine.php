@@ -2,21 +2,21 @@
 	include(dirname(__DIR__, 3).'/config/config.php');
 
 	define('DOWNLOADS_PATH', BASEPATH.'downloads'.DS);
-	define('DOWNLOADS_URL', BASEURL.'downloads'.DS);
+	define('DOWNLOADS_URL', BASEURL.'/downloads/');
 
 	define('RESULT_PATH', DOWNLOADS_PATH.'results'.DS);
 	define('PROCESS_PATH', DOWNLOADS_PATH.'progress'.DS);
 	define('USER_PATH', DOWNLOADS_PATH.'users'.DS);
 	
-	define('RESULT_URL', DOWNLOADS_URL.'results'.DS);
-	define('PROCESS_URL', DOWNLOADS_URL.'progress'.DS);
-	define('USER_URL', DOWNLOADS_URL.'users'.DS);
+	define('RESULT_URL', DOWNLOADS_URL.'results/');
+	define('PROCESS_URL', DOWNLOADS_URL.'progress/');
+	define('USER_URL', DOWNLOADS_URL.'users/');
 
 	define('IMAGES_PATH', BASEPATH.'public'.DS.'images'.DS);
-	define('IMAGES_URL', BASEURL.'public'.DS.'images'.DS);
+	define('IMAGES_URL', BASEURL.DS.'public'.DS.'images'.DS);
 
 	define('VIDEOS_PATH', BASEPATH.'public'.DS.'videos'.DS);
-	define('VIDEOS_URL', BASEURL.'public'.DS.'videos'.DS);
+	define('VIDEOS_URL', BASEURL.'/public/videos/');
 
 	define('ADMIN_USERID', 1573356581);
 	define('SUPPORT_USERID', 1573356581);

@@ -15,8 +15,48 @@ class KlingApi extends BaseKlingApi
         $this->modelTask = $modelTask;
     }
 
-    public function AccountInfo() {
-        return $this->makeRequest('/account/costs', [], false);
+    public function AccountInfo($params = []) {
+        return $this->makeRequest('account/costs', array_merge([
+            'start_time'=>time(),
+            'end_time'=>time(),
+            'resource_pack_name'=>'All'
+        ], $params), false);
+    }
+
+    protected function setImages($model_name, &$options, $images) {
+
+        if (count($images) == 0)
+            return false;
+
+        foreach ($options as $key=>$rec)
+            if ($key == 'image') {
+                $options['image'] = $this->prepareImage($images[0]);
+                return true;
+            }
+        return false;
+    }
+
+    public function prepareImage($url) {
+
+        $file_name = $this->bot->getUserId().'_'.basename($url);
+        $filePath = USER_PATH.$file_name;
+        $newUrl = USER_URL.$file_name;
+
+        if (file_exists($filePath))
+            return $newUrl;
+
+        $result = downloadFile($url, $filePath);
+
+        if ($result['success']) {
+            
+            resizeImageIfTooLarge($filePath, null, [
+                'max_width' => 640,
+                'max_height' => 640,
+            ]);
+
+            return $newUrl;
+        }
+        return false;
     }
 
     protected function makeRequest($url, $request_data, $preset_name=null)
