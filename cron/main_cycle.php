@@ -52,7 +52,7 @@ try {
 
     $dbp = new mySQLProvider(_dbhost, _dbname_default, _dbuser, _dbpassword);
 
-    $mj = new MainCycleEx($telegram, 'bot.php.cfg');
+    $mj = new MainCycleEx($telegram);
 
     //Основной цикл
     while ($lock->isFile()) {

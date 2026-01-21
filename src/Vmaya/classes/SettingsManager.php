@@ -3,6 +3,7 @@
 class SettingsManager extends SessionManager {
     private $file_settings;
     private $time_settings;
+    protected $settingsModel;
     protected $settings;
     protected $settingsChange;
 
@@ -21,15 +22,21 @@ class SettingsManager extends SessionManager {
             } else if (empty($this->settings)) {
                 $this->setSettingsAll($this->getDefaultSettings());
             }
-        } else trace_error("file_settings must be string, but given ".get_class($file_settings));
+        } else {
+            //trace_error("file_settings must be string, but given ".get_class($file_settings));
+            $this->settingsModel = new SettingsModel();
+            $this->setSettingsAll();
+        }
     }
 
-    public function setSettingsAll($settings)
+    public function setSettingsAll($settings = null)
     {
-        $this->settings = $settings;
-        $this->time_settings = time();
+        if (!$this->settingsModel && $settings) {
+            $this->settings = $settings;
+            $this->time_settings = time();
 
-        trace("Set settings: ".json_encode($settings, JSON_FLAGS));
+            trace("Set settings: ".json_encode($settings, JSON_FLAGS));
+        }
     }
 
     public function getDefaultSettings()
@@ -39,19 +46,29 @@ class SettingsManager extends SessionManager {
 
     public function getSetting($param_name, $default_value = null) {
 
-        if (isset($this->settings[$param_name])) {
-            return $this->settings[$param_name];
+        if ($this->settingsModel) 
+            return $this->settingsModel->getValue($param_name, $default_value);
+        else {
+            if (isset($this->settings[$param_name])) {
+                return $this->settings[$param_name];
+            }
+            return $default_value;
         }
-        return $default_value;
     }
 
     public function setSetting($param_name, $value) {
-        $this->settings[$param_name] = $value;
-        $this->settingsChange = true;
+
+        if ($this->settingsModel) 
+            return $this->settingsModel->setValue($param_name, $value);
+        else {
+            $this->settings[$param_name] = $value;
+            $this->settingsChange = true;
+        }
     }
 
     protected function saveSettings() {
-        if (!empty($this->file_settings) && !empty($this->settings)) {
+
+        if (!$this->settingsModel && !empty($this->file_settings) && !empty($this->settings)) {
             file_put_contents($this->file_settings, json_encode($this->settings, JSON_FLAGS));
             $this->time_settings = filemtime($this->file_settings);
             $this->settingsChange = false;
@@ -60,7 +77,8 @@ class SettingsManager extends SessionManager {
 
     public function checkAndUpdateSettings() {
         
-        if (file_exists($this->file_settings) &&
+        if (!empty($this->file_settings) && 
+            file_exists($this->file_settings) &&
             (filemtime($this->file_settings) != $this->time_settings))
             $this->openSettings($this->file_settings);
     }

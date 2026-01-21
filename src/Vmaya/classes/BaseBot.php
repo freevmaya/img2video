@@ -23,7 +23,7 @@ abstract class BaseBot extends SettingsManager {
         parent::__construct($file_settings);
     }
 
-    public function setSettingsAll($settings) {
+    public function setSettingsAll($settings = null) {
         parent::setSettingsAll($settings);
 
         if ($client_timeout = $this->getSetting('client_timeout', 10))

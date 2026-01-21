@@ -1002,6 +1002,7 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function create_image() {
+        
         [$gen, $imagesToImage_model] = $this->getCurrentGenModel('imagesToImage');
         [$gen, $textToImage_model] = $this->getCurrentGenModel('textToImage');
 
@@ -1009,13 +1010,32 @@ class Image2VideoBot extends YKassaBot {
         $this->setSession('prompt', '');
 
         if ($imagesToImage_model && $textToImage_model) {
+
+            $text = Lang("What kind of magic do you want to do?");
+
+            if ($create_image_preview = $this->getSetting('create_image_preview', false)) {
+                $this->SendVideo($text, $create_image_preview, [
+                    [$this->createButton('Select model', "selModel.imageToVideo.{$this->messageIndex()}")],
+                     [$this->closeMessageButton()]
+                ], 'Markdown', true);
+            } else {
+                $this->Answer($this->getCurrentChatId(), $this->genContent($text, true, [
+                    [
+                        $this->createButton('imagesToImage', "imagesToImage.0.prompt"),
+                        $this->createButton('textToImage', "textToImage.0.prompt")
+                    ],
+                    [$this->closeMessageButton()]
+                ]));
+            }
+
+            /*
             $this->Answer(null, $this->genContent(Lang("What kind of magic do you want to do?"), false, [
                 [
                     $this->createButton('imagesToImage', "imagesToImage.0.prompt"),
                     $this->createButton('textToImage', "textToImage.0.prompt")
                 ],
                 [$this->closeMessageButton()]
-            ]));
+            ]));*/
         } else $this->textToImage(0);
     }
 
