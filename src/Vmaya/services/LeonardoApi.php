@@ -337,8 +337,13 @@ class LeonardoApi extends BaseApi
                 $this->Answer(Lang("The task has been accepted"));
                 return $response;
 
-            } else trace_error($logstr.".\nSend data:".json_encode($data, JSON_FLAGS));
+            } else {
+                $msg = $logstr.".\nSend data:".json_encode($data, JSON_FLAGS);
+                trace_error($msg);
+                $this->SendToAdmin(['text' => $msg]);
+            }
         }
+
         $this->Wrong();
 
         return false;
