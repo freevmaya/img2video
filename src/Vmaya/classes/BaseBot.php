@@ -450,7 +450,7 @@ abstract class BaseBot extends SettingsManager {
     protected function runUpdate($update) {
 
         if ($message = $update->getMessage()) {
-            $chat = $update->getChat();        
+            $chat = $update->getChat();
 
             if ($chat) {
                 $chatId     = $chat->getId();
@@ -463,6 +463,7 @@ abstract class BaseBot extends SettingsManager {
 
                     if ($text && ($text[0] == '/')) {
                         $ctext = explode('@', $text);
+
                         if (!isset($ctext[1]) || ($ctext[1] == BOTALIASE))
                             $this->commandProcess($ctext[0], $chatId, $messageId, $text);
                     }
