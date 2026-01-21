@@ -520,24 +520,24 @@ abstract class BaseBot extends SettingsManager {
         $chatName = $chat['title'] ?? $chat['username'] ?? 'Личные сообщения';
         
         $statusNames = [
-            'creator' => '👑 Создатель',
-            'administrator' => '🛠️ Администратор',
-            'member' => '👤 Участник',
-            'restricted' => '⛔ Ограниченный',
-            'left' => '🚪 Покинул',
-            'kicked' => '🚫 Исключен',
+            'creator' => 'Создатель',
+            'administrator' => 'Администратор',
+            'member' => 'Участник',
+            'restricted' => 'Ограниченный',
+            'left' => 'Покинул',
+            'kicked' => 'Исключен',
         ];
         
         $oldStatusName = $statusNames[$oldStatus] ?? $oldStatus;
         $newStatusName = $statusNames[$newStatus] ?? $newStatus;
         
         $message = "📢 *Изменение статуса бота*\n\n";
-        $message .= "Чат:* $chatName\n";
-        $message .= "Тип:* $chatType\n";
-        $message .= "Пользователь:* {$from['first_name']}\n";
-        $message .= "ID пользователя:* `{$from['id']}`\n";
-        $message .= "ID чата:* `{$chat['id']}`\n";
-        $message .= "Изменения: $oldStatusName → $newStatusName\n";
+        $message .= "*Чат:* $chatName\n";
+        $message .= "*Тип:* $chatType\n";
+        $message .= "*Пользователь:* {$from['first_name']}\n";
+        $message .= "*ID пользователя:* `{$from['id']}`\n";
+        $message .= "*ID чата:* `{$chat['id']}`\n";
+        $message .= "*Изменения:* $oldStatusName → $newStatusName\n";
         
         $chageType = '';
 
@@ -575,11 +575,14 @@ abstract class BaseBot extends SettingsManager {
                 break;
         }
 
-        $message .= "Тип изменения: {$chageType}\n";
+        $message .= "*Тип изменения:* {$chageType}\n";
 
         if ($chatType !== 'private') {
             $message .= "\n👥 *Участников:* " . ($chat['members_count'] ?? 'неизвестно');
         }
+
+        if (DEV)
+            echo "$message\n";
         
         try {
             $this->api->sendMessage([
@@ -588,7 +591,7 @@ abstract class BaseBot extends SettingsManager {
                 'parse_mode' => 'Markdown',
             ]);
         } catch (Exception $e) {
-            error_log("Cannot send notification to owner: " . $e->getMessage());
+            trace_error("Cannot send notification to owner: " . $e->getMessage());
         }
     }
 
