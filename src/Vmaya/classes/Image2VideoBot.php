@@ -303,8 +303,10 @@ class Image2VideoBot extends YKassaBot {
 
         if ($preset = $this->getPreset($presetName)) {
 
-            $buttons = [['text'=>Lang('Begin'), 'callback_data' => "runPreset.{$presetName}"],
-                    $this->closeMessageButton()];
+            $buttons = [
+                [['text'=>Lang('Begin'), 'callback_data' => "runPreset.{$presetName}"],
+                    $this->closeMessageButton()]
+            ];
 
             if (!$this->ShowWithPreview($preset['caption'], $buttons, $presetName.'_preview', false)) {
 
@@ -312,18 +314,18 @@ class Image2VideoBot extends YKassaBot {
 
                     $file_id = DEV ? $preset['image_id']['DEV'] : $preset['image_id']['LIVE'];
 
-                    $this->SendPhoto($preset['caption'], $file_id, [$buttons], 'Markdown', true);
+                    $this->SendPhoto($preset['caption'], $file_id, $buttons, 'Markdown', true);
                 } else if (isset($preset['video_id'])) {
 
                     $file_id = DEV ? $preset['video_id']['DEV'] : $preset['video_id']['LIVE'];
 
-                    $this->SendVideo($preset['caption'], $file_id, [$buttons], 'Markdown', true);
+                    $this->SendVideo($preset['caption'], $file_id, $buttons, 'Markdown', true);
                 } else if (isset($preset['image'])) {
 
-                    $this->SendPhoto($preset['caption'], BASEPATH.$preset['image'], [$buttons]);
+                    $this->SendPhoto($preset['caption'], BASEPATH.$preset['image'], $buttons);
                 } else if (isset($preset['video'])) {
 
-                    $this->SendVideo($preset['caption'], BASEPATH.$preset['video'], [$buttons]);
+                    $this->SendVideo($preset['caption'], BASEPATH.$preset['video'], $buttons);
                 } 
             }
         } else $this->Answer(null, $this->genContent(Lang('Preset "%s" not found', $presetName), true));
@@ -904,7 +906,8 @@ class Image2VideoBot extends YKassaBot {
                     $this->pushRecallMethod($this->messageIndex(), "imageToVideo({$stage})");
 
                     $this->ShowWithPreview($text, [
-                        $this->createButton('Select model', "selModel.imageToVideo.{$this->messageIndex()}")
+                        [$this->createButton('Select model', "selModel.imageToVideo.{$this->messageIndex()}"),
+                            $this->closeMessageButton()]
                     ], 'imageToVideo_preview');
 
                     $this->setSession("expect", 'imageToVideo(1)');
@@ -976,7 +979,8 @@ class Image2VideoBot extends YKassaBot {
             ]));*/
 
             $this->ShowWithPreview($text, [
-                [$this->createButton('Select model', "selModel.imagesToImage.{$this->messageIndex()}")]
+                [$this->createButton('Select model', "selModel.imagesToImage.{$this->messageIndex()}"),
+                $this->closeMessageButton()]
             ], 'imagesToImage_preview');
 
             $this->setSession("expect", "imagesToImage(0)");
@@ -999,16 +1003,16 @@ class Image2VideoBot extends YKassaBot {
 
             $type = detectFileTypeByFileId($preview_id);
 
+            /*
+            echo "{$type}: {$setting_name}\n";
+            print_r($buttons);*/
+
             switch ($type) {
                 case 'video':
-                        $this->SendVideo($text, $preview_id, [
-                            $buttons
-                        ], 'Markdown', true);
+                        $this->SendVideo($text, $preview_id, $buttons, 'Markdown', true);
                     break;
                 case 'photo':
-                        $this->SendPhoto($text, $preview_id, [
-                            $buttons
-                        ], 'Markdown', true);
+                        $this->SendPhoto($text, $preview_id, $buttons, 'Markdown', true);
                     break;
                 default:
                     return false;
@@ -1016,9 +1020,8 @@ class Image2VideoBot extends YKassaBot {
 
             return true;
         } else if ($showSimpleMessage)
-            $this->Answer($this->getCurrentChatId(), $this->genContent($text, true, [
-                $buttons
-            ]));
+            //print_r($this->genContent($text, false, $buttons));
+            $this->Answer($this->getCurrentChatId(), $this->genContent($text, false, $buttons));
 
         return false;
     }
@@ -1034,8 +1037,8 @@ class Image2VideoBot extends YKassaBot {
         if ($imagesToImage_model && $textToImage_model) {
 
             $this->ShowWithPreview(Lang("What kind of magic do you want to do?"), [
-                $this->createButton('imagesToImage', "imagesToImage.0.prompt"),
-                $this->createButton('textToImage', "textToImage.0.prompt")
+                [$this->createButton('imagesToImage', "imagesToImage.0.prompt"), $this->createButton('textToImage', "textToImage.0.prompt")],
+                [$this->closeMessageButton()]
             ], 'create_image_preview');
 
         } else $this->textToImage(0);
