@@ -645,54 +645,6 @@ abstract class BaseBot extends SettingsManager {
         return "https://api.telegram.org/file/bot{$this->api->getAccessToken()}/{$file_path}";
     }
 
-
-    public function DownloadFileByFileId($file_id, $save_path = null) {
-        try {
-
-            // 1. Получаем информацию о файле
-            $response = $this->api->getFile([
-                'file_id' => $file_id
-            ]);
-            
-            $file_path = $response->getFilePath();
-            $file_url = $this->GetFileUrl($file_id);
-            
-            // 3. Скачиваем файл
-            $file_content = file_get_contents($file_url);
-            
-            if ($file_content === false) {
-                throw new Exception('Не удалось скачать файл');
-            }
-            
-            // 4. Сохраняем файл
-            if ($save_path === null) {
-                $save_path = BASEPATH.'downloads'.DS.$this->user['id'].DS.basename($file_path);
-            }
-            
-            // Создаем директорию, если не существует
-            $dir = dirname($save_path);
-            if (!is_dir($dir)) {
-                mkdir($dir, 0777, true);
-            }
-            
-            file_put_contents($save_path, $file_content);
-            
-            return [
-                'success' => true,
-                'path' => $save_path,
-                'url' => BASEURL.US.'downloads'.US.$this->user['id'].US.basename($file_path),
-                'size' => strlen($file_content),
-                'original_path' => $file_path
-            ];
-            
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'error' => $e->getMessage()
-            ];
-        }
-    }
-
     protected function genContent($text, $backToMenu = false, $buttons = null) {
         
         if ($buttons && !is_array($buttons)) {
