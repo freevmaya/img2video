@@ -509,7 +509,7 @@ abstract class BaseBot extends SettingsManager {
         
         $date = $chatMember['date'];
 
-        $this->SendToOwnerChangeStatus($chat, $from, $oldStatus, $newStatus);
+        //$this->SendToOwnerChangeStatus($chat, $from, $oldStatus, $newStatus);
 
         return true;
     }
