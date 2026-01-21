@@ -422,20 +422,22 @@ abstract class BaseBot extends SettingsManager {
         }
 
         //Обрабатываем каждое обновление
-        foreach ($updates as $update) {
+        foreach ($updates as $update) 
+            if ($update) {
+                $this->setSetting('lastUpdateId', $update->getUpdateId());
 
-            if (DEV || $this->getSetting('log'))
-                trace($update);
-            if (DEV)
-                $this->processUpdate($update);
-            else {
-                try {
+                if (DEV || $this->getSetting('log'))
+                    trace($update);
+                if (DEV)
                     $this->processUpdate($update);
-                } catch (Exception $e) {
-                    trace_error($e->getMessage()."\n\nUpdate:\n".json_encode($update, JSON_FLAGS));
+                else {
+                    try {
+                        $this->processUpdate($update);
+                    } catch (Exception $e) {
+                        trace_error($e->getMessage()."\n\nUpdate:\n".json_encode($update, JSON_FLAGS));
+                    }
                 }
             }
-        }
 
         if ($this->settingsChange)
             $this->saveSettings();
@@ -482,9 +484,6 @@ abstract class BaseBot extends SettingsManager {
 
         $chatId = $this->getCurrentChatId();
         $this->readSession($chatId);
-
-        // 6. Обновляем ID последнего обработанного сообщения
-        $this->setSetting('lastUpdateId', $update->getUpdateId());
         $this->runUpdate($update);
 
         if ($this->isSessionChanged()) $this->saveSession();
@@ -509,7 +508,7 @@ abstract class BaseBot extends SettingsManager {
         
         $date = $chatMember['date'];
 
-        //$this->SendToOwnerChangeStatus($chat, $from, $oldStatus, $newStatus);
+        $this->SendToOwnerChangeStatus($chat, $from, $oldStatus, $newStatus);
 
         return true;
     }
