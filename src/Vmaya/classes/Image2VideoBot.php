@@ -69,7 +69,7 @@ class Image2VideoBot extends YKassaBot {
     }
 
     protected function runUpdate($update) {
-        $this->expect = $this->getSession("expect");
+        $this->expect = $this->popSession("expect");
         parent::runUpdate($update);
 
         if ($this->firstStart) {
@@ -268,7 +268,7 @@ class Image2VideoBot extends YKassaBot {
                 if (!empty($text))
                     $this->setSession('prompt', $text);
 
-            if (!$this->processExpect($this->expect) && ($video || $photo))
+            if (!$this->processExpect($this->expect) && $photo)
                 $this->whatDo($photo);
         }
     }
@@ -1002,14 +1002,12 @@ class Image2VideoBot extends YKassaBot {
             switch ($type) {
                 case 'video':
                         $this->SendVideo($text, $preview_id, [
-                            $buttons,
-                            [$this->closeMessageButton()]
+                            $buttons
                         ], 'Markdown', true);
                     break;
                 case 'photo':
                         $this->SendPhoto($text, $preview_id, [
-                            $buttons,
-                            [$this->closeMessageButton()]
+                            $buttons
                         ], 'Markdown', true);
                     break;
                 default:
