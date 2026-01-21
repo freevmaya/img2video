@@ -187,6 +187,11 @@ abstract class BaseApi implements APIInterface
             $this->bot->Answer(null, $content);
     }
 
+    public function SendToAdmin($content) {
+        if ($this->bot)
+            $this->bot->Answer(ADMIN_USERID, $content);
+    }
+
     public function Wrong() {
         if ($this->bot)
             $this->bot->Wrong();

@@ -75,7 +75,10 @@ class KlingApi extends BaseKlingApi
             $this->Answer(Lang("The task has been accepted"));
 
             return $response;
-        } else trace_error($log_data);
+        } else {
+            trace_error($log_data);
+            $this->SendToAdmin(['text' => $log_data]);
+        }
 
         $this->Wrong();
 
