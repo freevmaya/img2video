@@ -268,7 +268,7 @@ class Image2VideoBot extends YKassaBot {
                 if (!empty($text))
                     $this->setSession('prompt', $text);
 
-            if (!$this->processExpect($this->expect))
+            if (!$this->processExpect($this->expect) && ($video || $photo))
                 $this->whatDo($photo);
         }
     }
@@ -970,9 +970,14 @@ class Image2VideoBot extends YKassaBot {
                     Lang("Current model %s", $info['name']).')';
 
             $this->pushRecallMethod($this->messageIndex(), "imagesToImage(0)");
+            /*
             $this->Answer(null, $this->genContent($text, true, [
                 [$this->createButton('Select model', "selModel.imagesToImage.{$this->messageIndex()}")]
-            ]));
+            ]));*/
+
+            $this->ShowWithPreview($text, [
+                [$this->createButton('Select model', "selModel.imagesToImage.{$this->messageIndex()}")]
+            ], 'imagesToImage_preview');
 
             $this->setSession("expect", "imagesToImage(0)");
         } else {
@@ -993,7 +998,7 @@ class Image2VideoBot extends YKassaBot {
         if ($preview_id = $this->getSetting($setting_name, false)) {
 
             $type = detectFileTypeByFileId($preview_id);
-            
+
             switch ($type) {
                 case 'video':
                         $this->SendVideo($text, $preview_id, [

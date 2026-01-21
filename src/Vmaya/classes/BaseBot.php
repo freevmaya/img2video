@@ -398,6 +398,13 @@ abstract class BaseBot extends SettingsManager {
         }
     }
 
+    private function processUpdate($update) {
+
+        if (!$this->notUserUpdate($update) && 
+            $this->initUser($update)) 
+                $this->_runUpdate($update);
+    }
+
     public function GetUpdates() {
 
         try {
@@ -419,12 +426,14 @@ abstract class BaseBot extends SettingsManager {
 
             if (DEV || $this->getSetting('log'))
                 trace($update);
-            
-            try {
-                if ($this->initUser($update)) 
-                    $this->_runUpdate($update);
-            } catch (Exception $e) {
-                trace_error($e->getMessage()."\n\nUpdate:\n".json_encode($update, JSON_FLAGS));
+            if (DEV)
+                $this->processUpdate($update);
+            else {
+                try {
+                    $this->processUpdate($update);
+                } catch (Exception $e) {
+                    trace_error($e->getMessage()."\n\nUpdate:\n".json_encode($update, JSON_FLAGS));
+                }
             }
         }
 
@@ -479,6 +488,108 @@ abstract class BaseBot extends SettingsManager {
         $this->runUpdate($update);
 
         if ($this->isSessionChanged()) $this->saveSession();
+    }
+
+    protected function notUserUpdate($update) {
+
+        if (!isset($update['my_chat_member'])) {
+            return false;
+        }
+    
+        $chatMember = $update['my_chat_member'];
+
+        // Извлекаем данные
+        $chat = $chatMember['chat'];
+        $from = $chatMember['from'];
+        $oldChatMember = $chatMember['old_chat_member'];
+        $newChatMember = $chatMember['new_chat_member'];
+        
+        $oldStatus = $oldChatMember['status'];
+        $newStatus = $newChatMember['status'];
+        
+        $date = $chatMember['date'];
+
+        $this->SendToOwner($chat, $from, $oldStatus, $newStatus);
+
+        return true;
+    }
+
+    public function SendToOwner($chat, $from, $oldStatus, $newStatus) {
+        
+        $chatType = $chat['type']; // private, group, supergroup, channel
+        $chatName = $chat['title'] ?? $chat['username'] ?? 'Личные сообщения';
+        
+        $statusNames = [
+            'creator' => '👑 Создатель',
+            'administrator' => '🛠️ Администратор',
+            'member' => '👤 Участник',
+            'restricted' => '⛔ Ограниченный',
+            'left' => '🚪 Покинул',
+            'kicked' => '🚫 Исключен',
+        ];
+        
+        $oldStatusName = $statusNames[$oldStatus] ?? $oldStatus;
+        $newStatusName = $statusNames[$newStatus] ?? $newStatus;
+        
+        $message = "📢 *Изменение статуса бота*\n\n";
+        $message .= "Чат:* $chatName\n";
+        $message .= "Тип:* $chatType\n";
+        $message .= "Пользователь:* {$from['first_name']}\n";
+        $message .= "ID пользователя:* `{$from['id']}`\n";
+        $message .= "ID чата:* `{$chat['id']}`\n";
+        $message .= "Изменения: $oldStatusName → $newStatusName\n";
+        
+        $chageType = '';
+
+        switch ("$oldStatus:$newStatus") {
+            // Бота добавили в чат
+            case 'left:member':
+            case 'kicked:member':
+            case 'left:administrator':
+            case 'kicked:administrator':
+                $chageType = "Added";
+                break;
+                
+            // Бота сделали администратором
+            case 'member:administrator':
+                $chageType = "Set admin";
+                break;
+                
+            // Бота удалили из администраторов
+            case 'administrator:member':
+                $chageType = "Remove admin";
+                break;
+                
+            // Бота исключили из чата
+            case 'member:left':
+            case 'administrator:left':
+            case 'member:kicked':
+            case 'administrator:kicked':
+                $chageType = "Removed";
+                break;
+                
+            // Бот сам покинул чат
+            case 'member:left':
+            case 'administrator:left':
+                $chageType = "Leave";
+                break;
+        }
+
+        $message .= "Тип изменения: {$chageType}\n";
+
+        if ($chatType !== 'private') {
+            $message .= "\n👥 *Участников:* " . ($chat['members_count'] ?? 'неизвестно');
+        }
+        
+        try {
+            $this->api->sendMessage([
+                'chat_id' => ADMIN_USERID,
+                'text' => $message,
+                'parse_mode' => 'Markdown',
+            ]);
+        } catch (Exception $e) {
+            error_log("Cannot send notification to owner: " . $e->getMessage());
+        }
     }
 
     protected function MLQuery($message, $start_promt="Отвечай на русском языке. Коротко.", $session_id=false)
