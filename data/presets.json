@@ -17,7 +17,9 @@
 					}
 				],
 				"options": {
-					"prompt": "A portrait of a forest fairy, hyperrealistic. A girl with delicate features and light hair braided in an intricate hairstyle with fresh flowers and twigs looks straight at the viewer with a mysterious half-smile, half-turned. She has graceful pointed ears and a light pattern of glowing pollen on her cheek. She is dressed in a dress made of living ferns and rose petals. Magical lights float around. Soft sunlight filtering through the foliage, the atmosphere of a mysterious forest, and detailed textures of her skin and wings. --ar 2:3 --style raw"
+					"parameters": {
+						"prompt": "A portrait of a forest fairy, hyperrealistic. A girl with delicate features and light hair braided in an intricate hairstyle with fresh flowers and twigs looks straight at the viewer with a mysterious half-smile, half-turned. She has graceful pointed ears and a light pattern of glowing pollen on her cheek. She is dressed in a dress made of living ferns and rose petals. Magical lights float around. Soft sunlight filtering through the foliage, the atmosphere of a mysterious forest, and detailed textures of her skin and wings. --ar 2:3 --style raw"
+					}
 				}
 			}
 		]
