@@ -120,16 +120,21 @@ abstract class BaseBot extends SettingsManager {
         if (empty($chatId))
             $chatId = $this->getCurrentChatId();
 
-        if (!empty($message_id) && !empty($chatId))
-            $this->api->deleteMessage([ 'chat_id' => $chatId, 'message_id' => $message_id]); 
+        if (!empty($message_id) && !empty($chatId)) {
+            try {
+                $this->api->deleteMessage([ 'chat_id' => $chatId, 'message_id' => $message_id]); 
+            } catch (Exception $e) {
+                trace_error($e->getMessage());
+            }
+        }
     }
 
     public function DeleteMessages($backCount = 1) {
         $history = array_values($this->getSession('history'));
 
-        for ($i=0; $i<$backCount; $i++)
-            $this->api->deleteMessage([ 'chat_id' => $this->getCurrentChatId(), 
-                'message_id' => $history[count($history) - 1 - $i]]); 
+        for ($i=0; $i<$backCount; $i++) {
+            $this->DeleteMessage($this->getCurrentChatId(), $history[count($history) - 1 - $i]); 
+        }
     }
 
     public function PrivateAnswerAndDelete($user_id, $chatId, $private_text, $temporary_text, $wait_sec = 6) {

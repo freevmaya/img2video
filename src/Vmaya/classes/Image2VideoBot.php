@@ -943,17 +943,20 @@ class Image2VideoBot extends YKassaBot {
                     $this->setSession('images', []);
                 break;
             case 1: 
-                    $this->DeleteMessages(1);
-                    if (count($this->getSession('images', [])) == 0) {
+
+                    $message_index = isset($data[2]) && is_numeric($data[2]) ? intval($data[2]) : 0;
+
+                    if ($message_index == 0)
+                        $this->DeleteMessages(1);
+
+                    if (($message_index == 0) && (count($this->getSession('images', [])) == 0)) {
                         $this->Answer(null, $this->genContent(Lang("Send your photo")));
                         $this->setSession('expect', $this->expect);
                     } else {
 
-                        $ext_data = isset($data[2]) ? $data[2] : false;
-
-                        if ($ext_data) {
-                            $this->askSendPrompt('imageToVideo', 2, $ext_data);
-                            $this->setSession("expect", "imageToVideo(['imageToVideo', 2, 'prompt', {$ext_data}])");
+                        if ($message_index) {
+                            $this->askSendPrompt('imageToVideo', 2, $message_index);
+                            $this->setSession("expect", "imageToVideo(['imageToVideo', 2, 'prompt', {$message_index}])");
                         } else {
                             $this->askSendPrompt('imageToVideo', 2);
                             $this->setSession("expect", "imageToVideo(2)");
