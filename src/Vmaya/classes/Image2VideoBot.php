@@ -91,7 +91,7 @@ class Image2VideoBot extends YKassaBot {
             [['text' => '💰 '.Lang('Balance'), 'callback_data' => 'MySubscribe']],
             //[['text' => '📊 '.Lang('My generations'), 'callback_data' => 'my_generations']],
             [['text' => '⭐ '.Lang('Subscription'), 'callback_data' => 'subscribe']],
-            [['text' => '🤖 '.Lang('Models'), 'callback_data' => 'models']],
+            //[['text' => '🤖 '.Lang('Models'), 'callback_data' => 'models']],
             [['text' => '💬 '.Lang('Help Desk'), 'callback_data' => 'support']],
             [['text' => '❕'.Lang('Agreement'), 'callback_data' => 'agreement']]
         ];
@@ -754,7 +754,7 @@ class Image2VideoBot extends YKassaBot {
             switch ($stage) {
                 case 0:
 
-                    $this->Answer(null, $this->genContent(Lang('Send your photo')));
+                    $this->Answer(null, $this->genContent(Lang('Send your photo'), true));
                     $this->setSession("expect", "runPreset('{$presetName}', 1, {$subIndex})");
                     $this->setSession('images', []);
 
