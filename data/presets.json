@@ -193,40 +193,5 @@
 				}
 			}
 		]
-	},
-
-	"Sorceress": {
-		"name": "Колдунья",
-		"caption": "Фэнтезийный образ девушки в красном, вечернем платье.\nПримерь на себя образ ✨волшебницы из сказок.\n\nЭтот шаблон переносит ваше лицо, с фото, на видео. Вероятная схожесть гаранируется от 80%\n\n👇Больше шаблонов ищите в главном меню.",
-		"video_id": {
-			"DEV": "BAACAgIAAxkBAAIYNmlvnaTEGejTeaFgBCD9WJTWIrmZAAJFlgACRBKBS6lYr5b_5fouOAQ",
-			"LIVE": "BAACAgIAAxkBAAIfxmlvnd1JDVlFHDSsK9eXEwxzJTwgAAJ2mAACMgSBSwfJjKGvedBjOAQ"
-		},
-		"gender": "female",
-		"subsequence": [
-			{
-				"model_index": "kling_Multi-Elements",
-				"images": [
-					{
-						"value": null,
-						"path": "image_list/0/image"
-					}
-				],
-				"options":{
-					"model_name": "kling-v1-6",
-					"session_id": "841048603464040512",
-					"edit_mode": "swap",
-					"image_list": [
-						{
-							"image":""
-						}
-					],
-					"prompt": "Swap [face] from <<<image_1>>> for [face] from <<<video_1>>>",
-					"negative_prompt": "",
-					"mode": "std",
-					"duration": 5
-				}
-			}
-		]
 	}
 }
