@@ -581,12 +581,17 @@ abstract class BaseBot extends SettingsManager {
             $message .= "\n👥 *Участников:* " . ($chat['members_count'] ?? 'неизвестно');
         }
         
+        $this->SendToAdmin($message);
+    }
+
+    public function SendToAdmin($msg) {
         try {
-            $this->api->sendMessage([
+
+            return $this->api->sendMessage(array_merge([
                 'chat_id' => ADMIN_USERID,
-                'text' => $message,
-                'parse_mode' => 'Markdown',
-            ]);
+                'parse_mode' => 'Markdown'
+            ], is_string($msg) ? ['text'=>$msg] : $msg));
+            
         } catch (Exception $e) {
             trace_error("Cannot send notification to owner: " . $e->getMessage());
         }

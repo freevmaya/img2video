@@ -83,7 +83,7 @@
 			"type": "unknown"
 		},
 		"Kling O1": {
-			"enabled": true,
+			"enabled": false,
 			"url": "https://cloud.leonardo.ai/api/rest/v2/generations",
 			"type": "imageToVideo",
 			"require_images": [1, 4]

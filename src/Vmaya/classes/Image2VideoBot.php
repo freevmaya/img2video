@@ -511,7 +511,13 @@ class Image2VideoBot extends YKassaBot {
                 $execute = "\$this->{$method}({$data});";
                 if (DEV) echo "Execute: $execute\n";
 
-                eval($execute);
+                try {
+                    eval($execute);
+                } catch (Exception $e) {
+                    $msg = $e->getMessage()."\nExecute: ".$execute;
+                    trace_error($msg);
+                    $this->SendToAdmin($msg);
+                }
             }
             else $this->$method($this->getCurrentChatId(), $data);
         }

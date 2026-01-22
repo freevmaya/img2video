@@ -13,19 +13,19 @@
 			"require_images": [1, 4]
 		},
 		"kling-v1-6": {
-			"enabled": true,
+			"enabled": false,
 			"url": "https://api-singapore.klingai.com/v1/videos/image2video",
 			"type": "imageToVideo",
 			"require_images": [1, 4]
 		},
 		"kling-v2-master": {
-			"enabled": true,
+			"enabled": false,
 			"url": "https://api-singapore.klingai.com/v1/videos/image2video",
 			"type": "imageToVideo",
 			"require_images": [1, 4]
 		},
 		"kling-v2-1": {
-			"enabled": true,
+			"enabled": false,
 			"url": "https://api-singapore.klingai.com/v1/videos/image2video",
 			"type": "imageToVideo",
 			"require_images": [1, 4]
@@ -37,13 +37,13 @@
 			"require_images": [1, 4]
 		},
 		"kling-v2-5-turbo": {
-			"enabled": true,
+			"enabled": false,
 			"url": "https://api-singapore.klingai.com/v1/videos/image2video",
 			"type": "imageToVideo",
 			"require_images": [1, 4]
 		},
 		"kling-v2-6": {
-			"enabled": true,
+			"enabled": false,
 			"url": "https://api-singapore.klingai.com/v1/videos/image2video",
 			"type": "imageToVideo",
 			"require_images": [1, 4]
