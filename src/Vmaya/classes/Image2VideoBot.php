@@ -328,7 +328,10 @@ class Image2VideoBot extends YKassaBot {
                     $this->SendVideo($preset['caption'], BASEPATH.$preset['video'], $buttons);
                 } 
             }
-        } else $this->Answer(null, $this->genContent(Lang('Preset "%s" not found', $presetName), true));
+        } else {
+            $this->Answer(ADMIN, $this->genContent(Lang('Preset "%s" not found', $presetName), true));
+            $this->SendToAdmin(Lang('Preset "%s" not found', $presetName));
+        }
     }
 
     protected function initAdmin($user, $update) {
@@ -389,12 +392,18 @@ class Image2VideoBot extends YKassaBot {
     protected function set_mfnsh($data) {
         $this->setSession($data[1], $data[2]);
 
+        if ($this->expect)
+            $this->setSession('expect', $this->expect);
+
         $this->DeleteMessageByIndex(@$data[3]);
         $this->DeleteMessageByIndex(@$data[4]);
         $this->recall(@$data[4]);
     }
 
     protected function selModel($type, $backMessageIndex) {
+        
+        if ($this->expect)
+            $this->setSession('expect', $this->expect);
 
         $list = [];
 
@@ -753,6 +762,7 @@ class Image2VideoBot extends YKassaBot {
 
             switch ($stage) {
                 case 0:
+                    $this->DeleteMessages(1);
 
                     $this->Answer(null, $this->genContent(Lang('Send your photo'), true));
                     $this->setSession("expect", "runPreset('{$presetName}', 1, {$subIndex})");
@@ -760,6 +770,7 @@ class Image2VideoBot extends YKassaBot {
 
                     break;
                 case 1:
+                    $this->DeleteMessages(1);
 
                     $images_url = $this->getImagesUrl();
                     $images = [];
@@ -853,7 +864,7 @@ class Image2VideoBot extends YKassaBot {
         }
     }
 
-    protected function askSendPrompt($genType, $stage, $ext = null) {
+    protected function askSendPrompt($genType, $stage, $ext = null, $selectModelButton = false) {
 
         $params = [
             'text' => Lang("Send a prompt")
@@ -875,9 +886,15 @@ class Image2VideoBot extends YKassaBot {
                 $menu[] = [['text' => Lang($prompt), 'callback_data' => "{$genType}.{$stage}.{$i}".$extaddstr]];
         }
 
-        $menu[] = [$this->createButton('Select model', "selModel.{$genType}.{$this->messageIndex()}"), $this->closeMessageButton()];
+        $callstr = "askSendPrompt('{$genType}', {$stage}, ".($ext ? "{$ext}" : 'null');
 
-        $callstr = $ext ? "askSendPrompt('{$genType}', {$stage}, {$ext})" : "askSendPrompt('{$genType}', {$stage})";
+        if ($selectModelButton) {
+            $menu[] = [$this->createButton('Select model', "selModel.{$genType}.{$this->messageIndex()}"), $this->closeMessageButton()];
+            $callstr .= ', true';
+        }
+        else $menu[] = [$this->closeMessageButton()];
+
+        $callstr .= ')';
 
         $this->pushRecallMethod($this->messageIndex(), $callstr);
 
@@ -926,18 +943,25 @@ class Image2VideoBot extends YKassaBot {
                     $this->setSession('images', []);
                 break;
             case 1: 
-
-                    $ext_data = isset($data[2]) ? $data[2] : false;
-
-                    if ($ext_data) {
-                        $this->askSendPrompt('imageToVideo', 2, $ext_data);
-                        $this->setSession("expect", "imageToVideo(['imageToVideo', 2, 'prompt', {$ext_data}])");
+                    $this->DeleteMessages(1);
+                    if (count($this->getSession('images', [])) == 0) {
+                        $this->Answer(null, $this->genContent(Lang("Send your photo")));
+                        $this->setSession('expect', $this->expect);
                     } else {
-                        $this->askSendPrompt('imageToVideo', 2);
-                        $this->setSession("expect", "imageToVideo(2)");
+
+                        $ext_data = isset($data[2]) ? $data[2] : false;
+
+                        if ($ext_data) {
+                            $this->askSendPrompt('imageToVideo', 2, $ext_data);
+                            $this->setSession("expect", "imageToVideo(['imageToVideo', 2, 'prompt', {$ext_data}])");
+                        } else {
+                            $this->askSendPrompt('imageToVideo', 2);
+                            $this->setSession("expect", "imageToVideo(2)");
+                        }
                     }
                 break;
             case 2: 
+                    $this->DeleteMessages(1);
                     if ($prompt)
                         $this->setSession('prompt', $prompt);
 
@@ -950,7 +974,7 @@ class Image2VideoBot extends YKassaBot {
                     ], 'competition_preview');
                 break;
             case 3: 
-                    $this->DeleteMessage();
+                    $this->DeleteMessages(1);
                     $prompt = empty($prompt) ? $this->getSession('prompt') : $prompt;
                     $message_index = isset($data[3]) && is_numeric($data[3]) ? intval($data[3]) : false;
 
@@ -979,20 +1003,25 @@ class Image2VideoBot extends YKassaBot {
 
         switch ($stage) {
             case 0:
-                    $this->askSendPrompt('textToImage', 0);
+                    $this->askSendPrompt('textToImage', 0, null, true);
                     $this->setSession("expect", 'textToImage(1)');
                 break;
             case 1: 
-                    if ($prompt)
+                    $this->DeleteMessages(1);
+                    $prompt = $prompt ? $prompt : $this->getSession('prompt');
+                    if ($prompt) {
                         $this->setSession('prompt', $prompt);
-
-                    $this->ShowWithPreview(Lang("Do you want to participate in the competition?"), [
-                        [$this->createButton('Ok', "textToImage.2.prompt.part_competition"),
-                         $this->createButton('No', "textToImage.2.prompt")]
-                    ], 'competition_preview');
+                        $this->ShowWithPreview(Lang("Do you want to participate in the competition?"), [
+                            [$this->createButton('Ok', "textToImage.2.prompt.part_competition"),
+                             $this->createButton('No', "textToImage.2.prompt")]
+                        ], 'competition_preview');
+                    } else {
+                        $this->Answer(null, $this->genContent(Lang("Send a prompt")));
+                        $this->setSession('expect', $this->expect);
+                    }
                 break;
             case 2:
-                    $this->DeleteMessage();
+                    $this->DeleteMessages(1);
                     $prompt = $prompt ? $prompt : $this->getSession('prompt');
 
                     $task_data = [];
@@ -1016,6 +1045,9 @@ class Image2VideoBot extends YKassaBot {
         $require_images = isset($info['require_images']) ? $info['require_images'][0] : 1;
 
         if ($count_images < $require_images) {
+            
+            if ($count_images > 0)
+                $this->DeleteMessages(1);
 
             $countText = $count_images == 0 ? '' : ("\n".sprintf(Lang("Loaded %s of %s"), $count_images, $require_images));
 
@@ -1038,6 +1070,7 @@ class Image2VideoBot extends YKassaBot {
 
             switch ($stage) {
                 case 0: 
+                        $this->DeleteMessages(1);
 
                         $prompt = $prompt ? $prompt : $this->getSession('prompt');
                         if (empty($prompt)) {
@@ -1053,18 +1086,18 @@ class Image2VideoBot extends YKassaBot {
                         }
                     break;
                 case 1: 
-                    $this->DeleteMessage();
+                        $this->DeleteMessages(1);
 
-                    $task_data = [];
-                    if (isset($stadeData[3]) && ($stadeData[3] == 'part_competition'))
-                        $task_data['part_competition'] = 1;
+                        $task_data = [];
+                        if (isset($stadeData[3]) && ($stadeData[3] == 'part_competition'))
+                            $task_data['part_competition'] = 1;
 
-                    return $this->Generate('imagesToImage', $this->getImagesUrl(), $this->getSession('prompt'), $task_data);
+                        return $this->Generate('imagesToImage', $this->getImagesUrl(), $this->getSession('prompt'), $task_data);
             }
         }
     }
 
-    protected function ShowWithPreview($text, $buttons, $setting_name, $showSimpleMessage = true) {
+    protected function ShowWithPreview($text, $buttons, $setting_name, $showSimpleMessage = true, $messageEditId = null) {
 
         if ($preview_id = $this->getSetting($setting_name, false)) {
 
@@ -1088,7 +1121,7 @@ class Image2VideoBot extends YKassaBot {
             return true;
         } else if ($showSimpleMessage)
             //print_r($this->genContent($text, false, $buttons));
-            $this->Answer($this->getCurrentChatId(), $this->genContent($text, false, $buttons));
+            $this->Answer($this->getCurrentChatId(), $this->genContent($text, false, $buttons), $messageEditId);
 
         return false;
     }
