@@ -33,7 +33,7 @@ abstract class BaseApi implements APIInterface
         return [];
     }
 
-    protected function makeRequest($url, $data, $preset_name=null) {
+    protected function makeRequest($url, $data, $preset_name=null, $task_data = null) {
         return null;
     }
 
@@ -41,7 +41,13 @@ abstract class BaseApi implements APIInterface
         return true;
     }
 
-    public function Generate($type, $images, $prompt, $model_name = null)
+    protected function prepareTaskData($task_data, $model_name, $preset_name = null) {
+        $task_data = array_merge(['model'=>$model_name], $task_data ? $task_data : []);
+        if ($preset_name) $task_data['preset'] = $preset_name;
+        return $task_data;
+    }
+
+    public function Generate($type, $images, $prompt, $model_name = null, $task_data = null)
     {
         $result = false;
         $data   = $this->PrepareRequestData($type, $images, $prompt, $model_name);
@@ -50,12 +56,12 @@ abstract class BaseApi implements APIInterface
             $model_name = empty($model_name) ? $this->getDefaultModelName($type) : $model_name;
 
             $url = $this->getModelUrl($type, $model_name);
-            $result = $this->makeRequest($url, $data);
+            $result = $this->makeRequest($url, $data, null, $this->prepareTaskData($task_data, $model_name));
         }
         return $result;
     }
 
-    public function GeneratePreset($model_name, $preset_name, $presetOptions, $images)
+    public function GeneratePreset($model_name, $preset_name, $presetOptions, $images, $task_data = null)
     {
         $result     = false;
 
@@ -63,7 +69,7 @@ abstract class BaseApi implements APIInterface
             $info    = $this->getModelInfo($model_name);
             if ($info) {
                 
-                $result = $this->makeRequest($info['url'], $options, $preset_name);
+                $result = $this->makeRequest($info['url'], $options, $preset_name, $this->prepareTaskData($task_data, $model_name, $preset_name));
             }
         }
         return $result;

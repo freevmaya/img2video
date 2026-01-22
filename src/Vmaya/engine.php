@@ -39,7 +39,7 @@
 
 	include(SERVICES_PATH.'APIInterface.php');
 	include(SERVICES_PATH.'BaseApi.php');
-	include(SERVICES_PATH.'MidjourneyApi.php');
+	//include(SERVICES_PATH.'MidjourneyApi.php');
 	include(SERVICES_PATH.'LeonardoApi.php');
 	include(SERVICES_PATH.'BaseKlingApi.php');
 	include(SERVICES_PATH.'KlingApi.php');

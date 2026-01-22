@@ -3,5 +3,5 @@ namespace App\Services\API;
 
 interface APIInterface
 {
-    public function Generate($type, $images, $prompt, $model_name = null);
+    public function Generate($type, $images, $prompt, $model_name = null, $task_data = null);
 }

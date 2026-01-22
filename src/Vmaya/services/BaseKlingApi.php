@@ -122,7 +122,7 @@ class BaseKlingApi extends BaseApi
         return $response;
     }
 
-    protected function makeRequest($url, $data, $preset_name=null)
+    protected function makeRequest($url, $data, $preset_name = null, $task_data = null)
     {
         return $this->baseRequest($url, $data);
     }

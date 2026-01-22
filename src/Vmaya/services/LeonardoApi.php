@@ -183,6 +183,9 @@ class LeonardoApi extends BaseApi
             else $filePath = USER_PATH.basename($file_id);
             */
 
+            if (DEV)
+                return 'dev-'.md5($file_id);
+
             $filePath = ($this->bot ? $this->bot->getUserId().'_' : '').time().'_'.basename($file_id);
 
             if (!file_exists($filePath))
@@ -281,7 +284,7 @@ class LeonardoApi extends BaseApi
         return false;
     }
 
-    protected function makeRequest($url, $data, $preset_name=null)
+    protected function makeRequest($url, $data, $preset_name=null, $task_data= null)
     {
 
         if (PRODUCTION) {
@@ -334,7 +337,8 @@ class LeonardoApi extends BaseApi
                         'preset'=>$preset_name,
                         'hash'=>$response['hash'] = $hash,
                         'request_data'=> json_encode(array_merge($data, ['url'=>$url]), JSON_FLAGS),
-                        'response_data'=> json_encode($response, JSON_FLAGS)
+                        'response_data'=> json_encode($response, JSON_FLAGS),
+                        'data' => json_encode($task_data, JSON_FLAGS)
                     ]);
                 }
 

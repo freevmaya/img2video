@@ -78,14 +78,14 @@ class KlingApi extends BaseKlingApi
         return false;
     }
 
-    protected function makeRequest($url, $request_data, $preset_name=null)
+    protected function makeRequest($url, $request_data, $preset_name=null, $task_data=null)
     {
         $url = isUrl($url) ? $url : $this->baseUrl . $url;
 
         $request_data['callback_url'] = KL_HOOK_URL;
 
         if (PRODUCTION) 
-            $response = parent::makeRequest($url, $request_data);
+            $response = parent::makeRequest($url, $request_data, $preset_name, $task_data);
         else {
 
             if (DEV) {
@@ -113,7 +113,8 @@ class KlingApi extends BaseKlingApi
         		'service'=>'kling',
                 'preset'=>$preset_name,
                 'request_data' => $request_data_json,
-                'response_data'=> json_encode($response, JSON_FLAGS)
+                'response_data'=> json_encode($response, JSON_FLAGS),
+                'data'=>json_encode($task_data, JSON_FLAGS)
         	];
 
             if (DEV)
