@@ -41,7 +41,11 @@ class LeoCycle extends BaseCycle {
                     'hash'=>$hash
                 ]);
 
-                $this->parent->finishTask($task, 'finished');
+                $file_id = null;
+                if ($video = $result->getVideo()) 
+                    $file_id = $video->getFileId();
+
+                $this->parent->finishTask($task, 'finished', $file_id);
             } else {
                 /*
                 $this->parent->Message($task['chat_id'], Lang('Something wrong'));
@@ -112,7 +116,11 @@ class LeoCycle extends BaseCycle {
                         'hash'=>$hash
                     ]);
 
-                    $this->parent->finishTask($task, 'finished');
+                    $file_id = null;
+                    if ($photos = $result->getPhoto()) 
+                        $file_id = $photos->last()->getFileId();
+
+                    $this->parent->finishTask($task, 'finished', $file_id);
                 }
 
             } else {

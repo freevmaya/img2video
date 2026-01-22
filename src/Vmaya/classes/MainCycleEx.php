@@ -70,9 +70,15 @@ class MainCycleEx extends TelegramClient {
         }
     }
 
-    public function finishTask($task, $state='finished') {        
+    public function finishTask($task, $state='finished', $file_id=null) {
+        $data = $task['data'] ? json_decode($task['data'], true) : [];
+
+        if ($file_id) $data['file_id'] = $file_id;
+
         $this->modelTask->Update([
-            'id'=>$task['id'], 'state'=>$state
+            'id'=>$task['id'], 
+            'state'=>$state,
+            'data'=>json_encode($data, JSON_FLAGS)
         ]);
 
         trace("finish task {$task['id']}: {$state}");

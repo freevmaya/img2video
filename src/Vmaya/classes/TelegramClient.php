@@ -60,7 +60,7 @@ class TelegramClient extends SettingsManager {
                 $params = encodeTelegramParams($params);
                 $message = $this->afterSend($this->api->sendVideo($params), true);
                 if ($message->getMessageId()) 
-                    return true;
+                    return $message;
 
             } catch (Exception $e) {
                 $error_message = $e->getMessage();
@@ -136,7 +136,7 @@ class TelegramClient extends SettingsManager {
 
                 $message = $this->afterSend($this->api->sendMessage($params), true);
                 if ($message->getMessageId())
-                    return true;
+                    return $message;
 
             } catch (Exception $e) {
                 $error_message = $e->getMessage();

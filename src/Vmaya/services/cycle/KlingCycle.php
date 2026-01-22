@@ -6,12 +6,17 @@ class KlingCycle extends BaseCycle {
 	protected function finalyDownloadfile($task, $response, $file_path, $filename) {
 
         //trace("Attempt send mp4 {$file_path}");
-		if ($this->parent->sendMp4($task, $file_path, $filename, Lang('Your video is ready'))) {
+		if ($sendResult = $this->parent->sendMp4($task, $file_path, $filename, Lang('Your video is ready'))) {
 
             $this->parent->PayVideo($task['user_id'], [
                 'hash'=>$task['hash']
             ]);
-            $this->parent->finishTask($task);
+
+            $file_id = null;
+            if ($video = $sendResult->getVideo()) 
+                $file_id = $video->getFileId();
+
+            $this->parent->finishTask($task, 'finished', $file_id);
             $this->finishResponse($response);
             
         } else $this->setResponseProcessed($response, 0);

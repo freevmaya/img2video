@@ -507,7 +507,7 @@ class Image2VideoBot extends YKassaBot {
 
     protected function callMethod($method, $data) {
         if (method_exists($this, $method)) {
-            if ($data) {
+            if (!isEmpty($data)) {
                 $execute = "\$this->{$method}({$data});";
                 if (DEV) echo "Execute: $execute\n";
 
@@ -792,7 +792,7 @@ class Image2VideoBot extends YKassaBot {
         }
     }
 
-    protected function Generate($type, $images_url, $prompt) {
+    protected function Generate($type, $images_url, $prompt, $task_data=null) {
         if (!empty($prompt)) {
             [$gen, $info] = $this->getCurrentGenModel($type);
             if ($gen) {
@@ -809,8 +809,13 @@ class Image2VideoBot extends YKassaBot {
                     return false;
                 }
 
+                if (DEV) {
+                    echo "task_data:\n";
+                    print_r($task_data);
+                }
+
                 if ($this->isAllowType($type)) {
-                    if ($gen->Generate($type, $images_url, $prompt, $info['name'])) {
+                    if ($gen->Generate($type, $images_url, $prompt, $info['name'], $task_data)) {
                         $this->unsetSessions(['images', 'prompt']);
                         return true;
                     }
@@ -899,6 +904,7 @@ class Image2VideoBot extends YKassaBot {
 
         //if (DEV) echo "imageToVideo: ".json_encode($data)."\n";
 
+        $prompt = null;
         if (is_array($data))
             [$stage, $prompt] = $this->parseCommandData('imageToVideo', $data);
         else $stage = $data;
@@ -932,7 +938,17 @@ class Image2VideoBot extends YKassaBot {
                     }
                 break;
             case 2: 
-                    $prompt = isset($prompt) ? $prompt : $this->getSession('prompt');
+                    if ($prompt)
+                        $this->setSession('prompt', $prompt);
+
+                    $this->ShowWithPreview(Lang("Do you want to participate in the competition?"), [
+                        [$this->createButton('Ok', "imageToVideo.3.prompt.part_competition"),
+                         $this->createButton('No', "imageToVideo.3.prompt")]
+                    ], 'competition_preview');
+                break;
+            case 3: 
+                    $this->DeleteMessage();
+                    $prompt = empty($prompt) ? $this->getSession('prompt') : $prompt;
                     $message_index = isset($data[3]) && is_numeric($data[3]) ? intval($data[3]) : false;
 
                     // Если есть номер сообщения, то считываем изображения от туда
@@ -942,30 +958,55 @@ class Image2VideoBot extends YKassaBot {
 
                     //if (DEV) print_r($images);
 
-                    return $this->Generate('imageToVideo', $images, $prompt);
+                    $task_data = [];
+                    if (isset($data[3]) && ($data[3] == 'part_competition'))
+                        $task_data['part_competition'] = 1;
+
+                    return $this->Generate('imageToVideo', $images, $prompt, $task_data);
                 break;
         }
     }
 
-    protected function textToImage($stage) {
-        if (is_array($stage))
-            [$stage, $prompt] = $this->parseCommandData('textToImage', $stage);
+    protected function textToImage($stadeData) {
+
+        $prompt = null;
+        if (is_array($stadeData))
+            [$stage, $prompt] = $this->parseCommandData('textToImage', $stadeData);
+        else $stage = $stadeData;
 
         switch ($stage) {
             case 0:
-                    $this->askSendPrompt('textToImage', 1);
+                    $this->askSendPrompt('textToImage', 0);
                     $this->setSession("expect", 'textToImage(1)');
                 break;
-            case 1:
-                    $prompt = isset($prompt) ? $prompt : $this->getSession('prompt');
-                    return $this->Generate('textToImage', [], $prompt);
+            case 1: 
+                    if ($prompt)
+                        $this->setSession('prompt', $prompt);
+
+                    $this->ShowWithPreview(Lang("Do you want to participate in the competition?"), [
+                        [$this->createButton('Ok', "textToImage.2.prompt.part_competition"),
+                         $this->createButton('No', "textToImage.2.prompt")]
+                    ], 'competition_preview');
+                break;
+            case 2:
+                    $this->DeleteMessage();
+                    $prompt = $prompt ? $prompt : $this->getSession('prompt');
+
+                    $task_data = [];
+                    if (isset($stadeData[3]) && ($stadeData[3] == 'part_competition'))
+                        $task_data['part_competition'] = 1;
+
+                    return $this->Generate('textToImage', [], $prompt, $task_data);
                 break;
         }
     }
 
-    protected function imagesToImage($stage) {
-        if (is_array($stage))
-            [$stage, $prompt] = $this->parseCommandData('imagesToImage', $stage);
+    protected function imagesToImage($stadeData) {
+
+        $prompt = null;
+        if (is_array($stadeData))
+            [$stage, $prompt] = $this->parseCommandData('imagesToImage', $stadeData);
+        else $stage = $stadeData;
 
         [$gen, $info] = $this->getCurrentGenModel('imagesToImage');
         $count_images = count($this->getSession('images', []));
@@ -991,14 +1032,31 @@ class Image2VideoBot extends YKassaBot {
 
             $this->setSession("expect", "imagesToImage(0)");
         } else {
-            $prompt = isset($prompt) ? $prompt : $this->getSession('prompt');
-            if (empty($prompt)) {
 
-                $this->askSendPrompt('imagesToImage', 2);
-                $this->setSession("expect", 'imagesToImage(2)');
-            } else {
+            switch ($stage) {
+                case 0: 
 
-                return $this->Generate('imagesToImage', $this->getImagesUrl(), $prompt);
+                        $prompt = $prompt ? $prompt : $this->getSession('prompt');
+                        if (empty($prompt)) {
+
+                            $this->askSendPrompt('imagesToImage', 0);
+                            $this->setSession("expect", 'imagesToImage(0)');
+                        } else {
+
+                            $this->ShowWithPreview(Lang("Do you want to participate in the competition?"), [
+                                [$this->createButton('Ok', "imagesToImage.1.prompt.part_competition"),
+                                 $this->createButton('No', "imagesToImage.1.prompt")]
+                            ], 'competition_preview');
+                        }
+                    break;
+                case 1: 
+                    $this->DeleteMessage();
+
+                    $task_data = [];
+                    if (isset($stadeData[3]) && ($stadeData[3] == 'part_competition'))
+                        $task_data['part_competition'] = 1;
+
+                    return $this->Generate('imagesToImage', $this->getImagesUrl(), $this->getSession('prompt'), $task_data);
             }
         }
     }

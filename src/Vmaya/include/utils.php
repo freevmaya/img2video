@@ -897,4 +897,20 @@ function encodeTelegramParams(array $params, bool $forceEncode = false): array
     
     return $params;
 }
+
+function isEmpty($value): bool
+{
+    // Проверка на null
+    if ($value === null) {
+        return true;
+    }
+    
+    // Проверка на пустую строку (строго, без приведения типов)
+    if (is_string($value) && $value === '') {
+        return true;
+    }
+    
+    // Все остальное - НЕ пустое
+    return false;
+}
 ?>
