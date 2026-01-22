@@ -129,14 +129,6 @@ abstract class BaseBot extends SettingsManager {
         }
     }
 
-    public function DeleteMessages($backCount = 1) {
-        $history = array_values($this->getSession('history'));
-
-        for ($i=0; $i<$backCount; $i++) {
-            $this->DeleteMessage($this->getCurrentChatId(), $history[count($history) - 1 - $i]); 
-        }
-    }
-
     public function PrivateAnswerAndDelete($user_id, $chatId, $private_text, $temporary_text, $wait_sec = 6) {
         $this->Answer($user_id, $private_text);
 
@@ -288,15 +280,20 @@ abstract class BaseBot extends SettingsManager {
 
     public function popMessageHistory() {
         $history = $this->getSession('history', []);
-        $result = array_pop($history);
-        $this->setSession('history', $history);
-        return $result;
+        if (count($history) > 0) {
+            $result = array_pop($history);
+            $this->setSession('history', $history);
+            return $result;
+        }
+        return null;
     }
 
-    public function DeleteLastMessage($count = 1) {
+    public function DeleteMessages($count = 1) {
         
-        for ($i=0; $i<$count; $i++)
-            $this->DeleteMessage(null, $this->popMessageHistory());
+        for ($i=0; $i<$count; $i++) {
+            if ($messageId = $this->popMessageHistory())
+                $this->DeleteMessage(null, $messageId);
+        }
     }
 
     public function sendMessage($params) {

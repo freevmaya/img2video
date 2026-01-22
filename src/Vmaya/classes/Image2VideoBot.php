@@ -1049,8 +1049,7 @@ class Image2VideoBot extends YKassaBot {
 
         if ($count_images < $require_images) {
             
-            if ($count_images > 0)
-                $this->DeleteMessages(1);
+            $this->DeleteMessages(1);
 
             $countText = $count_images == 0 ? '' : ("\n".sprintf(Lang("Loaded %s of %s"), $count_images, $require_images));
 
@@ -1077,7 +1076,6 @@ class Image2VideoBot extends YKassaBot {
 
                         $prompt = $prompt ? $prompt : $this->getSession('prompt');
                         if (empty($prompt)) {
-
                             $this->askSendPrompt('imagesToImage', 0);
                             $this->setSession("expect", 'imagesToImage(0)');
                         } else {
