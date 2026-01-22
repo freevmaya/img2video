@@ -174,12 +174,16 @@ class LeonardoApi extends BaseApi
         return $results;
     }
 
-    protected function validateImage($file_id) {
+    public function prepareImage($file_id) {
         if (isUrl($file_id)) {
 
+            /*
             if ($this->bot)
-                $filePath = USER_PATH.$this->bot->getUserId().'_'.basename($file_id);
+                $filePath = USER_PATH.$this->bot->getUserId().'_'.time().'_'.basename($file_id);
             else $filePath = USER_PATH.basename($file_id);
+            */
+
+            $filePath = ($this->bot ? $this->bot->getUserId().'_' : '').time().'_'.basename($file_id);
 
             if (!file_exists($filePath))
                 downloadFile($file_id, $filePath);
@@ -257,7 +261,7 @@ class LeonardoApi extends BaseApi
     protected function setImages($model_name, &$options, $images) {
         if (!empty($images))
             for ($i=0; $i<count($images); $i++)
-                if (!$images[$i] = $this->validateImage($images[$i]))
+                if (!$images[$i] = $this->prepareImage($images[$i]))
                     return false;
 
         if ($model_name == 'Kling O1') {

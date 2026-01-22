@@ -78,18 +78,37 @@ abstract class BaseApi implements APIInterface
         else return false;
     }
 
-    protected function validateImage($value) {
+    protected function prepareImage($value) {
         return $value;
     }
 
     protected function preparePresetImages(&$presetOptions, $images) {
         if (!empty($images))
             for ($i=0; $i<count($images); $i++)
-                if ($image_id = $this->validateImage($images[$i]['value']))
+                if ($image_id = $this->prepareImage($images[$i]['value']))
                     setArrayValueByPath($presetOptions, $images[$i]['path'], $image_id);
                 else return false;
                 
         return $presetOptions;
+    }
+
+    protected function prepareDefaultOptions($data, $model_name, $images, $prompt) {
+
+        $info = $this->getModelInfo($model_name);
+        if ($this->requireTranslate($info))
+            $prompt = checkRusAndTranslate($prompt);
+
+        if (!$this->setPrompt($model_name, $data, $prompt)) {
+            trace_error("Error set prompt model: '{$model_name}'");
+            return false;
+        }
+        
+        if (!$this->setImages($model_name, $data, $images)) {
+            trace_error("Error set images model: '{$model_name}'");
+            return false;
+        }
+
+        return $data;
     }
 
     public function PrepareRequestData($type, $images, $prompt, $model_name = null) {
@@ -104,7 +123,9 @@ abstract class BaseApi implements APIInterface
 
             $defaultOptions = isset($this->defaultModel[$model_name]) ? $this->defaultModel[$model_name] : null;
             if ($defaultOptions) {
+                return $this->prepareDefaultOptions(array_merge([], $defaultOptions), $model_name, $images, $prompt);
 
+                /*
                 $data = array_merge([], $defaultOptions);
 
                 if ($this->requireTranslate($info))
@@ -120,7 +141,7 @@ abstract class BaseApi implements APIInterface
                     return false;
                 }
 
-                return $data;
+                return $data;*/
             } else trace_error("Not found default options for model: '{$model_name}'");
         } else trace_error("Unknown model: {$model_name}");
         return false;
@@ -176,10 +197,6 @@ abstract class BaseApi implements APIInterface
 
     public function getModelOptions($model_name) {
     	return isset($this->defaultModel[$model_name]) ? $this->defaultModel[$model_name] : [];
-    }
-
-    public function prepareImage($imageUrl) {
-        return false;
     }
 
     public function Answer($content) {

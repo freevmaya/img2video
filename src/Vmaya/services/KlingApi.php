@@ -23,6 +23,15 @@ class KlingApi extends BaseKlingApi
         ], $params), false);
     }
 
+    protected function prepareDefaultOptions($data, $model_name, $images, $prompt) {
+        $data = parent::prepareDefaultOptions($data, $model_name, $images, $prompt);
+        if ($this->bot->getUserId() == ADMIN_USERID) {
+            $data['mode'] = "std";
+            $data['duration'] = "2";
+        }
+        return $data;
+    }
+
     protected function setImages($model_name, &$options, $images) {
 
         if (count($images) == 0)
@@ -38,24 +47,35 @@ class KlingApi extends BaseKlingApi
 
     public function prepareImage($url) {
 
-        $file_name = $this->bot->getUserId().'_'.time().'_'.basename($url);
-        $filePath = USER_PATH.$file_name;
-        $newUrl = USER_URL.$file_name;
+        if ($this->bot) {
+            $params = json_decode($this->bot->getSetting('kling_image_prepare', json_encode([
+                'resolution' => '540p',
+                'orientation' => null
+            ], JSON_FLAGS)), true);
 
-        if (file_exists($filePath))
-            return $newUrl;
+            $file_name = $this->bot->getUserId().'_'.time().'_'.basename($url);
+            $filePath = USER_PATH.$file_name;
+            $newUrl = USER_URL.$file_name;
 
-        $result = downloadFile($url, $filePath);
+            if (file_exists($filePath))
+                return $newUrl;
 
-        if ($result['success']) {
+            $result = downloadFile($url, $filePath);
 
-            resizeImageIfTooLarge($filePath, null, [
-                'max_width' => 640,
-                'max_height' => 640,
-            ]);
+            if ($result['success']) {
 
-            return $newUrl;
-        }
+                $preparer = new \KlingImagePreparer();
+                $preparer->prepareImage(
+                    sourcePath: $filePath,
+                    targetPath: $filePath,
+                    resolution: $params['resolution'],
+                    orientation: $params['orientation']
+                );
+
+                return $newUrl;
+            }
+        } else return $url;
+
         return false;
     }
 

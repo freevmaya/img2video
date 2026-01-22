@@ -90,13 +90,13 @@ class SessionManager {
     }
 
     public function pushImage($image_id) {
-        if (!($images = $this->getSession('images'))) $images = [];
+        if (!($images = $this->getSession('images', []))) $images = [];
         $images[] = $image_id;
         $this->setSession('images', $images);
     }
 
     public function getImagesUrl() {
-        $images = array_reverse(array_values($this->getSession('images')));
+        $images = array_reverse(array_values($this->getSession('images', [])));
         $images_url = [];
         if (!empty($images))
             foreach ($images as $image_id)

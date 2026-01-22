@@ -4,6 +4,8 @@ namespace App\Services\API;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
+include_once(SERVICES_PATH.'KlingImagePreparer.php');
+
 class BaseKlingApi extends BaseApi
 {
     private $accessKey;
