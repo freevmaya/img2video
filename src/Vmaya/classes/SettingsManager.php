@@ -90,7 +90,7 @@ class SettingsManager extends SessionManager {
     public function pushMessageImage($message_id, $image_id) {
         $images = $this->getSession('messageImages', []);
 
-        if (!in_array($image_id, $images)) {
+        if (!isset($images[$message_id])) {
             array_add_limit($images, $message_id, $image_id, 10);
             $this->setSession('messageImages', $images);
         }
@@ -99,7 +99,8 @@ class SettingsManager extends SessionManager {
     public function pushMessageVideo($message_id, $file_id) {
         $list = $this->getSession('messageVideos', []);
 
-        if (!in_array($file_id, $list)) {
+        if (!isset($list[$message_id])) {
+
             array_add_limit($list, $message_id, $file_id, 10);
             $this->setSession('messageVideos', $list);
         }
@@ -108,7 +109,7 @@ class SettingsManager extends SessionManager {
     public function getMessageImageUrl($message_id) {
         $images = $this->getSession('messageImages', []);
         if (DEV) {
-            echo $message_id."\n";
+            echo "getMessageImageUrl($message_id)\n";
         }
 
         if (isset($images[$message_id])) {

@@ -941,9 +941,12 @@ class Image2VideoBot extends YKassaBot {
                     if ($prompt)
                         $this->setSession('prompt', $prompt);
 
+                    $message_index = isset($data[3]) && is_numeric($data[3]) ? intval($data[3]) : 0;
+
+
                     $this->ShowWithPreview(Lang("Do you want to participate in the competition?"), [
-                        [$this->createButton('Ok', "imageToVideo.3.prompt.part_competition"),
-                         $this->createButton('No', "imageToVideo.3.prompt")]
+                        [$this->createButton('Ok', "imageToVideo.3.prompt.{$message_index}.part_competition"),
+                         $this->createButton('No', "imageToVideo.3.prompt.{$message_index}")]
                     ], 'competition_preview');
                 break;
             case 3: 
@@ -959,7 +962,7 @@ class Image2VideoBot extends YKassaBot {
                     //if (DEV) print_r($images);
 
                     $task_data = [];
-                    if (isset($data[3]) && ($data[3] == 'part_competition'))
+                    if (isset($data[4]) && ($data[4] == 'part_competition'))
                         $task_data['part_competition'] = 1;
 
                     return $this->Generate('imageToVideo', $images, $prompt, $task_data);
