@@ -27,7 +27,6 @@ class KlingApi extends BaseKlingApi
         $data = parent::prepareDefaultOptions($data, $model_name, $images, $prompt);
         if ($this->bot->getUserId() == ADMIN_USERID) {
             $data['mode'] = "std";
-            $data['duration'] = "2";
         }
         return $data;
     }
