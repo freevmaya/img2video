@@ -71,7 +71,7 @@ class Image2VideoBot extends YKassaBot {
     protected function runUpdate($update) {
         $this->expect = $this->popSession("expect");
         parent::runUpdate($update);
-
+        /*
         if ($this->firstStart) {
             if ($this->user['language_code'] == 'ru') {
                 $startBalance = 40;
@@ -80,7 +80,7 @@ class Image2VideoBot extends YKassaBot {
                     sprintf(Lang('We have topped up your account with %s'), 
                         strEnum($startBalance, 'рубл[ь,я,ей]', $this->user['language_code'])));
             }
-        }
+        }*/
     }
 
     protected function startMenuList() {
