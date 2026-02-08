@@ -86,7 +86,7 @@ class Image2VideoBot extends YKassaBot {
     protected function startMenuList() {
         $result = [
             [['text' => '🖼️ '.Lang('Create an image'), 'callback_data'  => 'create_image']],
-            //[['text' => '🎥 '.Lang('Bring a photo to life'), 'callback_data' => 'create_video']],
+            [['text' => '🎥 '.Lang('Bring a photo to life'), 'callback_data' => 'create_video']],
             //[['text' => '📂 '.Lang('Presets'), 'callback_data' => 'presets']],
             [['text' => '💰 '.Lang('Balance'), 'callback_data' => 'MySubscribe']],
             //[['text' => '📊 '.Lang('My generations'), 'callback_data' => 'my_generations']],
