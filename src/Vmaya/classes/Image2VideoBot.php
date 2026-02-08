@@ -36,8 +36,8 @@ class Image2VideoBot extends YKassaBot {
 
         $this->generators = [
             //'mj' => new MidjourneyApi(MJ_APIKEY, MJ_HOOK_URL, MJ_ACCOUNTHASH, $this, $this->taskModel, new MJModel()),
-            'kling' => new KlingApi(KL_ACCESS_KEY, KL_SECRET_KEY, $this->taskModel, $this),
-            'leo' => new LeonardoApi(LEO_APIKEY, $this, $this->taskModel, new LeoTasksModel())
+            'leo' => new LeonardoApi(LEO_APIKEY, $this, $this->taskModel, new LeoTasksModel())/*,
+            'kling' => new KlingApi(KL_ACCESS_KEY, KL_SECRET_KEY, $this->taskModel, $this)*/
         ];
 
         $this->pmenuMap = [
